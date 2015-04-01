@@ -10,14 +10,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import de.rwth.i9.palm.persistence.GenericDAO;
 
-public abstract class GenericDAOImpl<T> implements GenericDAO<T>
+public abstract class GenericDAOHibernate<T> implements GenericDAO<T>
 {
 
 	private SessionFactory sessionFactory;
 	private T persistenceClass;
 
 	@SuppressWarnings( { "unchecked" } )
-	public GenericDAOImpl( SessionFactory sessionFactory )
+	public GenericDAOHibernate( SessionFactory sessionFactory )
 	{
 		if ( getClass().getGenericSuperclass() instanceof ParameterizedType )
 			persistenceClass = (T) ( (ParameterizedType) getClass().getGenericSuperclass() ).getActualTypeArguments()[0];
