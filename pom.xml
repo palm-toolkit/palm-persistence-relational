@@ -49,7 +49,7 @@
 		<version>${commonsio.version}</version>
 	</dependency>
 	
-	<!-- for junit integration with spring -->
+	<!-- for integration with spring -->
 	<dependency>
 	  <groupId>org.springframework</groupId>
 	  <artifactId>spring-core</artifactId>
