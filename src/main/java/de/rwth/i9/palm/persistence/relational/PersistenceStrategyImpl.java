@@ -7,6 +7,7 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import de.rwth.i9.palm.persistence.AlgorithmDAO;
+import de.rwth.i9.palm.persistence.AuthorAliasDAO;
 import de.rwth.i9.palm.persistence.AuthorDAO;
 import de.rwth.i9.palm.persistence.InstantiableDAO;
 import de.rwth.i9.palm.persistence.InstitutionDAO;
@@ -14,6 +15,7 @@ import de.rwth.i9.palm.persistence.KeywordDAO;
 import de.rwth.i9.palm.persistence.LocationDAO;
 import de.rwth.i9.palm.persistence.PersistenceStrategy;
 import de.rwth.i9.palm.persistence.PublicationDAO;
+import de.rwth.i9.palm.persistence.PublicationOldDAO;
 import de.rwth.i9.palm.persistence.RoleDAO;
 import de.rwth.i9.palm.persistence.RunTimeDAO;
 import de.rwth.i9.palm.persistence.SourceDAO;
@@ -52,6 +54,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private AlgorithmDAO algorithmDAO;
 
 	@Autowired( required = false )
+	private AuthorAliasDAO authorAliasDAO;
+
+	@Autowired( required = false )
 	private AuthorDAO authorDAO;
 
 	@Autowired( required = false )
@@ -65,6 +70,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private PublicationDAO publicationDAO;
+
+	@Autowired( required = false )
+	private PublicationOldDAO publicationOldDAO;
 
 	@Autowired( required = false )
 	private RoleDAO roleDAO;
@@ -190,5 +198,23 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.venueDAO = new VenueDAOHibernate( this.sessionFactory );
 
 		return this.venueDAO;
+	}
+
+	@Override
+	public AuthorAliasDAO getAuthorAliasDAO()
+	{
+		if ( this.authorAliasDAO == null )
+			this.authorAliasDAO = new AuthorAliasDAOHibernate( this.sessionFactory );
+
+		return this.authorAliasDAO;
+	}
+
+	@Override
+	public PublicationOldDAO getPublicationOldDAO()
+	{
+		if ( this.publicationOldDAO == null )
+			this.publicationOldDAO = new PublicationOldDAOHibernate( this.sessionFactory );
+
+		return this.publicationOldDAO;
 	}
 }
