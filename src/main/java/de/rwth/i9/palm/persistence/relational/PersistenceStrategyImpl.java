@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import de.rwth.i9.palm.persistence.AlgorithmDAO;
 import de.rwth.i9.palm.persistence.AuthorAliasDAO;
 import de.rwth.i9.palm.persistence.AuthorDAO;
+import de.rwth.i9.palm.persistence.DatasetDAO;
+import de.rwth.i9.palm.persistence.FunctionDAO;
 import de.rwth.i9.palm.persistence.InstantiableDAO;
 import de.rwth.i9.palm.persistence.InstitutionDAO;
 import de.rwth.i9.palm.persistence.KeywordDAO;
@@ -19,6 +21,7 @@ import de.rwth.i9.palm.persistence.PublicationOldDAO;
 import de.rwth.i9.palm.persistence.RoleDAO;
 import de.rwth.i9.palm.persistence.RunTimeDAO;
 import de.rwth.i9.palm.persistence.SourceDAO;
+import de.rwth.i9.palm.persistence.TagDAO;
 import de.rwth.i9.palm.persistence.TopicDAO;
 import de.rwth.i9.palm.persistence.UserDAO;
 import de.rwth.i9.palm.persistence.VenueDAO;
@@ -60,6 +63,12 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private AuthorDAO authorDAO;
 
 	@Autowired( required = false )
+	private DatasetDAO datasetDAO;
+
+	@Autowired( required = false )
+	private FunctionDAO functionDAO;
+
+	@Autowired( required = false )
 	private InstitutionDAO institutionDAO;
 
 	@Autowired( required = false )
@@ -82,6 +91,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private SourceDAO sourceDAO;
+
+	@Autowired( required = false )
+	private TagDAO tagDAO;
 
 	@Autowired( required = false )
 	private TopicDAO topicDAO;
@@ -108,6 +120,24 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.authorDAO = new AuthorDAOHibernate( this.sessionFactory );
 
 		return this.authorDAO;
+	}
+
+	@Override
+	public DatasetDAO getDatasetDAO()
+	{
+		if ( this.datasetDAO == null )
+			this.datasetDAO = new DatasetDAOHibernate( this.sessionFactory );
+
+		return this.datasetDAO;
+	}
+
+	@Override
+	public FunctionDAO getFunctionDAO()
+	{
+		if ( this.functionDAO == null )
+			this.functionDAO = new FunctionDAOHibernate( this.sessionFactory );
+
+		return this.functionDAO;
 	}
 
 	@Override
@@ -147,6 +177,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
+	public PublicationOldDAO getPublicationOldDAO()
+	{
+		if ( this.publicationOldDAO == null )
+			this.publicationOldDAO = new PublicationOldDAOHibernate( this.sessionFactory );
+
+		return this.publicationOldDAO;
+	}
+
+	@Override
 	public RoleDAO getRoleDAO()
 	{
 		if ( this.roleDAO == null )
@@ -171,6 +210,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.sourceDAO = new SourceDAOHibernate( this.sessionFactory );
 
 		return this.sourceDAO;
+	}
+
+	@Override
+	public TagDAO getTagDAO()
+	{
+		if ( this.tagDAO == null )
+			this.tagDAO = new TagDAOHibernate( this.sessionFactory );
+
+		return this.tagDAO;
 	}
 
 	@Override
@@ -207,14 +255,5 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.authorAliasDAO = new AuthorAliasDAOHibernate( this.sessionFactory );
 
 		return this.authorAliasDAO;
-	}
-
-	@Override
-	public PublicationOldDAO getPublicationOldDAO()
-	{
-		if ( this.publicationOldDAO == null )
-			this.publicationOldDAO = new PublicationOldDAOHibernate( this.sessionFactory );
-
-		return this.publicationOldDAO;
 	}
 }
