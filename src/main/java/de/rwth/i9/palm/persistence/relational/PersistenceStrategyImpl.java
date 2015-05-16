@@ -25,6 +25,7 @@ import de.rwth.i9.palm.persistence.TagDAO;
 import de.rwth.i9.palm.persistence.TopicDAO;
 import de.rwth.i9.palm.persistence.UserDAO;
 import de.rwth.i9.palm.persistence.VenueDAO;
+import de.rwth.i9.palm.persistence.WidgetDAO;
 
 public class PersistenceStrategyImpl implements PersistenceStrategy
 {
@@ -104,6 +105,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	@Autowired( required = false )
 	private VenueDAO venueDAO;
 
+	@Autowired( required = false )
+	private WidgetDAO widgetDAO;
+
 	@Override
 	public AlgorithmDAO getAlgorithmDAO()
 	{
@@ -111,6 +115,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.algorithmDAO = new AlgorithmDAOHibernate( this.sessionFactory );
 
 		return this.algorithmDAO;
+	}
+
+	@Override
+	public AuthorAliasDAO getAuthorAliasDAO()
+	{
+		if ( this.authorAliasDAO == null )
+			this.authorAliasDAO = new AuthorAliasDAOHibernate( this.sessionFactory );
+
+		return this.authorAliasDAO;
 	}
 
 	@Override
@@ -249,11 +262,11 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
-	public AuthorAliasDAO getAuthorAliasDAO()
+	public WidgetDAO getWidgetDAO()
 	{
-		if ( this.authorAliasDAO == null )
-			this.authorAliasDAO = new AuthorAliasDAOHibernate( this.sessionFactory );
+		if ( this.widgetDAO == null )
+			this.widgetDAO = new WidgetDAOHibernate( this.sessionFactory );
 
-		return this.authorAliasDAO;
+		return this.widgetDAO;
 	}
 }
