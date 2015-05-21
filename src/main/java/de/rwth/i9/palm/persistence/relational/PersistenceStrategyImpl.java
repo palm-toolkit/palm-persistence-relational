@@ -20,6 +20,7 @@ import de.rwth.i9.palm.persistence.PublicationDAO;
 import de.rwth.i9.palm.persistence.PublicationOldDAO;
 import de.rwth.i9.palm.persistence.RoleDAO;
 import de.rwth.i9.palm.persistence.RunTimeDAO;
+import de.rwth.i9.palm.persistence.SessionDataSetDAO;
 import de.rwth.i9.palm.persistence.SourceDAO;
 import de.rwth.i9.palm.persistence.TagDAO;
 import de.rwth.i9.palm.persistence.TopicDAO;
@@ -90,6 +91,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	@Autowired( required = false )
 	private RunTimeDAO runTimeDAO;
 
+	@Autowired( required = false )
+	private SessionDataSetDAO sessionDataSetDAO;
+	
 	@Autowired( required = false )
 	private SourceDAO sourceDAO;
 
@@ -214,6 +218,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.runTimeDAO = new RunTimeDAOHibernate( this.sessionFactory );
 
 		return this.runTimeDAO;
+	}
+	
+	@Override
+	public SessionDataSetDAO getSessionDataSetDAO()
+	{
+		if ( this.sessionDataSetDAO == null )
+			this.sessionDataSetDAO = new SessionDataSetDAOHibernate( this.sessionFactory );
+
+		return this.sessionDataSetDAO;
 	}
 
 	@Override
