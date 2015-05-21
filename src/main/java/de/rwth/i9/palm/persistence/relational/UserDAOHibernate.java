@@ -13,4 +13,18 @@ public class UserDAOHibernate extends GenericDAOHibernate<User> implements UserD
 		super( sessionFactory );
 	}
 
+	@Override
+	public boolean isAuthorizedForFunction( User user, String functionName )
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public User getByUsername( String username )
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
