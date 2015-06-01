@@ -81,6 +81,7 @@ public class WidgetDAOHibernate extends GenericDAOHibernate<Widget> implements W
 		{
 			queryString.append( "AND widgetStatus = :widgetStatus" + i + " " );
 		}
+		queryString.append( "ORDER BY position ASC" );
 
 		Query query = getCurrentSession().createQuery( queryString.toString() );
 		query.setParameter( "widgetType", widgetType );
@@ -112,6 +113,7 @@ public class WidgetDAOHibernate extends GenericDAOHibernate<Widget> implements W
 		{
 			queryString.append( "AND widgetStatus = :widgetStatus" + i + " " );
 		}
+		queryString.append( "ORDER BY position ASC" );
 
 		Query query = getCurrentSession().createQuery( queryString.toString() );
 		query.setParameter( "widgetType", widgetType );
