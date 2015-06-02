@@ -37,7 +37,7 @@ import de.rwth.i9.palm.model.Tag;
 import de.rwth.i9.palm.model.Topic;
 import de.rwth.i9.palm.model.User;
 import de.rwth.i9.palm.model.UserWidget;
-import de.rwth.i9.palm.model.Venue;
+import de.rwth.i9.palm.model.Conference;
 import de.rwth.i9.palm.model.Widget;
 import de.rwth.i9.palm.persistence.relational.PersistenceStrategyImpl;
 
@@ -140,7 +140,7 @@ public class DatabaseConfigTest
 						Topic.class,
 						User.class,
 						UserWidget.class,
-						Venue.class,
+						Conference.class,
 						Widget.class
 						} );
 		return sessionFactoryBean;

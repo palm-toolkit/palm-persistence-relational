@@ -25,7 +25,7 @@ import de.rwth.i9.palm.persistence.SourceDAO;
 import de.rwth.i9.palm.persistence.TagDAO;
 import de.rwth.i9.palm.persistence.TopicDAO;
 import de.rwth.i9.palm.persistence.UserDAO;
-import de.rwth.i9.palm.persistence.VenueDAO;
+import de.rwth.i9.palm.persistence.ConferenceDAO;
 import de.rwth.i9.palm.persistence.WidgetDAO;
 
 public class PersistenceStrategyImpl implements PersistenceStrategy
@@ -107,7 +107,7 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private UserDAO userDAO;
 
 	@Autowired( required = false )
-	private VenueDAO venueDAO;
+	private ConferenceDAO conferenceDAO;
 
 	@Autowired( required = false )
 	private WidgetDAO widgetDAO;
@@ -266,12 +266,12 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
-	public VenueDAO getVenueDAO()
+	public ConferenceDAO getVenueDAO()
 	{
-		if ( this.venueDAO == null )
-			this.venueDAO = new VenueDAOHibernate( this.sessionFactory );
+		if ( this.conferenceDAO == null )
+			this.conferenceDAO = new ConferenceDAOHibernate( this.sessionFactory );
 
-		return this.venueDAO;
+		return this.conferenceDAO;
 	}
 
 	@Override
