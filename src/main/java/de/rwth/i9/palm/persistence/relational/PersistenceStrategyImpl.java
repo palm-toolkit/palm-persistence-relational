@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import de.rwth.i9.palm.persistence.AlgorithmDAO;
 import de.rwth.i9.palm.persistence.AuthorAliasDAO;
 import de.rwth.i9.palm.persistence.AuthorDAO;
+import de.rwth.i9.palm.persistence.ConferenceDAO;
 import de.rwth.i9.palm.persistence.DatasetDAO;
 import de.rwth.i9.palm.persistence.FunctionDAO;
 import de.rwth.i9.palm.persistence.InstantiableDAO;
@@ -25,7 +26,6 @@ import de.rwth.i9.palm.persistence.SourceDAO;
 import de.rwth.i9.palm.persistence.TagDAO;
 import de.rwth.i9.palm.persistence.TopicDAO;
 import de.rwth.i9.palm.persistence.UserDAO;
-import de.rwth.i9.palm.persistence.ConferenceDAO;
 import de.rwth.i9.palm.persistence.WidgetDAO;
 
 public class PersistenceStrategyImpl implements PersistenceStrategy
@@ -266,7 +266,7 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
-	public ConferenceDAO getVenueDAO()
+	public ConferenceDAO getConferenceDAO()
 	{
 		if ( this.conferenceDAO == null )
 			this.conferenceDAO = new ConferenceDAOHibernate( this.sessionFactory );
