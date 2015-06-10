@@ -14,16 +14,15 @@ import de.rwth.i9.palm.persistence.DatasetDAO;
 import de.rwth.i9.palm.persistence.FunctionDAO;
 import de.rwth.i9.palm.persistence.InstantiableDAO;
 import de.rwth.i9.palm.persistence.InstitutionDAO;
-import de.rwth.i9.palm.persistence.KeywordDAO;
 import de.rwth.i9.palm.persistence.LocationDAO;
 import de.rwth.i9.palm.persistence.PersistenceStrategy;
 import de.rwth.i9.palm.persistence.PublicationDAO;
-import de.rwth.i9.palm.persistence.PublicationOldDAO;
+import de.rwth.i9.palm.persistence.ReferenceDAO;
 import de.rwth.i9.palm.persistence.RoleDAO;
 import de.rwth.i9.palm.persistence.RunTimeDAO;
 import de.rwth.i9.palm.persistence.SessionDataSetDAO;
 import de.rwth.i9.palm.persistence.SourceDAO;
-import de.rwth.i9.palm.persistence.TagDAO;
+import de.rwth.i9.palm.persistence.SubjectDAO;
 import de.rwth.i9.palm.persistence.TopicDAO;
 import de.rwth.i9.palm.persistence.UserDAO;
 import de.rwth.i9.palm.persistence.WidgetDAO;
@@ -74,7 +73,7 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private InstitutionDAO institutionDAO;
 
 	@Autowired( required = false )
-	private KeywordDAO keywordDAO;
+	private SubjectDAO subjectDAO;
 
 	@Autowired( required = false )
 	private LocationDAO locationDAO;
@@ -83,7 +82,7 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private PublicationDAO publicationDAO;
 
 	@Autowired( required = false )
-	private PublicationOldDAO publicationOldDAO;
+	private ReferenceDAO referenceDAO;
 
 	@Autowired( required = false )
 	private RoleDAO roleDAO;
@@ -96,9 +95,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	
 	@Autowired( required = false )
 	private SourceDAO sourceDAO;
-
-	@Autowired( required = false )
-	private TagDAO tagDAO;
 
 	@Autowired( required = false )
 	private TopicDAO topicDAO;
@@ -167,12 +163,12 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
-	public KeywordDAO getKeywordDAO()
+	public SubjectDAO getSubjectDAO()
 	{
-		if ( this.keywordDAO == null )
-			this.keywordDAO = new KeywordDAOHibernate( this.sessionFactory );
+		if ( this.subjectDAO == null )
+			this.subjectDAO = new SubjectDAOHibernate( this.sessionFactory );
 
-		return this.keywordDAO;
+		return this.subjectDAO;
 	}
 
 	@Override
@@ -194,12 +190,12 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
-	public PublicationOldDAO getPublicationOldDAO()
+	public ReferenceDAO getReferenceDAO()
 	{
-		if ( this.publicationOldDAO == null )
-			this.publicationOldDAO = new PublicationOldDAOHibernate( this.sessionFactory );
+		if ( this.referenceDAO == null )
+			this.referenceDAO = new ReferenceDAOHibernate( this.sessionFactory );
 
-		return this.publicationOldDAO;
+		return this.referenceDAO;
 	}
 
 	@Override
@@ -239,15 +235,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
-	public TagDAO getTagDAO()
-	{
-		if ( this.tagDAO == null )
-			this.tagDAO = new TagDAOHibernate( this.sessionFactory );
-
-		return this.tagDAO;
-	}
-
-	@Override
 	public TopicDAO getTopicDAO()
 	{
 		if ( this.topicDAO == null )
@@ -282,4 +269,5 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 		return this.widgetDAO;
 	}
+
 }
