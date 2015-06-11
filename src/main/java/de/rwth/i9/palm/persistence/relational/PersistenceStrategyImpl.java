@@ -6,24 +6,24 @@ import java.util.Map;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import de.rwth.i9.palm.persistence.AlgorithmDAO;
 import de.rwth.i9.palm.persistence.AuthorAliasDAO;
 import de.rwth.i9.palm.persistence.AuthorDAO;
 import de.rwth.i9.palm.persistence.ConferenceDAO;
 import de.rwth.i9.palm.persistence.DatasetDAO;
+import de.rwth.i9.palm.persistence.ExtractionRuntimeDAO;
+import de.rwth.i9.palm.persistence.ExtractionServiceDAO;
 import de.rwth.i9.palm.persistence.FunctionDAO;
 import de.rwth.i9.palm.persistence.InstantiableDAO;
 import de.rwth.i9.palm.persistence.InstitutionDAO;
 import de.rwth.i9.palm.persistence.LocationDAO;
 import de.rwth.i9.palm.persistence.PersistenceStrategy;
 import de.rwth.i9.palm.persistence.PublicationDAO;
+import de.rwth.i9.palm.persistence.PublicationTopicDAO;
 import de.rwth.i9.palm.persistence.ReferenceDAO;
 import de.rwth.i9.palm.persistence.RoleDAO;
-import de.rwth.i9.palm.persistence.RunTimeDAO;
 import de.rwth.i9.palm.persistence.SessionDataSetDAO;
 import de.rwth.i9.palm.persistence.SourceDAO;
 import de.rwth.i9.palm.persistence.SubjectDAO;
-import de.rwth.i9.palm.persistence.TopicDAO;
 import de.rwth.i9.palm.persistence.UserDAO;
 import de.rwth.i9.palm.persistence.WidgetDAO;
 
@@ -55,7 +55,7 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Autowired( required = false )
-	private AlgorithmDAO algorithmDAO;
+	private ExtractionServiceDAO extractionServiceDAO;
 
 	@Autowired( required = false )
 	private AuthorAliasDAO authorAliasDAO;
@@ -88,7 +88,7 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private RoleDAO roleDAO;
 
 	@Autowired( required = false )
-	private RunTimeDAO runTimeDAO;
+	private ExtractionRuntimeDAO extractionRuntimeDAO;
 
 	@Autowired( required = false )
 	private SessionDataSetDAO sessionDataSetDAO;
@@ -97,7 +97,7 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private SourceDAO sourceDAO;
 
 	@Autowired( required = false )
-	private TopicDAO topicDAO;
+	private PublicationTopicDAO publicationTopicDAO;
 
 	@Autowired( required = false )
 	private UserDAO userDAO;
@@ -109,12 +109,12 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private WidgetDAO widgetDAO;
 
 	@Override
-	public AlgorithmDAO getAlgorithmDAO()
+	public ExtractionServiceDAO getExtractionServiceDAO()
 	{
-		if ( this.algorithmDAO == null )
-			this.algorithmDAO = new AlgorithmDAOHibernate( this.sessionFactory );
+		if ( this.extractionServiceDAO == null )
+			this.extractionServiceDAO = new ExtractionServiceDAOHibernate( this.sessionFactory );
 
-		return this.algorithmDAO;
+		return this.extractionServiceDAO;
 	}
 
 	@Override
@@ -208,12 +208,12 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
-	public RunTimeDAO getRunTimeDAO()
+	public ExtractionRuntimeDAO getExtractionRuntimeDAO()
 	{
-		if ( this.runTimeDAO == null )
-			this.runTimeDAO = new RunTimeDAOHibernate( this.sessionFactory );
+		if ( this.extractionRuntimeDAO == null )
+			this.extractionRuntimeDAO = new ExtractionRuntimeDAOHibernate( this.sessionFactory );
 
-		return this.runTimeDAO;
+		return this.extractionRuntimeDAO;
 	}
 	
 	@Override
@@ -235,12 +235,12 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
-	public TopicDAO getTopicDAO()
+	public PublicationTopicDAO getPublicationTopicDAO()
 	{
-		if ( this.topicDAO == null )
-			this.topicDAO = new TopicDAOHibernate( this.sessionFactory );
+		if ( this.publicationTopicDAO == null )
+			this.publicationTopicDAO = new PublicationTopicDAOHibernate( this.sessionFactory );
 
-		return this.topicDAO;
+		return this.publicationTopicDAO;
 	}
 
 	@Override
