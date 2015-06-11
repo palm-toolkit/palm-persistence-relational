@@ -18,6 +18,8 @@ import de.rwth.i9.palm.persistence.InstitutionDAO;
 import de.rwth.i9.palm.persistence.LocationDAO;
 import de.rwth.i9.palm.persistence.PersistenceStrategy;
 import de.rwth.i9.palm.persistence.PublicationDAO;
+import de.rwth.i9.palm.persistence.PublicationHistoryDAO;
+import de.rwth.i9.palm.persistence.PublicationSourceDAO;
 import de.rwth.i9.palm.persistence.PublicationTopicDAO;
 import de.rwth.i9.palm.persistence.ReferenceDAO;
 import de.rwth.i9.palm.persistence.RoleDAO;
@@ -64,6 +66,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private AuthorDAO authorDAO;
 
 	@Autowired( required = false )
+	private ConferenceDAO conferenceDAO;
+
+	@Autowired( required = false )
 	private DatasetDAO datasetDAO;
 
 	@Autowired( required = false )
@@ -73,13 +78,19 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private InstitutionDAO institutionDAO;
 
 	@Autowired( required = false )
-	private SubjectDAO subjectDAO;
-
-	@Autowired( required = false )
 	private LocationDAO locationDAO;
 
 	@Autowired( required = false )
 	private PublicationDAO publicationDAO;
+
+	@Autowired( required = false )
+	private PublicationHistoryDAO publicationHistoryDAO;
+
+	@Autowired( required = false )
+	private PublicationSourceDAO publicationSourceDAO;
+
+	@Autowired( required = false )
+	private PublicationTopicDAO publicationTopicDAO;
 
 	@Autowired( required = false )
 	private ReferenceDAO referenceDAO;
@@ -97,13 +108,10 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private SourceDAO sourceDAO;
 
 	@Autowired( required = false )
-	private PublicationTopicDAO publicationTopicDAO;
+	private SubjectDAO subjectDAO;
 
 	@Autowired( required = false )
 	private UserDAO userDAO;
-
-	@Autowired( required = false )
-	private ConferenceDAO conferenceDAO;
 
 	@Autowired( required = false )
 	private WidgetDAO widgetDAO;
@@ -136,6 +144,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
+	public ConferenceDAO getConferenceDAO()
+	{
+		if ( this.conferenceDAO == null )
+			this.conferenceDAO = new ConferenceDAOHibernate( this.sessionFactory );
+
+		return this.conferenceDAO;
+	}
+
+	@Override
 	public DatasetDAO getDatasetDAO()
 	{
 		if ( this.datasetDAO == null )
@@ -163,15 +180,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
-	public SubjectDAO getSubjectDAO()
-	{
-		if ( this.subjectDAO == null )
-			this.subjectDAO = new SubjectDAOHibernate( this.sessionFactory );
-
-		return this.subjectDAO;
-	}
-
-	@Override
 	public LocationDAO getLocationDAO()
 	{
 		if ( this.locationDAO == null )
@@ -187,6 +195,33 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.publicationDAO = new PublicationDAOHibernate( this.sessionFactory );
 
 		return this.publicationDAO;
+	}
+
+	@Override
+	public PublicationSourceDAO getPublicationSourceDAO()
+	{
+		if ( this.publicationSourceDAO == null )
+			this.publicationSourceDAO = new PublicationSourceDAOHibernate( this.sessionFactory );
+
+		return this.publicationSourceDAO;
+	}
+
+	@Override
+	public PublicationHistoryDAO getPublicationHistoryDAO()
+	{
+		if ( this.publicationHistoryDAO == null )
+			this.publicationHistoryDAO = new PublicationHistoryDAOHibernate( this.sessionFactory );
+
+		return this.publicationHistoryDAO;
+	}
+
+	@Override
+	public PublicationTopicDAO getPublicationTopicDAO()
+	{
+		if ( this.publicationTopicDAO == null )
+			this.publicationTopicDAO = new PublicationTopicDAOHibernate( this.sessionFactory );
+
+		return this.publicationTopicDAO;
 	}
 
 	@Override
@@ -235,12 +270,12 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
-	public PublicationTopicDAO getPublicationTopicDAO()
+	public SubjectDAO getSubjectDAO()
 	{
-		if ( this.publicationTopicDAO == null )
-			this.publicationTopicDAO = new PublicationTopicDAOHibernate( this.sessionFactory );
+		if ( this.subjectDAO == null )
+			this.subjectDAO = new SubjectDAOHibernate( this.sessionFactory );
 
-		return this.publicationTopicDAO;
+		return this.subjectDAO;
 	}
 
 	@Override
@@ -250,15 +285,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.userDAO = new UserDAOHibernate( this.sessionFactory );
 
 		return this.userDAO;
-	}
-
-	@Override
-	public ConferenceDAO getConferenceDAO()
-	{
-		if ( this.conferenceDAO == null )
-			this.conferenceDAO = new ConferenceDAOHibernate( this.sessionFactory );
-
-		return this.conferenceDAO;
 	}
 
 	@Override

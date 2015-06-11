@@ -35,4 +35,23 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		return authors.get( 0 );
 	}
 
+	@Override
+	public Author getByUri( String uri )
+	{
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "FROM Author " );
+		queryString.append( "WHERE uri = :uri " );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+		query.setParameter( "uri", uri );
+
+		@SuppressWarnings( "unchecked" )
+		List<Author> Authors = query.list();
+
+		if ( Authors == null || Authors.isEmpty() )
+			return null;
+
+		return Authors.get( 0 );
+	}
+
 }

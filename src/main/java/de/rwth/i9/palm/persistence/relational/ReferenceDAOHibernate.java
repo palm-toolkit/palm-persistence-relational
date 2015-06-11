@@ -22,9 +22,11 @@ public class ReferenceDAOHibernate extends GenericDAOHibernate<Reference> implem
 		StringBuilder queryString = new StringBuilder();
 		queryString.append( "FROM Reference " );
 		queryString.append( "WHERE uri = :uri " );
+		queryString.append( "OR sameAsUri = :sameAsUri " );
 
 		Query query = getCurrentSession().createQuery( queryString.toString() );
 		query.setParameter( "uri", uri );
+		query.setParameter( "sameAsUri", uri );
 
 		@SuppressWarnings( "unchecked" )
 		List<Reference> References = query.list();
