@@ -54,4 +54,11 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		return Authors.get( 0 );
 	}
 
+	@Override
+	public List<Author> getAuthorByFUllTextSearch( String queryString )
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -44,6 +44,9 @@ public class ConferenceDAOHibernateTest
 		{
 			System.out.println( entry.getKey() + "/" + entry.getValue().getYear() );
 		}
+
+		int totalConferences = persistenceStrategy.getConferenceDAO().countTotal();
+		System.out.println( "total record : " + totalConferences );
 	}
 
 }
