@@ -46,7 +46,7 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 
 		// prepare the container for result
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
-		resultMap.put( "count", query.getFetchSize() );
+		resultMap.put( "count", this.countTotal() );
 		resultMap.put( "result", query.list() );
 
 		return resultMap;
@@ -95,10 +95,10 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	 * 
 	 */
 	@Override
-	public Map<String, Object> getPublicationByFUllTextSearchWithPaging( String queryString, int pageNo, int maxResult )
+	public Map<String, Object> getPublicationByFullTextSearchWithPaging( String queryString, int page, int maxResult )
 	{
 		if ( queryString.equals( "" ) )
-			return this.getPublicationWithPaging( pageNo, maxResult );
+			return this.getPublicationWithPaging( page, maxResult );
 
 		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
 		
@@ -122,7 +122,7 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		int totalRows = hibQuery.getResultSize();
 		
 		// apply limit
-		hibQuery.setFirstResult( pageNo * maxResult );
+		hibQuery.setFirstResult( page * maxResult );
 		hibQuery.setMaxResults( maxResult );
 		
 		// org.apache.lucene.search.Sort sort = new Sort( new SortField(

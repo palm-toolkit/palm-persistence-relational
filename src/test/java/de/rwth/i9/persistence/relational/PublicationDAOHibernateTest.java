@@ -59,7 +59,7 @@ public class PublicationDAOHibernateTest
 	@Test
 	public void fullTextSearchPagging()
 	{
-		Map<String, Object> results = persistenceStrategy.getPublicationDAO().getPublicationByFUllTextSearchWithPaging( "social network analysis", 0, 20 );
+		Map<String, Object> results = persistenceStrategy.getPublicationDAO().getPublicationByFullTextSearchWithPaging( "social network analysis", 0, 20 );
 
 		System.out.println( "total record " + results.get( "count" ) );
 		@SuppressWarnings( "unchecked" )
