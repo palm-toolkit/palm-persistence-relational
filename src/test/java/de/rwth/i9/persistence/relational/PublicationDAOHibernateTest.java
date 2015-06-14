@@ -45,7 +45,7 @@ public class PublicationDAOHibernateTest
 		// persistenceStrategy.getPublicationDAO().doReindexing();
 
 		// try to search something
-		List<Publication> publications = persistenceStrategy.getPublicationDAO().getPublicationByFUllTextSearch( "learning analytics" );
+		List<Publication> publications = persistenceStrategy.getPublicationDAO().getPublicationByFullTextSearch( "learning analytics" );
 
 		for ( Publication publication : publications )
 		{

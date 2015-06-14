@@ -57,7 +57,7 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<Publication> getPublicationByFUllTextSearch( String queryString )
+	public List<Publication> getPublicationByFullTextSearch( String queryString )
 	{
 		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
 		
