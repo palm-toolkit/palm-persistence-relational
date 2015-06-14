@@ -2,9 +2,11 @@ package de.rwth.i9.persistence.relational;
 
 import static org.junit.Assert.assertNotNull;
 
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,7 @@ public class ConferenceDAOHibernateTest
 	}
 
 	@Test
+	@Ignore
 	public void test()
 	{
 		Map<String, Conference> notationConferenceMaps = persistenceStrategy.getConferenceDAO().getNotationConferenceMaps();
@@ -47,6 +50,25 @@ public class ConferenceDAOHibernateTest
 
 		int totalConferences = persistenceStrategy.getConferenceDAO().countTotal();
 		System.out.println( "total record : " + totalConferences );
+	}
+	
+	@Test
+	public void fullTextSearchPagging() throws InterruptedException
+	{
+		// do reindexing first
+		persistenceStrategy.getConferenceDAO().doReindexing();
+		
+		Map<String, Object> results = persistenceStrategy.getConferenceDAO().getConferenceByFullTextSearchWithPaging( "data mining", 0, 20 );
+
+		System.out.println( "total record " + results.get( "count" ) );
+		@SuppressWarnings( "unchecked" )
+		List<Conference> conferences = (List<Conference>) results.get( "result" );
+
+		for ( Conference conference : conferences )
+		{
+			System.out.println( "title : " + conference.getConferenceGroup().getName() + conference.getYear() );
+		}
+		
 	}
 
 }

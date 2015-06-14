@@ -34,6 +34,9 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		fullTextSession.createIndexer().startAndWait();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Map<String, Object> getPublicationWithPaging( int pageNo, int maxResult )
 	{
