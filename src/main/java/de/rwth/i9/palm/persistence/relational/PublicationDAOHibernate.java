@@ -11,6 +11,7 @@ import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
 import org.hibernate.search.query.dsl.QueryBuilder;
 
+import de.rwth.i9.palm.model.Conference;
 import de.rwth.i9.palm.model.Publication;
 import de.rwth.i9.palm.persistence.PublicationDAO;
 
@@ -139,6 +140,30 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 		resultMap.put( "count", totalRows );
 		resultMap.put( "result", hibQuery.list() );
+
+		return resultMap;
+	}
+
+	@Override
+	public Map<String, Object> getPublicationByConferenceWithPaging( Conference conference, int pageNo, int maxResult )
+	{
+		// do query twice, first query the total rows
+		Query queryCount = getCurrentSession().createQuery( "FROM Publication WHERE conference = :conference" );
+		queryCount.setParameter( "conference", conference );
+		int countTotal = queryCount.list().size();
+
+		Query query = getCurrentSession().createQuery( "FROM Publication WHERE conference = :conference" );
+		query.setParameter( "conference", conference );
+		query.setFirstResult( pageNo * maxResult );
+		query.setMaxResults( maxResult );
+
+		// @SuppressWarnings( "unchecked" )
+		// List<Publication> publications = query.list();
+
+		// prepare the container for result
+		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+		resultMap.put( "count", countTotal );
+		resultMap.put( "result", query.list() );
 
 		return resultMap;
 	}
