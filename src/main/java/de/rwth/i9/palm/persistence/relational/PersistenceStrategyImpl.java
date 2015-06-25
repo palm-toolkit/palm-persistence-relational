@@ -27,6 +27,7 @@ import de.rwth.i9.palm.persistence.SessionDataSetDAO;
 import de.rwth.i9.palm.persistence.SourceDAO;
 import de.rwth.i9.palm.persistence.SubjectDAO;
 import de.rwth.i9.palm.persistence.UserDAO;
+import de.rwth.i9.palm.persistence.UserRequestDAO;
 import de.rwth.i9.palm.persistence.WidgetDAO;
 
 public class PersistenceStrategyImpl implements PersistenceStrategy
@@ -112,6 +113,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private UserDAO userDAO;
+
+	@Autowired( required = false )
+	private UserRequestDAO userRequestDAO;
 
 	@Autowired( required = false )
 	private WidgetDAO widgetDAO;
@@ -285,6 +289,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.userDAO = new UserDAOHibernate( this.sessionFactory );
 
 		return this.userDAO;
+	}
+
+	@Override
+	public UserRequestDAO getUserRequestDAO()
+	{
+		if ( this.userRequestDAO == null )
+			this.userRequestDAO = new UserRequestDAOHibernate( this.sessionFactory );
+
+		return this.userRequestDAO;
 	}
 
 	@Override
