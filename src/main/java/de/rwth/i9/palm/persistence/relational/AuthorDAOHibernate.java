@@ -1,6 +1,7 @@
 package de.rwth.i9.palm.persistence.relational;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,9 +108,16 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Map<String, Object> getAuthorWithPaging( int pageNo, int maxResult )
+	public Map<String, Object> getAuthorWithPaging( String queryString, int pageNo, int maxResult )
 	{
-		Query query = getCurrentSession().createQuery( "FROM Author " );
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append( "FROM Author " );
+		if ( !queryString.equals( "" ) )
+			stringBuilder.append( "WHERE name LIKE :queryString " );
+
+		Query query = getCurrentSession().createQuery( stringBuilder.toString() );
+		if ( !queryString.equals( "" ) )
+			query.setParameter( "queryString", "%" + queryString + "%" );
 		query.setFirstResult( pageNo * maxResult );
 		query.setMaxResults( maxResult );
 
@@ -167,7 +175,7 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 	public Map<String, Object> getAuthorByFullTextSearchWithPaging( String queryString, int page, int maxResult )
 	{
 		if ( queryString.equals( "" ) )
-			return this.getAuthorWithPaging( page, maxResult );
+			return this.getAuthorWithPaging( "", page, maxResult );
 		
 		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
 		
@@ -208,4 +216,49 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		return resultMap;
 	}
 
+	@Override
+	public List<Author> getAuthorByNameAndInstitution( String name, String institution )
+	{
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "SELECT author " );
+		queryString.append( "FROM Author author " );
+		queryString.append( "LEFT JOIN author.aliases authorAlias " );
+		queryString.append( "WHERE author.name = :aname " );
+		queryString.append( "OR authorAlias.name = :asname " );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+		query.setParameter( "aname", name );
+		query.setParameter( "asname", name );
+
+		@SuppressWarnings( "unchecked" )
+		List<Author> authors = query.list();
+
+		if ( authors == null || authors.isEmpty() )
+			return Collections.emptyList();
+
+		// if only one result
+		if ( authors.size() == 1 )
+		{
+			if ( authors.get( 0 ).getInstitutions() == null || authors.get( 0 ).getInstitutions().isEmpty() )
+				return authors;
+			else
+			{
+				if ( authors.get( 0 ).getInstitutions().get( 0 ).getName().contains( institution ) )
+					return authors;
+				else
+					return Collections.emptyList();
+			}
+		}
+		else
+		{
+			Iterator<Author> i = authors.iterator();
+			while ( i.hasNext() )
+			{
+				Author author = i.next();
+				if ( !author.getInstitutions().get( 0 ).getName().contains( institution ) )
+					i.remove();
+			}
+		}
+		return authors;
+	}
 }

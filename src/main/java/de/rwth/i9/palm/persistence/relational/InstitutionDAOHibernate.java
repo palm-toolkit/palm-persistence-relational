@@ -35,4 +35,23 @@ public class InstitutionDAOHibernate extends GenericDAOHibernate<Institution> im
 		return institutions.get( 0 );
 	}
 
+	@Override
+	public Institution getByName( String name )
+	{
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "FROM Institution " );
+		queryString.append( "WHERE name = :name " );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+		query.setParameter( "name", name );
+
+		@SuppressWarnings( "unchecked" )
+		List<Institution> institutions = query.list();
+
+		if ( institutions == null || institutions.isEmpty() )
+			return null;
+
+		return institutions.get( 0 );
+	}
+
 }

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import de.rwth.i9.palm.persistence.AuthorAliasDAO;
 import de.rwth.i9.palm.persistence.AuthorDAO;
+import de.rwth.i9.palm.persistence.AuthorSourceDAO;
 import de.rwth.i9.palm.persistence.ConferenceDAO;
 import de.rwth.i9.palm.persistence.DatasetDAO;
 import de.rwth.i9.palm.persistence.ExtractionRuntimeDAO;
@@ -67,6 +68,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private AuthorDAO authorDAO;
 
 	@Autowired( required = false )
+	private AuthorSourceDAO authorSourceDAO;
+
+	@Autowired( required = false )
 	private ConferenceDAO conferenceDAO;
 
 	@Autowired( required = false )
@@ -121,15 +125,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private WidgetDAO widgetDAO;
 
 	@Override
-	public ExtractionServiceDAO getExtractionServiceDAO()
-	{
-		if ( this.extractionServiceDAO == null )
-			this.extractionServiceDAO = new ExtractionServiceDAOHibernate( this.sessionFactory );
-
-		return this.extractionServiceDAO;
-	}
-
-	@Override
 	public AuthorAliasDAO getAuthorAliasDAO()
 	{
 		if ( this.authorAliasDAO == null )
@@ -148,6 +143,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
+	public AuthorSourceDAO getAuthorSourceDAO()
+	{
+		if ( this.authorSourceDAO == null )
+			this.authorSourceDAO = new AuthorSourceDAOHibernate( this.sessionFactory );
+
+		return this.authorSourceDAO;
+	}
+
+	@Override
 	public ConferenceDAO getConferenceDAO()
 	{
 		if ( this.conferenceDAO == null )
@@ -163,6 +167,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.datasetDAO = new DatasetDAOHibernate( this.sessionFactory );
 
 		return this.datasetDAO;
+	}
+
+	@Override
+	public ExtractionServiceDAO getExtractionServiceDAO()
+	{
+		if ( this.extractionServiceDAO == null )
+			this.extractionServiceDAO = new ExtractionServiceDAOHibernate( this.sessionFactory );
+
+		return this.extractionServiceDAO;
 	}
 
 	@Override
