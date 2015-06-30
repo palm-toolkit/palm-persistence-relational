@@ -6,7 +6,6 @@ import java.util.Map;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import de.rwth.i9.palm.persistence.AuthorAliasDAO;
 import de.rwth.i9.palm.persistence.AuthorDAO;
 import de.rwth.i9.palm.persistence.AuthorSourceDAO;
 import de.rwth.i9.palm.persistence.ConferenceDAO;
@@ -60,9 +59,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private ExtractionServiceDAO extractionServiceDAO;
-
-	@Autowired( required = false )
-	private AuthorAliasDAO authorAliasDAO;
 
 	@Autowired( required = false )
 	private AuthorDAO authorDAO;
@@ -123,15 +119,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private WidgetDAO widgetDAO;
-
-	@Override
-	public AuthorAliasDAO getAuthorAliasDAO()
-	{
-		if ( this.authorAliasDAO == null )
-			this.authorAliasDAO = new AuthorAliasDAOHibernate( this.sessionFactory );
-
-		return this.authorAliasDAO;
-	}
 
 	@Override
 	public AuthorDAO getAuthorDAO()

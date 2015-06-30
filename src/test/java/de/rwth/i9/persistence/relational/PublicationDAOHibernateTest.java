@@ -57,6 +57,7 @@ public class PublicationDAOHibernateTest
 	}
 
 	@Test
+	@Ignore
 	public void fullTextSearchPagging()
 	{
 		Map<String, Object> results = persistenceStrategy.getPublicationDAO().getPublicationByFullTextSearchWithPaging( "social network analysis", 0, 20 );

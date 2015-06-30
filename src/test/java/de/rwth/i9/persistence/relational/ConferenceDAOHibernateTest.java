@@ -53,6 +53,7 @@ public class ConferenceDAOHibernateTest
 	}
 	
 	@Test
+	@Ignore
 	public void fullTextSearchPagging() throws InterruptedException
 	{
 		// do reindexing first

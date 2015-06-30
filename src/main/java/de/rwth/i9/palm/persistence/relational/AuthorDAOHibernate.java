@@ -220,15 +220,12 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 	public List<Author> getAuthorByNameAndInstitution( String name, String institution )
 	{
 		StringBuilder queryString = new StringBuilder();
-		queryString.append( "SELECT author " );
+		queryString.append( "SELECT DISTINCT author " );
 		queryString.append( "FROM Author author " );
-		queryString.append( "LEFT JOIN author.aliases authorAlias " );
 		queryString.append( "WHERE author.name = :aname " );
-		queryString.append( "OR authorAlias.name = :asname " );
 
 		Query query = getCurrentSession().createQuery( queryString.toString() );
 		query.setParameter( "aname", name );
-		query.setParameter( "asname", name );
 
 		@SuppressWarnings( "unchecked" )
 		List<Author> authors = query.list();
