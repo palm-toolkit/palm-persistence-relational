@@ -187,7 +187,7 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		
 		org.apache.lucene.search.Query query = qb
 				  .keyword()
-				  .onFields( "lastName", "name", "institutions.name" )
+				  .onFields( "lastName", "name", "institution.name" )
 				  .matching( queryString )
 				  .createQuery();
 		
@@ -220,12 +220,11 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 	public List<Author> getAuthorByNameAndInstitution( String name, String institution )
 	{
 		StringBuilder queryString = new StringBuilder();
-		queryString.append( "SELECT DISTINCT author " );
-		queryString.append( "FROM Author author " );
-		queryString.append( "WHERE author.name = :aname " );
+		queryString.append( "FROM Author " );
+		queryString.append( "WHERE name = :name " );
 
 		Query query = getCurrentSession().createQuery( queryString.toString() );
-		query.setParameter( "aname", name );
+		query.setParameter( "name", name );
 
 		@SuppressWarnings( "unchecked" )
 		List<Author> authors = query.list();
@@ -236,11 +235,11 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		// if only one result
 		if ( authors.size() == 1 )
 		{
-			if ( authors.get( 0 ).getInstitutions() == null || authors.get( 0 ).getInstitutions().isEmpty() )
+			if ( authors.get( 0 ).getInstitution() == null )
 				return authors;
 			else
 			{
-				if ( authors.get( 0 ).getInstitutions().get( 0 ).getName().contains( institution ) )
+				if ( authors.get( 0 ).getInstitution().getName().contains( institution ) )
 					return authors;
 				else
 					return Collections.emptyList();
@@ -252,7 +251,7 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 			while ( i.hasNext() )
 			{
 				Author author = i.next();
-				if ( !author.getInstitutions().get( 0 ).getName().contains( institution ) )
+				if ( !author.getInstitution().getName().contains( institution ) )
 					i.remove();
 			}
 		}
