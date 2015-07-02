@@ -14,6 +14,7 @@ import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
 import org.hibernate.search.query.dsl.QueryBuilder;
 
+import de.rwth.i9.palm.helper.comparator.AuthorByNoCitationComparator;
 import de.rwth.i9.palm.model.Author;
 import de.rwth.i9.palm.persistence.AuthorDAO;
 
@@ -114,7 +115,8 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		stringBuilder.append( "FROM Author " );
 		if ( !queryString.equals( "" ) )
 			stringBuilder.append( "WHERE name LIKE :queryString " );
-
+		stringBuilder.append( "ORDER BY citedBy desc " );
+		
 		Query query = getCurrentSession().createQuery( stringBuilder.toString() );
 		if ( !queryString.equals( "" ) )
 			query.setParameter( "queryString", "%" + queryString + "%" );
@@ -201,17 +203,20 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		// apply limit
 		hibQuery.setFirstResult( page * maxResult );
 		hibQuery.setMaxResults( maxResult );
-				
-		org.apache.lucene.search.Sort sort = new Sort( new SortField("name",  SortField.Type.STRING ));
-		hibQuery.setSort( sort );
 
 		if( totalRows == 0 )
 			return null;
 		
 		// prepare the container for result
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+		
+		@SuppressWarnings( "unchecked" )
+		List<Author> authors =  hibQuery.list();
+		
+		Collections.sort( authors, new AuthorByNoCitationComparator() );
+		
 		resultMap.put( "count", totalRows );
-		resultMap.put( "result", hibQuery.list() );
+		resultMap.put( "result", authors);
 
 		return resultMap;
 	}
