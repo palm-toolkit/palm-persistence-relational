@@ -123,12 +123,22 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		query.setFirstResult( pageNo * maxResult );
 		query.setMaxResults( maxResult );
 
-//		@SuppressWarnings( "unchecked" )
-//		List<Author> authors = query.list();
+		int count;
+		if( !queryString.equals( "" ) ){
+			StringBuilder stringBuilder2 = new StringBuilder();
+			stringBuilder2.append( "SELECT COUNT(*) FROM Author " );
+			stringBuilder2.append( "WHERE name LIKE :queryString " );
+			
+			Query query2 = getCurrentSession().createQuery( stringBuilder2.toString() );
+			query2.setParameter( "queryString", "%" + queryString + "%" );
+			
+			count = ((Number) query2.uniqueResult()).intValue();
+		} else
+			count = this.countTotal();
 
 		// prepare the container for result
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
-		resultMap.put( "count", this.countTotal() );
+		resultMap.put( "count", count );
 		resultMap.put( "result", query.list() );
 
 		return resultMap;
