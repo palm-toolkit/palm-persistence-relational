@@ -168,4 +168,41 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		return resultMap;
 	}
 
+	@Override
+	public List<Publication> getPublicationViaFuzzyQuery( String queryString, float threshold, int prefixLength)
+	{
+		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
+		
+		// create native Lucene query using the query DSL
+		// alternatively you can write the Lucene query using the Lucene query parser
+		// or the Lucene programmatic API. The Hibernate Search DSL is recommended though
+		QueryBuilder qb = fullTextSession.getSearchFactory()
+				.buildQueryBuilder().forEntity( Publication.class ).get();
+		
+		org.apache.lucene.search.Query query = qb
+				  .keyword()
+				  .fuzzy()
+			        .withThreshold( threshold )
+			        .withPrefixLength( prefixLength )
+				  .onFields("title")
+				  .matching( queryString )
+				  .createQuery();
+		
+		// wrap Lucene query in a org.hibernate.Query
+		org.hibernate.search.FullTextQuery hibQuery =
+		    fullTextSession.createFullTextQuery(query, Publication.class);
+		
+		// org.apache.lucene.search.Sort sort = new Sort( new SortField(
+		// "title", (Type) SortField.STRING_FIRST ) );
+		// hibQuery.setSort( sort );
+
+		@SuppressWarnings( "unchecked" )
+		List<Publication> publications = hibQuery.list();
+		
+		if( publications ==  null || publications.isEmpty() )
+			return Collections.emptyList();
+		
+		return publications;
+	}
+
 }
