@@ -272,4 +272,33 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		}
 		return authors;
 	}
+
+	@Override
+	public List<Author> getAuthorViaFuzzyQuery( String name, float threshold, int prefixLength )
+	{
+		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
+		
+		QueryBuilder qb = fullTextSession.getSearchFactory()
+				.buildQueryBuilder().forEntity( Author.class ).get();
+		
+		org.apache.lucene.search.Query query = qb
+				  .keyword()
+				  .fuzzy()
+			        .withThreshold( threshold )
+			        .withPrefixLength( prefixLength )
+				  .onFields("name")
+				  .matching( name )
+				  .createQuery();
+		
+		org.hibernate.search.FullTextQuery hibQuery =
+		    fullTextSession.createFullTextQuery(query, Author.class);
+
+		@SuppressWarnings( "unchecked" )
+		List<Author> authors = hibQuery.list();
+		
+		if( authors ==  null || authors.isEmpty() )
+			return Collections.emptyList();
+		
+		return authors;
+	}
 }

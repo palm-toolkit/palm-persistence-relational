@@ -173,4 +173,41 @@ FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession()
 		return resultMap;
 	}
 
+	@Override
+	public List<ConferenceGroup> getConferenceViaFuzzyQuery( String name, float threshold, int prefixLength )
+	{
+FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
+		
+		// create native Lucene query using the query DSL
+		// alternatively you can write the Lucene query using the Lucene query parser
+		// or the Lucene programmatic API. The Hibernate Search DSL is recommended though
+		QueryBuilder qb = fullTextSession.getSearchFactory()
+				.buildQueryBuilder().forEntity( ConferenceGroup.class ).get();
+		
+		org.apache.lucene.search.Query query = qb
+				  .keyword()
+				  .fuzzy()
+			        .withThreshold( threshold )
+			        .withPrefixLength( prefixLength )
+				  .onFields("name")
+				  .matching( name )
+				  .createQuery();
+		
+		// wrap Lucene query in a org.hibernate.Query
+		org.hibernate.search.FullTextQuery hibQuery =
+		    fullTextSession.createFullTextQuery(query, ConferenceGroup.class);
+		
+		// org.apache.lucene.search.Sort sort = new Sort( new SortField(
+		// "title", (Type) SortField.STRING_FIRST ) );
+		// hibQuery.setSort( sort );
+
+		@SuppressWarnings( "unchecked" )
+		List<ConferenceGroup> publicationGroups = hibQuery.list();
+		
+		if( publicationGroups ==  null || publicationGroups.isEmpty() )
+			return Collections.emptyList();
+		
+		return publicationGroups;
+	}
+
 }

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import de.rwth.i9.palm.persistence.AuthorDAO;
 import de.rwth.i9.palm.persistence.AuthorSourceDAO;
 import de.rwth.i9.palm.persistence.ConferenceDAO;
+import de.rwth.i9.palm.persistence.ConferenceGroupDAO;
 import de.rwth.i9.palm.persistence.DatasetDAO;
 import de.rwth.i9.palm.persistence.ExtractionRuntimeDAO;
 import de.rwth.i9.palm.persistence.ExtractionServiceDAO;
@@ -68,6 +69,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private ConferenceDAO conferenceDAO;
+
+	@Autowired( required = false )
+	private ConferenceGroupDAO conferenceGroupDAO;
 
 	@Autowired( required = false )
 	private DatasetDAO datasetDAO;
@@ -145,6 +149,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.conferenceDAO = new ConferenceDAOHibernate( this.sessionFactory );
 
 		return this.conferenceDAO;
+	}
+
+	@Override
+	public ConferenceGroupDAO getConferenceGroupDAO()
+	{
+		if ( this.conferenceGroupDAO == null )
+			this.conferenceGroupDAO = new ConferenceGroupDAOHibernate( this.sessionFactory );
+
+		return this.conferenceGroupDAO;
 	}
 
 	@Override
