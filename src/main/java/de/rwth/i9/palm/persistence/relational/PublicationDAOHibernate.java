@@ -169,7 +169,7 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	}
 
 	@Override
-	public List<Publication> getPublicationViaFuzzyQuery( String queryString, float threshold, int prefixLength)
+	public List<Publication> getPublicationViaPhraseSlopQuery( String publicationTitle , int slope)
 	{
 		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
 		
@@ -179,14 +179,12 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		QueryBuilder qb = fullTextSession.getSearchFactory()
 				.buildQueryBuilder().forEntity( Publication.class ).get();
 		
+		@SuppressWarnings( "deprecation" )
 		org.apache.lucene.search.Query query = qb
-				  .keyword()
-				  .fuzzy()
-			        .withThreshold( threshold )
-			        .withPrefixLength( prefixLength )
-				  .onFields("title")
-				  .matching( queryString )
-				  .createQuery();
+					.phrase().withSlop( slope )
+					.onField( "title" )
+					.sentence( publicationTitle )
+					.createQuery();
 		
 		// wrap Lucene query in a org.hibernate.Query
 		org.hibernate.search.FullTextQuery hibQuery =

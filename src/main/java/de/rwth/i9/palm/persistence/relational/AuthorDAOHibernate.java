@@ -30,28 +30,6 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Author getByLastName( String lastName )
-	{
-		StringBuilder queryString = new StringBuilder();
-		queryString.append( "FROM Author " );
-		queryString.append( "WHERE lastName = :lastName " );
-
-		Query query = getCurrentSession().createQuery( queryString.toString() );
-		query.setParameter( "lastName", lastName );
-
-		@SuppressWarnings( "unchecked" )
-		List<Author> authors = query.list();
-
-		if ( authors == null || authors.isEmpty() )
-			return null;
-
-		return authors.get( 0 );
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
 	public Author getByUri( String uri )
 	{
 		StringBuilder queryString = new StringBuilder();
@@ -74,7 +52,7 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<Author> getAuthorByLastName( String lastName )
+	public List<Author> getByLastName( String lastName )
 	{
 		if( lastName.equals( "" ))
 			return Collections.emptyList();
@@ -85,6 +63,35 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 
 		Query query = getCurrentSession().createQuery( queryString.toString() );
 		query.setParameter( "lastName", lastName );
+
+		@SuppressWarnings( "unchecked" )
+		List<Author> authors = query.list();
+
+		if ( authors == null || authors.isEmpty() )
+			return Collections.emptyList();
+
+		return authors;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<Author> getByName( String name )
+	{
+		if ( name.equals( "" ) )
+			return Collections.emptyList();
+
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "SELECT a " );
+		queryString.append( "FROM Author a " );
+		queryString.append( "LEFT JOIN a.aliases aa " );
+		queryString.append( "WHERE a.name = :name " );
+		queryString.append( "OR aa.name = :aname " );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+		query.setParameter( "name", name );
+		query.setParameter( "aname", name );
 
 		@SuppressWarnings( "unchecked" )
 		List<Author> authors = query.list();
@@ -115,7 +122,7 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		stringBuilder.append( "FROM Author " );
 		if ( !queryString.equals( "" ) )
 			stringBuilder.append( "WHERE name LIKE :queryString " );
-		stringBuilder.append( "ORDER BY citedBy desc " );
+		stringBuilder.append( "ORDER BY citedBy desc, name asc" );
 		
 		Query query = getCurrentSession().createQuery( stringBuilder.toString() );
 		if ( !queryString.equals( "" ) )
