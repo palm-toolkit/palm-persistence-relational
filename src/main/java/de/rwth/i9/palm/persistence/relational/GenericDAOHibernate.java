@@ -4,8 +4,10 @@ import java.lang.reflect.ParameterizedType;
 import java.util.Collections;
 import java.util.List;
 
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Projections;
 import org.springframework.transaction.annotation.Transactional;
 
 import de.rwth.i9.palm.persistence.GenericDAO;
@@ -86,6 +88,16 @@ public abstract class GenericDAOHibernate<T> implements GenericDAO<T>
 	public void insert( T entity )
 	{
 		sessionFactory.getCurrentSession().save( entity );
+	}
+
+	@SuppressWarnings( "unchecked" )
+	@Transactional
+	public int countTotal()
+	{
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria( (Class<T>) getPersistenceClass() );
+		criteria.setProjection( Projections.rowCount() );
+
+		return ( (Long) criteria.uniqueResult() ).intValue();
 	}
 
 }

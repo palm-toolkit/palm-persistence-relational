@@ -12,21 +12,56 @@ import org.hibernate.search.Search;
 import org.hibernate.search.query.dsl.QueryBuilder;
 
 import de.rwth.i9.palm.model.Conference;
-import de.rwth.i9.palm.model.Publication;
-import de.rwth.i9.palm.persistence.PublicationDAO;
+import de.rwth.i9.palm.model.ConferenceGroup;
+import de.rwth.i9.palm.persistence.ConferenceDAO;
 
-public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> implements PublicationDAO
+public class ConferenceDAOHibernate extends GenericDAOHibernate<Conference> implements ConferenceDAO
 {
-
-	public PublicationDAOHibernate( SessionFactory sessionFactory )
+	/**
+	 * {@inheritDoc}
+	 */
+	public ConferenceDAOHibernate( SessionFactory sessionFactory )
 	{
 		super( sessionFactory );
 	}
 
 	/**
 	 * {@inheritDoc}
-	 * 
-	 * @throws InterruptedException
+	 */
+	@Override
+	public Map<String, Conference> getNotationConferenceMaps()
+	{
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "SELECT cg, c " );
+		queryString.append( "FROM ConferenceGroup cg " );
+		queryString.append( "JOIN cg.conferences c " );
+		queryString.append( "ORDER BY cg.notation ASC, c.year ASC " );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+
+		@SuppressWarnings( "unchecked" )
+		List<Object[]> conferenceObjects = query.list();
+
+		if ( conferenceObjects == null || conferenceObjects.isEmpty() )
+			return Collections.emptyMap();
+
+		// prepare the map object
+		Map<String, Conference> conferencesMap = new LinkedHashMap<String, Conference>();
+
+		// loop through resultList object
+		for ( Object[] item : conferenceObjects )
+		{
+			ConferenceGroup conferenceGroup = (ConferenceGroup) item[0];
+			Conference conference = (Conference) item[1];
+
+			conferencesMap.put( conferenceGroup.getNotation() + conference.getYear(), conference );
+		}
+
+		return conferencesMap;
+	}
+
+	/**
+	 * {@inheritDoc}
 	 */
 	@Override
 	public void doReindexing() throws InterruptedException
@@ -39,14 +74,17 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Map<String, Object> getPublicationWithPaging( int pageNo, int maxResult )
+	public Map<String, Object> getConferenceWithPaging( int pageNo, int maxResult )
 	{
-		Query query = getCurrentSession().createQuery( "FROM Publication " );
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "SELECT c " );
+		queryString.append( "FROM ConferenceGroup cg " );
+		queryString.append( "JOIN cg.conferences c " );
+		queryString.append( "ORDER BY cg.notation ASC, c.year ASC " );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
 		query.setFirstResult( pageNo * maxResult );
 		query.setMaxResults( maxResult );
-
-//		@SuppressWarnings( "unchecked" )
-//		List<Publication> publications = query.list();
 
 		// prepare the container for result
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
@@ -54,55 +92,50 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		resultMap.put( "result", query.list() );
 
 		return resultMap;
-
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<Publication> getPublicationByFullTextSearch( String queryString )
+	public List<Conference> getConferenceByFullTextSearch( String queryString )
 	{
-		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
+FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
 		
 		// create native Lucene query using the query DSL
 		// alternatively you can write the Lucene query using the Lucene query parser
 		// or the Lucene programmatic API. The Hibernate Search DSL is recommended though
 		QueryBuilder qb = fullTextSession.getSearchFactory()
-				.buildQueryBuilder().forEntity( Publication.class ).get();
+				.buildQueryBuilder().forEntity( Conference.class ).get();
 		
 		org.apache.lucene.search.Query query = qb
 				  .keyword()
-				  .onFields("title", "abstractTokenized", "contentTextTokenized")
+				  .onFields("conferenceGroup.name", "year", "thema")
 				  .matching( queryString )
 				  .createQuery();
 		
 		// wrap Lucene query in a org.hibernate.Query
 		org.hibernate.search.FullTextQuery hibQuery =
-		    fullTextSession.createFullTextQuery(query, Publication.class);
-		
-		// org.apache.lucene.search.Sort sort = new Sort( new SortField(
-		// "title", (Type) SortField.STRING_FIRST ) );
-		// hibQuery.setSort( sort );
+		    fullTextSession.createFullTextQuery(query, Conference.class);
 
 		@SuppressWarnings( "unchecked" )
-		List<Publication> publications = hibQuery.list();
+		List<Conference> conferences = hibQuery.list();
 		
-		if( publications ==  null || publications.isEmpty() )
+		if( conferences ==  null || conferences.isEmpty() )
 			return Collections.emptyList();
 		
-		return publications;
+		return conferences;
 	}
 
 	/**
 	 * {@inheritDoc}
-	 * 
 	 */
 	@Override
-	public Map<String, Object> getPublicationByFullTextSearchWithPaging( String queryString, int page, int maxResult )
+	public Map<String, Object> getConferenceByFullTextSearchWithPaging( String queryString, int page, int maxResult )
 	{
+
 		if ( queryString.equals( "" ) )
-			return this.getPublicationWithPaging( page, maxResult );
+			return this.getConferenceWithPaging( page, maxResult );
 
 		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
 		
@@ -110,17 +143,17 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		// alternatively you can write the Lucene query using the Lucene query parser
 		// or the Lucene programmatic API. The Hibernate Search DSL is recommended though
 		QueryBuilder qb = fullTextSession.getSearchFactory()
-				.buildQueryBuilder().forEntity( Publication.class ).get();
+				.buildQueryBuilder().forEntity( Conference.class ).get();
 		
 		org.apache.lucene.search.Query query = qb
 				  .keyword()
-				  .onFields("title", "abstractTokenized", "contentTextTokenized")
+				  .onFields("conferenceGroup.name", "year", "thema")
 				  .matching( queryString )
 				  .createQuery();
 		
 		// wrap Lucene query in a org.hibernate.Query
 		org.hibernate.search.FullTextQuery hibQuery =
-		    fullTextSession.createFullTextQuery(query, Publication.class);
+		    fullTextSession.createFullTextQuery(query, Conference.class);
 		
 		// get the total number of matching elements
 		int totalRows = hibQuery.getResultSize();
@@ -128,10 +161,6 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		// apply limit
 		hibQuery.setFirstResult( page * maxResult );
 		hibQuery.setMaxResults( maxResult );
-		
-		// org.apache.lucene.search.Sort sort = new Sort( new SortField(
-		// "title", (Type) SortField.STRING_FIRST ) );
-		// hibQuery.setSort( sort );
 		
 		if( totalRows == 0 )
 			return null;
@@ -145,62 +174,40 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	}
 
 	@Override
-	public Map<String, Object> getPublicationByConferenceWithPaging( Conference conference, int pageNo, int maxResult )
+	public List<ConferenceGroup> getConferenceViaFuzzyQuery( String name, float threshold, int prefixLength )
 	{
-		// do query twice, first query the total rows
-		Query queryCount = getCurrentSession().createQuery( "FROM Publication WHERE conference = :conference" );
-		queryCount.setParameter( "conference", conference );
-		int countTotal = queryCount.list().size();
-
-		Query query = getCurrentSession().createQuery( "FROM Publication WHERE conference = :conference" );
-		query.setParameter( "conference", conference );
-		query.setFirstResult( pageNo * maxResult );
-		query.setMaxResults( maxResult );
-
-		// @SuppressWarnings( "unchecked" )
-		// List<Publication> publications = query.list();
-
-		// prepare the container for result
-		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
-		resultMap.put( "count", countTotal );
-		resultMap.put( "result", query.list() );
-
-		return resultMap;
-	}
-
-	@Override
-	public List<Publication> getPublicationViaPhraseSlopQuery( String publicationTitle , int slope)
-	{
-		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
+FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
 		
 		// create native Lucene query using the query DSL
 		// alternatively you can write the Lucene query using the Lucene query parser
 		// or the Lucene programmatic API. The Hibernate Search DSL is recommended though
 		QueryBuilder qb = fullTextSession.getSearchFactory()
-				.buildQueryBuilder().forEntity( Publication.class ).get();
+				.buildQueryBuilder().forEntity( ConferenceGroup.class ).get();
 		
-		@SuppressWarnings( "deprecation" )
 		org.apache.lucene.search.Query query = qb
-					.phrase().withSlop( slope )
-					.onField( "title" )
-					.sentence( publicationTitle )
-					.createQuery();
+				  .keyword()
+				  .fuzzy()
+			        .withThreshold( threshold )
+			        .withPrefixLength( prefixLength )
+				  .onFields("name")
+				  .matching( name )
+				  .createQuery();
 		
 		// wrap Lucene query in a org.hibernate.Query
 		org.hibernate.search.FullTextQuery hibQuery =
-		    fullTextSession.createFullTextQuery(query, Publication.class);
+		    fullTextSession.createFullTextQuery(query, ConferenceGroup.class);
 		
 		// org.apache.lucene.search.Sort sort = new Sort( new SortField(
 		// "title", (Type) SortField.STRING_FIRST ) );
 		// hibQuery.setSort( sort );
 
 		@SuppressWarnings( "unchecked" )
-		List<Publication> publications = hibQuery.list();
+		List<ConferenceGroup> publicationGroups = hibQuery.list();
 		
-		if( publications ==  null || publications.isEmpty() )
+		if( publicationGroups ==  null || publicationGroups.isEmpty() )
 			return Collections.emptyList();
 		
-		return publications;
+		return publicationGroups;
 	}
 
 }

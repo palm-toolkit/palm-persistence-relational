@@ -6,25 +6,31 @@ import java.util.Map;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import de.rwth.i9.palm.persistence.AlgorithmDAO;
-import de.rwth.i9.palm.persistence.AuthorAliasDAO;
 import de.rwth.i9.palm.persistence.AuthorDAO;
+import de.rwth.i9.palm.persistence.AuthorSourceDAO;
+import de.rwth.i9.palm.persistence.ConferenceDAO;
+import de.rwth.i9.palm.persistence.ConferenceGroupDAO;
 import de.rwth.i9.palm.persistence.DatasetDAO;
+import de.rwth.i9.palm.persistence.ExtractionRuntimeDAO;
+import de.rwth.i9.palm.persistence.ExtractionServiceDAO;
 import de.rwth.i9.palm.persistence.FunctionDAO;
 import de.rwth.i9.palm.persistence.InstantiableDAO;
 import de.rwth.i9.palm.persistence.InstitutionDAO;
-import de.rwth.i9.palm.persistence.KeywordDAO;
 import de.rwth.i9.palm.persistence.LocationDAO;
+import de.rwth.i9.palm.persistence.PalmConfigurationDAO;
 import de.rwth.i9.palm.persistence.PersistenceStrategy;
 import de.rwth.i9.palm.persistence.PublicationDAO;
-import de.rwth.i9.palm.persistence.PublicationOldDAO;
+import de.rwth.i9.palm.persistence.PublicationHistoryDAO;
+import de.rwth.i9.palm.persistence.PublicationSourceDAO;
+import de.rwth.i9.palm.persistence.PublicationTopicDAO;
+import de.rwth.i9.palm.persistence.ReferenceDAO;
 import de.rwth.i9.palm.persistence.RoleDAO;
-import de.rwth.i9.palm.persistence.RunTimeDAO;
+import de.rwth.i9.palm.persistence.SessionDataSetDAO;
 import de.rwth.i9.palm.persistence.SourceDAO;
-import de.rwth.i9.palm.persistence.TagDAO;
-import de.rwth.i9.palm.persistence.TopicDAO;
+import de.rwth.i9.palm.persistence.SubjectDAO;
 import de.rwth.i9.palm.persistence.UserDAO;
-import de.rwth.i9.palm.persistence.VenueDAO;
+import de.rwth.i9.palm.persistence.UserRequestDAO;
+import de.rwth.i9.palm.persistence.WidgetDAO;
 
 public class PersistenceStrategyImpl implements PersistenceStrategy
 {
@@ -54,13 +60,19 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Autowired( required = false )
-	private AlgorithmDAO algorithmDAO;
-
-	@Autowired( required = false )
-	private AuthorAliasDAO authorAliasDAO;
+	private ExtractionServiceDAO extractionServiceDAO;
 
 	@Autowired( required = false )
 	private AuthorDAO authorDAO;
+
+	@Autowired( required = false )
+	private AuthorSourceDAO authorSourceDAO;
+
+	@Autowired( required = false )
+	private ConferenceDAO conferenceDAO;
+
+	@Autowired( required = false )
+	private ConferenceGroupDAO conferenceGroupDAO;
 
 	@Autowired( required = false )
 	private DatasetDAO datasetDAO;
@@ -72,46 +84,49 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private InstitutionDAO institutionDAO;
 
 	@Autowired( required = false )
-	private KeywordDAO keywordDAO;
+	private LocationDAO locationDAO;
 
 	@Autowired( required = false )
-	private LocationDAO locationDAO;
+	private PalmConfigurationDAO palmConfigurationDAO;
 
 	@Autowired( required = false )
 	private PublicationDAO publicationDAO;
 
 	@Autowired( required = false )
-	private PublicationOldDAO publicationOldDAO;
+	private PublicationHistoryDAO publicationHistoryDAO;
+
+	@Autowired( required = false )
+	private PublicationSourceDAO publicationSourceDAO;
+
+	@Autowired( required = false )
+	private PublicationTopicDAO publicationTopicDAO;
+
+	@Autowired( required = false )
+	private ReferenceDAO referenceDAO;
 
 	@Autowired( required = false )
 	private RoleDAO roleDAO;
 
 	@Autowired( required = false )
-	private RunTimeDAO runTimeDAO;
+	private ExtractionRuntimeDAO extractionRuntimeDAO;
 
+	@Autowired( required = false )
+	private SessionDataSetDAO sessionDataSetDAO;
+	
 	@Autowired( required = false )
 	private SourceDAO sourceDAO;
 
 	@Autowired( required = false )
-	private TagDAO tagDAO;
-
-	@Autowired( required = false )
-	private TopicDAO topicDAO;
+	private SubjectDAO subjectDAO;
 
 	@Autowired( required = false )
 	private UserDAO userDAO;
 
 	@Autowired( required = false )
-	private VenueDAO venueDAO;
+	private UserRequestDAO userRequestDAO;
 
-	@Override
-	public AlgorithmDAO getAlgorithmDAO()
-	{
-		if ( this.algorithmDAO == null )
-			this.algorithmDAO = new AlgorithmDAOHibernate( this.sessionFactory );
-
-		return this.algorithmDAO;
-	}
+	@Autowired( required = false )
+	private WidgetDAO widgetDAO;
 
 	@Override
 	public AuthorDAO getAuthorDAO()
@@ -123,12 +138,57 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
+	public AuthorSourceDAO getAuthorSourceDAO()
+	{
+		if ( this.authorSourceDAO == null )
+			this.authorSourceDAO = new AuthorSourceDAOHibernate( this.sessionFactory );
+
+		return this.authorSourceDAO;
+	}
+
+	@Override
+	public ConferenceDAO getConferenceDAO()
+	{
+		if ( this.conferenceDAO == null )
+			this.conferenceDAO = new ConferenceDAOHibernate( this.sessionFactory );
+
+		return this.conferenceDAO;
+	}
+
+	@Override
+	public ConferenceGroupDAO getConferenceGroupDAO()
+	{
+		if ( this.conferenceGroupDAO == null )
+			this.conferenceGroupDAO = new ConferenceGroupDAOHibernate( this.sessionFactory );
+
+		return this.conferenceGroupDAO;
+	}
+
+	@Override
 	public DatasetDAO getDatasetDAO()
 	{
 		if ( this.datasetDAO == null )
 			this.datasetDAO = new DatasetDAOHibernate( this.sessionFactory );
 
 		return this.datasetDAO;
+	}
+
+	@Override
+	public ExtractionServiceDAO getExtractionServiceDAO()
+	{
+		if ( this.extractionServiceDAO == null )
+			this.extractionServiceDAO = new ExtractionServiceDAOHibernate( this.sessionFactory );
+
+		return this.extractionServiceDAO;
+	}
+
+	@Override
+	public ExtractionRuntimeDAO getExtractionRuntimeDAO()
+	{
+		if ( this.extractionRuntimeDAO == null )
+			this.extractionRuntimeDAO = new ExtractionRuntimeDAOHibernate( this.sessionFactory );
+
+		return this.extractionRuntimeDAO;
 	}
 
 	@Override
@@ -150,21 +210,21 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
-	public KeywordDAO getKeywordDAO()
-	{
-		if ( this.keywordDAO == null )
-			this.keywordDAO = new KeywordDAOHibernate( this.sessionFactory );
-
-		return this.keywordDAO;
-	}
-
-	@Override
 	public LocationDAO getLocationDAO()
 	{
 		if ( this.locationDAO == null )
 			this.locationDAO = new LocationDAOHibernate( this.sessionFactory );
 
 		return this.locationDAO;
+	}
+
+	@Override
+	public PalmConfigurationDAO getPalmConfigurationDAO()
+	{
+		if ( this.palmConfigurationDAO == null )
+			this.palmConfigurationDAO = new PalmConfigurationDAOHibernate( this.sessionFactory );
+
+		return this.palmConfigurationDAO;
 	}
 
 	@Override
@@ -177,12 +237,39 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
-	public PublicationOldDAO getPublicationOldDAO()
+	public PublicationSourceDAO getPublicationSourceDAO()
 	{
-		if ( this.publicationOldDAO == null )
-			this.publicationOldDAO = new PublicationOldDAOHibernate( this.sessionFactory );
+		if ( this.publicationSourceDAO == null )
+			this.publicationSourceDAO = new PublicationSourceDAOHibernate( this.sessionFactory );
 
-		return this.publicationOldDAO;
+		return this.publicationSourceDAO;
+	}
+
+	@Override
+	public PublicationHistoryDAO getPublicationHistoryDAO()
+	{
+		if ( this.publicationHistoryDAO == null )
+			this.publicationHistoryDAO = new PublicationHistoryDAOHibernate( this.sessionFactory );
+
+		return this.publicationHistoryDAO;
+	}
+
+	@Override
+	public PublicationTopicDAO getPublicationTopicDAO()
+	{
+		if ( this.publicationTopicDAO == null )
+			this.publicationTopicDAO = new PublicationTopicDAOHibernate( this.sessionFactory );
+
+		return this.publicationTopicDAO;
+	}
+
+	@Override
+	public ReferenceDAO getReferenceDAO()
+	{
+		if ( this.referenceDAO == null )
+			this.referenceDAO = new ReferenceDAOHibernate( this.sessionFactory );
+
+		return this.referenceDAO;
 	}
 
 	@Override
@@ -193,14 +280,14 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 		return this.roleDAO;
 	}
-
+	
 	@Override
-	public RunTimeDAO getRunTimeDAO()
+	public SessionDataSetDAO getSessionDataSetDAO()
 	{
-		if ( this.runTimeDAO == null )
-			this.runTimeDAO = new RunTimeDAOHibernate( this.sessionFactory );
+		if ( this.sessionDataSetDAO == null )
+			this.sessionDataSetDAO = new SessionDataSetDAOHibernate( this.sessionFactory );
 
-		return this.runTimeDAO;
+		return this.sessionDataSetDAO;
 	}
 
 	@Override
@@ -213,21 +300,12 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
-	public TagDAO getTagDAO()
+	public SubjectDAO getSubjectDAO()
 	{
-		if ( this.tagDAO == null )
-			this.tagDAO = new TagDAOHibernate( this.sessionFactory );
+		if ( this.subjectDAO == null )
+			this.subjectDAO = new SubjectDAOHibernate( this.sessionFactory );
 
-		return this.tagDAO;
-	}
-
-	@Override
-	public TopicDAO getTopicDAO()
-	{
-		if ( this.topicDAO == null )
-			this.topicDAO = new TopicDAOHibernate( this.sessionFactory );
-
-		return this.topicDAO;
+		return this.subjectDAO;
 	}
 
 	@Override
@@ -240,20 +318,21 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
-	public VenueDAO getVenueDAO()
+	public UserRequestDAO getUserRequestDAO()
 	{
-		if ( this.venueDAO == null )
-			this.venueDAO = new VenueDAOHibernate( this.sessionFactory );
+		if ( this.userRequestDAO == null )
+			this.userRequestDAO = new UserRequestDAOHibernate( this.sessionFactory );
 
-		return this.venueDAO;
+		return this.userRequestDAO;
 	}
 
 	@Override
-	public AuthorAliasDAO getAuthorAliasDAO()
+	public WidgetDAO getWidgetDAO()
 	{
-		if ( this.authorAliasDAO == null )
-			this.authorAliasDAO = new AuthorAliasDAOHibernate( this.sessionFactory );
+		if ( this.widgetDAO == null )
+			this.widgetDAO = new WidgetDAOHibernate( this.sessionFactory );
 
-		return this.authorAliasDAO;
+		return this.widgetDAO;
 	}
+
 }
