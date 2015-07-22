@@ -17,6 +17,7 @@ import de.rwth.i9.palm.persistence.FunctionDAO;
 import de.rwth.i9.palm.persistence.InstantiableDAO;
 import de.rwth.i9.palm.persistence.InstitutionDAO;
 import de.rwth.i9.palm.persistence.LocationDAO;
+import de.rwth.i9.palm.persistence.PalmConfigurationDAO;
 import de.rwth.i9.palm.persistence.PersistenceStrategy;
 import de.rwth.i9.palm.persistence.PublicationDAO;
 import de.rwth.i9.palm.persistence.PublicationHistoryDAO;
@@ -84,6 +85,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private LocationDAO locationDAO;
+
+	@Autowired( required = false )
+	private PalmConfigurationDAO palmConfigurationDAO;
 
 	@Autowired( required = false )
 	private PublicationDAO publicationDAO;
@@ -179,6 +183,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
+	public ExtractionRuntimeDAO getExtractionRuntimeDAO()
+	{
+		if ( this.extractionRuntimeDAO == null )
+			this.extractionRuntimeDAO = new ExtractionRuntimeDAOHibernate( this.sessionFactory );
+
+		return this.extractionRuntimeDAO;
+	}
+
+	@Override
 	public FunctionDAO getFunctionDAO()
 	{
 		if ( this.functionDAO == null )
@@ -203,6 +216,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.locationDAO = new LocationDAOHibernate( this.sessionFactory );
 
 		return this.locationDAO;
+	}
+
+	@Override
+	public PalmConfigurationDAO getPalmConfigurationDAO()
+	{
+		if ( this.palmConfigurationDAO == null )
+			this.palmConfigurationDAO = new PalmConfigurationDAOHibernate( this.sessionFactory );
+
+		return this.palmConfigurationDAO;
 	}
 
 	@Override
@@ -257,15 +279,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.roleDAO = new RoleDAOHibernate( this.sessionFactory );
 
 		return this.roleDAO;
-	}
-
-	@Override
-	public ExtractionRuntimeDAO getExtractionRuntimeDAO()
-	{
-		if ( this.extractionRuntimeDAO == null )
-			this.extractionRuntimeDAO = new ExtractionRuntimeDAOHibernate( this.sessionFactory );
-
-		return this.extractionRuntimeDAO;
 	}
 	
 	@Override
