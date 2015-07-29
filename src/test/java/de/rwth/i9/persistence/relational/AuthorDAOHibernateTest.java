@@ -63,6 +63,7 @@ public class AuthorDAOHibernateTest
 	}
 
 	@Test
+	@Ignore
 	public void fullTextSearchPaging()
 	{
 		Map<String, Object> results = persistenceStrategy.getAuthorDAO().getAuthorByFullTextSearchWithPaging( "rwth aachen", 0, 20 );
