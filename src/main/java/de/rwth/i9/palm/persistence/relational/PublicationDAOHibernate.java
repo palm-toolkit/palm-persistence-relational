@@ -73,7 +73,7 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		
 		org.apache.lucene.search.Query query = qb
 				  .keyword()
-				  .onFields("title", "abstractTokenized", "contentTextTokenized")
+				  .onFields("title", "abstractText", "contentText")
 				  .matching( queryString )
 				  .createQuery();
 		
@@ -114,7 +114,7 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		
 		org.apache.lucene.search.Query query = qb
 				  .keyword()
-				  .onFields("title", "abstractTokenized", "contentTextTokenized")
+				  .onFields("title", "abstractText", "contentText")
 				  .matching( queryString )
 				  .createQuery();
 		
