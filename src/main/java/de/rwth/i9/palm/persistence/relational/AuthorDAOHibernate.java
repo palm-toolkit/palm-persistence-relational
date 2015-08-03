@@ -308,4 +308,30 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		
 		return authors;
 	}
+
+	@Override
+	public List<Author> getAuthorWithLikeQuery( String name )
+	{
+		if ( name.equals( "" ) )
+			return Collections.emptyList();
+
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "SELECT DISTINCT a " );
+		queryString.append( "FROM Author a " );
+		queryString.append( "LEFT JOIN a.aliases aa " );
+		queryString.append( "WHERE a.name LIKE :name " );
+		queryString.append( "OR aa.name LIKE :aname " );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+		query.setParameter( "name", "%" + name + "%" );
+		query.setParameter( "aname", "%" + name + "%" );
+
+		@SuppressWarnings( "unchecked" )
+		List<Author> authors = query.list();
+
+		if ( authors == null || authors.isEmpty() )
+			return Collections.emptyList();
+
+		return authors;
+	}
 }
