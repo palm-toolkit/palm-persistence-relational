@@ -41,17 +41,17 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	@Override
 	public Map<String, Object> getPublicationWithPaging( int pageNo, int maxResult )
 	{
-		Query query = getCurrentSession().createQuery( "FROM Publication " );
+		Query query = getCurrentSession().createQuery( "FROM Publication ORDER BY citedBy DESC" );
 		query.setFirstResult( pageNo * maxResult );
 		query.setMaxResults( maxResult );
 
-//		@SuppressWarnings( "unchecked" )
-//		List<Publication> publications = query.list();
+		@SuppressWarnings( "unchecked" )
+		List<Publication> publications = query.list();
 
 		// prepare the container for result
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 		resultMap.put( "count", this.countTotal() );
-		resultMap.put( "result", query.list() );
+		resultMap.put( "result", publications );
 
 		return resultMap;
 
