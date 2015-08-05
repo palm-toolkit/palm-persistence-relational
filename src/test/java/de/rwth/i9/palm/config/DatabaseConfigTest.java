@@ -24,7 +24,6 @@ import de.rwth.i9.palm.model.AuthorAlias;
 import de.rwth.i9.palm.model.Conference;
 import de.rwth.i9.palm.model.ConferenceGroup;
 import de.rwth.i9.palm.model.Dataset;
-import de.rwth.i9.palm.model.ExtractionRuntime;
 import de.rwth.i9.palm.model.ExtractionService;
 import de.rwth.i9.palm.model.Function;
 import de.rwth.i9.palm.model.Institution;
@@ -130,7 +129,6 @@ public class DatabaseConfigTest
 				Conference.class,
 				ConferenceGroup.class,
 				Dataset.class,
-				ExtractionRuntime.class,
 				ExtractionService.class,
 				Function.class,
 				Institution.class,

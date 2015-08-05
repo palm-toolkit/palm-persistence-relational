@@ -11,7 +11,6 @@ import de.rwth.i9.palm.persistence.AuthorSourceDAO;
 import de.rwth.i9.palm.persistence.ConferenceDAO;
 import de.rwth.i9.palm.persistence.ConferenceGroupDAO;
 import de.rwth.i9.palm.persistence.DatasetDAO;
-import de.rwth.i9.palm.persistence.ExtractionRuntimeDAO;
 import de.rwth.i9.palm.persistence.ExtractionServiceDAO;
 import de.rwth.i9.palm.persistence.FunctionDAO;
 import de.rwth.i9.palm.persistence.InstantiableDAO;
@@ -108,9 +107,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private RoleDAO roleDAO;
 
 	@Autowired( required = false )
-	private ExtractionRuntimeDAO extractionRuntimeDAO;
-
-	@Autowired( required = false )
 	private SessionDataSetDAO sessionDataSetDAO;
 	
 	@Autowired( required = false )
@@ -180,15 +176,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.extractionServiceDAO = new ExtractionServiceDAOHibernate( this.sessionFactory );
 
 		return this.extractionServiceDAO;
-	}
-
-	@Override
-	public ExtractionRuntimeDAO getExtractionRuntimeDAO()
-	{
-		if ( this.extractionRuntimeDAO == null )
-			this.extractionRuntimeDAO = new ExtractionRuntimeDAOHibernate( this.sessionFactory );
-
-		return this.extractionRuntimeDAO;
 	}
 
 	@Override
