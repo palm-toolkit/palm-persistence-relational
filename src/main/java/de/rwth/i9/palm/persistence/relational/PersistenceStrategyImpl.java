@@ -15,6 +15,7 @@ import de.rwth.i9.palm.persistence.ExtractionServiceDAO;
 import de.rwth.i9.palm.persistence.FunctionDAO;
 import de.rwth.i9.palm.persistence.InstantiableDAO;
 import de.rwth.i9.palm.persistence.InstitutionDAO;
+import de.rwth.i9.palm.persistence.InterestDAO;
 import de.rwth.i9.palm.persistence.LocationDAO;
 import de.rwth.i9.palm.persistence.PalmConfigurationDAO;
 import de.rwth.i9.palm.persistence.PersistenceStrategy;
@@ -81,6 +82,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private InstitutionDAO institutionDAO;
+
+	@Autowired( required = false )
+	private InterestDAO interestDAO;
 
 	@Autowired( required = false )
 	private LocationDAO locationDAO;
@@ -194,6 +198,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.institutionDAO = new InstitutionDAOHibernate( this.sessionFactory );
 
 		return this.institutionDAO;
+	}
+
+	@Override
+	public InterestDAO getInterestDAO()
+	{
+		if ( this.interestDAO == null )
+			this.interestDAO = new InterestDAOHibernate( this.sessionFactory );
+
+		return this.interestDAO;
 	}
 
 	@Override

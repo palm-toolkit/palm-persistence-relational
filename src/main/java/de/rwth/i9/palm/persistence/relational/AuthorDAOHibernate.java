@@ -40,12 +40,12 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		query.setParameter( "uri", uri );
 
 		@SuppressWarnings( "unchecked" )
-		List<Author> Authors = query.list();
+		List<Author> authors = query.list();
 
-		if ( Authors == null || Authors.isEmpty() )
+		if ( authors == null || authors.isEmpty() )
 			return null;
 
-		return Authors.get( 0 );
+		return authors.get( 0 );
 	}
 
 	/**
