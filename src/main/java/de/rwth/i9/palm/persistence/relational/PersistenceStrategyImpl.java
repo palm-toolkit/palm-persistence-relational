@@ -7,6 +7,8 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import de.rwth.i9.palm.persistence.AuthorDAO;
+import de.rwth.i9.palm.persistence.AuthorInterestDAO;
+import de.rwth.i9.palm.persistence.AuthorInterestProfileDAO;
 import de.rwth.i9.palm.persistence.AuthorSourceDAO;
 import de.rwth.i9.palm.persistence.ConferenceDAO;
 import de.rwth.i9.palm.persistence.ConferenceGroupDAO;
@@ -60,10 +62,13 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Autowired( required = false )
-	private ExtractionServiceDAO extractionServiceDAO;
+	private AuthorDAO authorDAO;
 
 	@Autowired( required = false )
-	private AuthorDAO authorDAO;
+	private AuthorInterestDAO authorInterestDAO;
+
+	@Autowired( required = false )
+	private AuthorInterestProfileDAO authorInterestProfileDAO;
 
 	@Autowired( required = false )
 	private AuthorSourceDAO authorSourceDAO;
@@ -76,6 +81,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private DatasetDAO datasetDAO;
+
+	@Autowired( required = false )
+	private ExtractionServiceDAO extractionServiceDAO;
 
 	@Autowired( required = false )
 	private FunctionDAO functionDAO;
@@ -135,6 +143,24 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.authorDAO = new AuthorDAOHibernate( this.sessionFactory );
 
 		return this.authorDAO;
+	}
+
+	@Override
+	public AuthorInterestDAO getAuthorInterestDAO()
+	{
+		if ( this.authorInterestDAO == null )
+			this.authorInterestDAO = new AuthorInterestDAOHibernate( this.sessionFactory );
+
+		return this.authorInterestDAO;
+	}
+
+	@Override
+	public AuthorInterestProfileDAO getAuthorInterestProfileDAO()
+	{
+		if ( this.authorInterestProfileDAO == null )
+			this.authorInterestProfileDAO = new AuthorInterestProfileDAOHibernate( this.sessionFactory );
+
+		return this.authorInterestProfileDAO;
 	}
 
 	@Override
