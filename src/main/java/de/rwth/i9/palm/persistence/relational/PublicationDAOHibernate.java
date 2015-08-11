@@ -11,7 +11,7 @@ import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
 import org.hibernate.search.query.dsl.QueryBuilder;
 
-import de.rwth.i9.palm.model.Conference;
+import de.rwth.i9.palm.model.Event;
 import de.rwth.i9.palm.model.Publication;
 import de.rwth.i9.palm.persistence.PublicationDAO;
 
@@ -145,15 +145,15 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	}
 
 	@Override
-	public Map<String, Object> getPublicationByConferenceWithPaging( Conference conference, int pageNo, int maxResult )
+	public Map<String, Object> getPublicationByEventWithPaging( Event event, int pageNo, int maxResult )
 	{
 		// do query twice, first query the total rows
-		Query queryCount = getCurrentSession().createQuery( "FROM Publication WHERE conference = :conference" );
-		queryCount.setParameter( "conference", conference );
+		Query queryCount = getCurrentSession().createQuery( "FROM Publication WHERE event = :event" );
+		queryCount.setParameter( "event", event );
 		int countTotal = queryCount.list().size();
 
-		Query query = getCurrentSession().createQuery( "FROM Publication WHERE conference = :conference" );
-		query.setParameter( "conference", conference );
+		Query query = getCurrentSession().createQuery( "FROM Publication WHERE event = :event" );
+		query.setParameter( "event", event );
 		query.setFirstResult( pageNo * maxResult );
 		query.setMaxResults( maxResult );
 

@@ -10,9 +10,9 @@ import de.rwth.i9.palm.persistence.AuthorDAO;
 import de.rwth.i9.palm.persistence.AuthorInterestDAO;
 import de.rwth.i9.palm.persistence.AuthorInterestProfileDAO;
 import de.rwth.i9.palm.persistence.AuthorSourceDAO;
-import de.rwth.i9.palm.persistence.ConferenceDAO;
-import de.rwth.i9.palm.persistence.ConferenceGroupDAO;
 import de.rwth.i9.palm.persistence.DatasetDAO;
+import de.rwth.i9.palm.persistence.EventDAO;
+import de.rwth.i9.palm.persistence.EventGroupDAO;
 import de.rwth.i9.palm.persistence.ExtractionServiceDAO;
 import de.rwth.i9.palm.persistence.FunctionDAO;
 import de.rwth.i9.palm.persistence.InstantiableDAO;
@@ -74,13 +74,13 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private AuthorSourceDAO authorSourceDAO;
 
 	@Autowired( required = false )
-	private ConferenceDAO conferenceDAO;
-
-	@Autowired( required = false )
-	private ConferenceGroupDAO conferenceGroupDAO;
-
-	@Autowired( required = false )
 	private DatasetDAO datasetDAO;
+
+	@Autowired( required = false )
+	private EventDAO eventDAO;
+
+	@Autowired( required = false )
+	private EventGroupDAO eventGroupDAO;
 
 	@Autowired( required = false )
 	private ExtractionServiceDAO extractionServiceDAO;
@@ -173,30 +173,30 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
-	public ConferenceDAO getConferenceDAO()
-	{
-		if ( this.conferenceDAO == null )
-			this.conferenceDAO = new ConferenceDAOHibernate( this.sessionFactory );
-
-		return this.conferenceDAO;
-	}
-
-	@Override
-	public ConferenceGroupDAO getConferenceGroupDAO()
-	{
-		if ( this.conferenceGroupDAO == null )
-			this.conferenceGroupDAO = new ConferenceGroupDAOHibernate( this.sessionFactory );
-
-		return this.conferenceGroupDAO;
-	}
-
-	@Override
 	public DatasetDAO getDatasetDAO()
 	{
 		if ( this.datasetDAO == null )
 			this.datasetDAO = new DatasetDAOHibernate( this.sessionFactory );
 
 		return this.datasetDAO;
+	}
+
+	@Override
+	public EventDAO getEventDAO()
+	{
+		if ( this.eventDAO == null )
+			this.eventDAO = new EventDAOHibernate( this.sessionFactory );
+
+		return this.eventDAO;
+	}
+
+	@Override
+	public EventGroupDAO getEventGroupDAO()
+	{
+		if ( this.eventGroupDAO == null )
+			this.eventGroupDAO = new EventGroupDAOHibernate( this.sessionFactory );
+
+		return this.eventGroupDAO;
 	}
 
 	@Override

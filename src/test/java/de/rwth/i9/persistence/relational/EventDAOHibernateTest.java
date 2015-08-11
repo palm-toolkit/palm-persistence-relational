@@ -16,40 +16,40 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.transaction.annotation.Transactional;
 
 import de.rwth.i9.palm.config.DatabaseConfigTest;
-import de.rwth.i9.palm.model.Conference;
-import de.rwth.i9.palm.persistence.ConferenceDAO;
+import de.rwth.i9.palm.model.Event;
+import de.rwth.i9.palm.persistence.EventDAO;
 import de.rwth.i9.palm.persistence.PersistenceStrategy;
 
 @RunWith( SpringJUnit4ClassRunner.class )
 @ContextConfiguration( classes = DatabaseConfigTest.class, loader = AnnotationConfigContextLoader.class )
 @Transactional
-public class ConferenceDAOHibernateTest
+public class EventDAOHibernateTest
 {
 	@Autowired
 	private PersistenceStrategy persistenceStrategy;
 
-	private ConferenceDAO conferenceDAO;
+	private EventDAO eventDAO;
 
 	@Before
 	public void init()
 	{
-		conferenceDAO = persistenceStrategy.getConferenceDAO();
-		assertNotNull( conferenceDAO );
+		eventDAO = persistenceStrategy.getEventDAO();
+		assertNotNull( eventDAO );
 	}
 
 	@Test
 	@Ignore
 	public void test()
 	{
-		Map<String, Conference> notationConferenceMaps = persistenceStrategy.getConferenceDAO().getNotationConferenceMaps();
+		Map<String, Event> notationEventMaps = persistenceStrategy.getEventDAO().getNotationEventMaps();
 
-		for ( Map.Entry<String, Conference> entry : notationConferenceMaps.entrySet() )
+		for ( Map.Entry<String, Event> entry : notationEventMaps.entrySet() )
 		{
 			System.out.println( entry.getKey() + "/" + entry.getValue().getYear() );
 		}
 
-		int totalConferences = persistenceStrategy.getConferenceDAO().countTotal();
-		System.out.println( "total record : " + totalConferences );
+		int totalEvents = persistenceStrategy.getEventDAO().countTotal();
+		System.out.println( "total record : " + totalEvents );
 	}
 	
 	@Test
@@ -57,17 +57,17 @@ public class ConferenceDAOHibernateTest
 	public void fullTextSearchPagging() throws InterruptedException
 	{
 		// do reindexing first
-		persistenceStrategy.getConferenceDAO().doReindexing();
+		persistenceStrategy.getEventDAO().doReindexing();
 		
-		Map<String, Object> results = persistenceStrategy.getConferenceDAO().getConferenceByFullTextSearchWithPaging( "data mining", 0, 20 );
+		Map<String, Object> results = persistenceStrategy.getEventDAO().getEventByFullTextSearchWithPaging( "data mining", 0, 20 );
 
 		System.out.println( "total record " + results.get( "count" ) );
 		@SuppressWarnings( "unchecked" )
-		List<Conference> conferences = (List<Conference>) results.get( "result" );
+		List<Event> events = (List<Event>) results.get( "result" );
 
-		for ( Conference conference : conferences )
+		for ( Event event : events )
 		{
-			System.out.println( "title : " + conference.getConferenceGroup().getName() + conference.getYear() );
+			System.out.println( "title : " + event.getEventGroup().getName() + event.getYear() );
 		}
 		
 	}
