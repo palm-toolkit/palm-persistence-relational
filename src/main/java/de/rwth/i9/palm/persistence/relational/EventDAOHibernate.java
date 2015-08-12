@@ -11,16 +11,16 @@ import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
 import org.hibernate.search.query.dsl.QueryBuilder;
 
-import de.rwth.i9.palm.model.Conference;
-import de.rwth.i9.palm.model.ConferenceGroup;
-import de.rwth.i9.palm.persistence.ConferenceDAO;
+import de.rwth.i9.palm.model.Event;
+import de.rwth.i9.palm.model.EventGroup;
+import de.rwth.i9.palm.persistence.EventDAO;
 
-public class ConferenceDAOHibernate extends GenericDAOHibernate<Conference> implements ConferenceDAO
+public class EventDAOHibernate extends GenericDAOHibernate<Event> implements EventDAO
 {
 	/**
 	 * {@inheritDoc}
 	 */
-	public ConferenceDAOHibernate( SessionFactory sessionFactory )
+	public EventDAOHibernate( SessionFactory sessionFactory )
 	{
 		super( sessionFactory );
 	}
@@ -29,35 +29,35 @@ public class ConferenceDAOHibernate extends GenericDAOHibernate<Conference> impl
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Map<String, Conference> getNotationConferenceMaps()
+	public Map<String, Event> getNotationEventMaps()
 	{
 		StringBuilder queryString = new StringBuilder();
-		queryString.append( "SELECT cg, c " );
-		queryString.append( "FROM ConferenceGroup cg " );
-		queryString.append( "JOIN cg.conferences c " );
-		queryString.append( "ORDER BY cg.notation ASC, c.year ASC " );
+		queryString.append( "SELECT cg, e " );
+		queryString.append( "FROM EventGroup cg " );
+		queryString.append( "JOIN cg.events e " );
+		queryString.append( "ORDER BY cg.notation ASC, e.year ASC " );
 
 		Query query = getCurrentSession().createQuery( queryString.toString() );
 
 		@SuppressWarnings( "unchecked" )
-		List<Object[]> conferenceObjects = query.list();
+		List<Object[]> eventObjects = query.list();
 
-		if ( conferenceObjects == null || conferenceObjects.isEmpty() )
+		if ( eventObjects == null || eventObjects.isEmpty() )
 			return Collections.emptyMap();
 
 		// prepare the map object
-		Map<String, Conference> conferencesMap = new LinkedHashMap<String, Conference>();
+		Map<String, Event> eventsMap = new LinkedHashMap<String, Event>();
 
 		// loop through resultList object
-		for ( Object[] item : conferenceObjects )
+		for ( Object[] item : eventObjects )
 		{
-			ConferenceGroup conferenceGroup = (ConferenceGroup) item[0];
-			Conference conference = (Conference) item[1];
+			EventGroup eventGroup = (EventGroup) item[0];
+			Event event = (Event) item[1];
 
-			conferencesMap.put( conferenceGroup.getNotation() + conference.getYear(), conference );
+			eventsMap.put( eventGroup.getNotation() + event.getYear(), event );
 		}
 
-		return conferencesMap;
+		return eventsMap;
 	}
 
 	/**
@@ -74,12 +74,12 @@ public class ConferenceDAOHibernate extends GenericDAOHibernate<Conference> impl
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Map<String, Object> getConferenceWithPaging( int pageNo, int maxResult )
+	public Map<String, Object> getEventWithPaging( int pageNo, int maxResult )
 	{
 		StringBuilder queryString = new StringBuilder();
 		queryString.append( "SELECT c " );
-		queryString.append( "FROM ConferenceGroup cg " );
-		queryString.append( "JOIN cg.conferences c " );
+		queryString.append( "FROM EventGroup cg " );
+		queryString.append( "JOIN cg.events c " );
 		queryString.append( "ORDER BY cg.notation ASC, c.year ASC " );
 
 		Query query = getCurrentSession().createQuery( queryString.toString() );
@@ -98,7 +98,7 @@ public class ConferenceDAOHibernate extends GenericDAOHibernate<Conference> impl
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<Conference> getConferenceByFullTextSearch( String queryString )
+	public List<Event> getEventByFullTextSearch( String queryString )
 	{
 FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
 		
@@ -106,36 +106,36 @@ FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession()
 		// alternatively you can write the Lucene query using the Lucene query parser
 		// or the Lucene programmatic API. The Hibernate Search DSL is recommended though
 		QueryBuilder qb = fullTextSession.getSearchFactory()
-				.buildQueryBuilder().forEntity( Conference.class ).get();
+				.buildQueryBuilder().forEntity( Event.class ).get();
 		
 		org.apache.lucene.search.Query query = qb
 				  .keyword()
-				  .onFields("conferenceGroup.name", "year", "thema")
+.onFields( "eventGroup.name", "year", "thema" )
 				  .matching( queryString )
 				  .createQuery();
 		
 		// wrap Lucene query in a org.hibernate.Query
 		org.hibernate.search.FullTextQuery hibQuery =
-		    fullTextSession.createFullTextQuery(query, Conference.class);
+		    fullTextSession.createFullTextQuery(query, Event.class);
 
 		@SuppressWarnings( "unchecked" )
-		List<Conference> conferences = hibQuery.list();
+		List<Event> events = hibQuery.list();
 		
-		if( conferences ==  null || conferences.isEmpty() )
+		if( events ==  null || events.isEmpty() )
 			return Collections.emptyList();
 		
-		return conferences;
+		return events;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Map<String, Object> getConferenceByFullTextSearchWithPaging( String queryString, int page, int maxResult )
+	public Map<String, Object> getEventByFullTextSearchWithPaging( String queryString, int page, int maxResult )
 	{
 
 		if ( queryString.equals( "" ) )
-			return this.getConferenceWithPaging( page, maxResult );
+			return this.getEventWithPaging( page, maxResult );
 
 		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
 		
@@ -143,17 +143,17 @@ FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession()
 		// alternatively you can write the Lucene query using the Lucene query parser
 		// or the Lucene programmatic API. The Hibernate Search DSL is recommended though
 		QueryBuilder qb = fullTextSession.getSearchFactory()
-				.buildQueryBuilder().forEntity( Conference.class ).get();
+				.buildQueryBuilder().forEntity( Event.class ).get();
 		
 		org.apache.lucene.search.Query query = qb
 				  .keyword()
-				  .onFields("conferenceGroup.name", "year", "thema")
+.onFields( "eventGroup.name", "year", "thema" )
 				  .matching( queryString )
 				  .createQuery();
 		
 		// wrap Lucene query in a org.hibernate.Query
 		org.hibernate.search.FullTextQuery hibQuery =
-		    fullTextSession.createFullTextQuery(query, Conference.class);
+		    fullTextSession.createFullTextQuery(query, Event.class);
 		
 		// get the total number of matching elements
 		int totalRows = hibQuery.getResultSize();
@@ -174,7 +174,7 @@ FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession()
 	}
 
 	@Override
-	public List<ConferenceGroup> getConferenceViaFuzzyQuery( String name, float threshold, int prefixLength )
+	public List<EventGroup> getEventViaFuzzyQuery( String name, float threshold, int prefixLength )
 	{
 FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
 		
@@ -182,7 +182,7 @@ FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession()
 		// alternatively you can write the Lucene query using the Lucene query parser
 		// or the Lucene programmatic API. The Hibernate Search DSL is recommended though
 		QueryBuilder qb = fullTextSession.getSearchFactory()
-				.buildQueryBuilder().forEntity( ConferenceGroup.class ).get();
+				.buildQueryBuilder().forEntity( EventGroup.class ).get();
 		
 		org.apache.lucene.search.Query query = qb
 				  .keyword()
@@ -195,14 +195,14 @@ FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession()
 		
 		// wrap Lucene query in a org.hibernate.Query
 		org.hibernate.search.FullTextQuery hibQuery =
-		    fullTextSession.createFullTextQuery(query, ConferenceGroup.class);
+		    fullTextSession.createFullTextQuery(query, EventGroup.class);
 		
 		// org.apache.lucene.search.Sort sort = new Sort( new SortField(
 		// "title", (Type) SortField.STRING_FIRST ) );
 		// hibQuery.setSort( sort );
 
 		@SuppressWarnings( "unchecked" )
-		List<ConferenceGroup> publicationGroups = hibQuery.list();
+		List<EventGroup> publicationGroups = hibQuery.list();
 		
 		if( publicationGroups ==  null || publicationGroups.isEmpty() )
 			return Collections.emptyList();

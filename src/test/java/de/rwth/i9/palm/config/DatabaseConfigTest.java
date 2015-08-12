@@ -21,13 +21,16 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import de.rwth.i9.palm.model.Author;
 import de.rwth.i9.palm.model.AuthorAlias;
-import de.rwth.i9.palm.model.Conference;
-import de.rwth.i9.palm.model.ConferenceGroup;
+import de.rwth.i9.palm.model.AuthorInterest;
+import de.rwth.i9.palm.model.AuthorInterestProfile;
+import de.rwth.i9.palm.model.Event;
+import de.rwth.i9.palm.model.EventGroup;
 import de.rwth.i9.palm.model.Dataset;
-import de.rwth.i9.palm.model.ExtractionRuntime;
 import de.rwth.i9.palm.model.ExtractionService;
 import de.rwth.i9.palm.model.Function;
 import de.rwth.i9.palm.model.Institution;
+import de.rwth.i9.palm.model.Interest;
+import de.rwth.i9.palm.model.InterestAuthor;
 import de.rwth.i9.palm.model.Location;
 import de.rwth.i9.palm.model.PalmConfiguration;
 import de.rwth.i9.palm.model.Publication;
@@ -41,6 +44,7 @@ import de.rwth.i9.palm.model.Subject;
 import de.rwth.i9.palm.model.User;
 import de.rwth.i9.palm.model.UserRequest;
 import de.rwth.i9.palm.model.UserWidget;
+import de.rwth.i9.palm.model.WeightingAlgorithm;
 import de.rwth.i9.palm.model.Widget;
 import de.rwth.i9.palm.persistence.relational.PersistenceStrategyImpl;
 
@@ -127,27 +131,31 @@ public class DatabaseConfigTest
 				/* model class here */
 				Author.class,
 				AuthorAlias.class,
-				Conference.class,
-				ConferenceGroup.class,
+				AuthorInterest.class,
+				AuthorInterestProfile.class,
+				Event.class,
+				EventGroup.class,
 				Dataset.class,
 				ExtractionService.class,
 				Function.class,
 				Institution.class,
+				Interest.class,
+				InterestAuthor.class,
 				Location.class,
 				Publication.class,
 				PalmConfiguration.class,
 				PublicationHistory.class,
 				PublicationSource.class,
+				PublicationTopic.class,
 				Reference.class,
 				Role.class,
-				ExtractionRuntime.class, 
  				Source.class,
  				Subject.class,
-				PublicationTopic.class,
 				User.class,
 				UserRequest.class,
 				UserWidget.class,
-				Widget.class
+				Widget.class,
+				WeightingAlgorithm.class
 		} );
 		return sessionFactoryBean;
 	}

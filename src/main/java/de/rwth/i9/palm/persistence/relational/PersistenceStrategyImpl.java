@@ -7,15 +7,17 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import de.rwth.i9.palm.persistence.AuthorDAO;
+import de.rwth.i9.palm.persistence.AuthorInterestDAO;
+import de.rwth.i9.palm.persistence.AuthorInterestProfileDAO;
 import de.rwth.i9.palm.persistence.AuthorSourceDAO;
-import de.rwth.i9.palm.persistence.ConferenceDAO;
-import de.rwth.i9.palm.persistence.ConferenceGroupDAO;
 import de.rwth.i9.palm.persistence.DatasetDAO;
-import de.rwth.i9.palm.persistence.ExtractionRuntimeDAO;
+import de.rwth.i9.palm.persistence.EventDAO;
+import de.rwth.i9.palm.persistence.EventGroupDAO;
 import de.rwth.i9.palm.persistence.ExtractionServiceDAO;
 import de.rwth.i9.palm.persistence.FunctionDAO;
 import de.rwth.i9.palm.persistence.InstantiableDAO;
 import de.rwth.i9.palm.persistence.InstitutionDAO;
+import de.rwth.i9.palm.persistence.InterestDAO;
 import de.rwth.i9.palm.persistence.LocationDAO;
 import de.rwth.i9.palm.persistence.PalmConfigurationDAO;
 import de.rwth.i9.palm.persistence.PersistenceStrategy;
@@ -60,28 +62,37 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Autowired( required = false )
-	private ExtractionServiceDAO extractionServiceDAO;
+	private AuthorDAO authorDAO;
 
 	@Autowired( required = false )
-	private AuthorDAO authorDAO;
+	private AuthorInterestDAO authorInterestDAO;
+
+	@Autowired( required = false )
+	private AuthorInterestProfileDAO authorInterestProfileDAO;
 
 	@Autowired( required = false )
 	private AuthorSourceDAO authorSourceDAO;
 
 	@Autowired( required = false )
-	private ConferenceDAO conferenceDAO;
-
-	@Autowired( required = false )
-	private ConferenceGroupDAO conferenceGroupDAO;
-
-	@Autowired( required = false )
 	private DatasetDAO datasetDAO;
+
+	@Autowired( required = false )
+	private EventDAO eventDAO;
+
+	@Autowired( required = false )
+	private EventGroupDAO eventGroupDAO;
+
+	@Autowired( required = false )
+	private ExtractionServiceDAO extractionServiceDAO;
 
 	@Autowired( required = false )
 	private FunctionDAO functionDAO;
 
 	@Autowired( required = false )
 	private InstitutionDAO institutionDAO;
+
+	@Autowired( required = false )
+	private InterestDAO interestDAO;
 
 	@Autowired( required = false )
 	private LocationDAO locationDAO;
@@ -106,9 +117,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private RoleDAO roleDAO;
-
-	@Autowired( required = false )
-	private ExtractionRuntimeDAO extractionRuntimeDAO;
 
 	@Autowired( required = false )
 	private SessionDataSetDAO sessionDataSetDAO;
@@ -138,30 +146,30 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
+	public AuthorInterestDAO getAuthorInterestDAO()
+	{
+		if ( this.authorInterestDAO == null )
+			this.authorInterestDAO = new AuthorInterestDAOHibernate( this.sessionFactory );
+
+		return this.authorInterestDAO;
+	}
+
+	@Override
+	public AuthorInterestProfileDAO getAuthorInterestProfileDAO()
+	{
+		if ( this.authorInterestProfileDAO == null )
+			this.authorInterestProfileDAO = new AuthorInterestProfileDAOHibernate( this.sessionFactory );
+
+		return this.authorInterestProfileDAO;
+	}
+
+	@Override
 	public AuthorSourceDAO getAuthorSourceDAO()
 	{
 		if ( this.authorSourceDAO == null )
 			this.authorSourceDAO = new AuthorSourceDAOHibernate( this.sessionFactory );
 
 		return this.authorSourceDAO;
-	}
-
-	@Override
-	public ConferenceDAO getConferenceDAO()
-	{
-		if ( this.conferenceDAO == null )
-			this.conferenceDAO = new ConferenceDAOHibernate( this.sessionFactory );
-
-		return this.conferenceDAO;
-	}
-
-	@Override
-	public ConferenceGroupDAO getConferenceGroupDAO()
-	{
-		if ( this.conferenceGroupDAO == null )
-			this.conferenceGroupDAO = new ConferenceGroupDAOHibernate( this.sessionFactory );
-
-		return this.conferenceGroupDAO;
 	}
 
 	@Override
@@ -174,21 +182,30 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
+	public EventDAO getEventDAO()
+	{
+		if ( this.eventDAO == null )
+			this.eventDAO = new EventDAOHibernate( this.sessionFactory );
+
+		return this.eventDAO;
+	}
+
+	@Override
+	public EventGroupDAO getEventGroupDAO()
+	{
+		if ( this.eventGroupDAO == null )
+			this.eventGroupDAO = new EventGroupDAOHibernate( this.sessionFactory );
+
+		return this.eventGroupDAO;
+	}
+
+	@Override
 	public ExtractionServiceDAO getExtractionServiceDAO()
 	{
 		if ( this.extractionServiceDAO == null )
 			this.extractionServiceDAO = new ExtractionServiceDAOHibernate( this.sessionFactory );
 
 		return this.extractionServiceDAO;
-	}
-
-	@Override
-	public ExtractionRuntimeDAO getExtractionRuntimeDAO()
-	{
-		if ( this.extractionRuntimeDAO == null )
-			this.extractionRuntimeDAO = new ExtractionRuntimeDAOHibernate( this.sessionFactory );
-
-		return this.extractionRuntimeDAO;
 	}
 
 	@Override
@@ -207,6 +224,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.institutionDAO = new InstitutionDAOHibernate( this.sessionFactory );
 
 		return this.institutionDAO;
+	}
+
+	@Override
+	public InterestDAO getInterestDAO()
+	{
+		if ( this.interestDAO == null )
+			this.interestDAO = new InterestDAOHibernate( this.sessionFactory );
+
+		return this.interestDAO;
 	}
 
 	@Override
