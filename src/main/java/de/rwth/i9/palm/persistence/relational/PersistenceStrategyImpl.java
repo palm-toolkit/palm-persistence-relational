@@ -22,6 +22,7 @@ import de.rwth.i9.palm.persistence.LocationDAO;
 import de.rwth.i9.palm.persistence.PalmConfigurationDAO;
 import de.rwth.i9.palm.persistence.PersistenceStrategy;
 import de.rwth.i9.palm.persistence.PublicationDAO;
+import de.rwth.i9.palm.persistence.PublicationFileDAO;
 import de.rwth.i9.palm.persistence.PublicationHistoryDAO;
 import de.rwth.i9.palm.persistence.PublicationSourceDAO;
 import de.rwth.i9.palm.persistence.PublicationTopicDAO;
@@ -102,6 +103,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private PublicationDAO publicationDAO;
+
+	@Autowired( required = false )
+	private PublicationFileDAO publicationFileDAO;
 
 	@Autowired( required = false )
 	private PublicationHistoryDAO publicationHistoryDAO;
@@ -260,6 +264,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.publicationDAO = new PublicationDAOHibernate( this.sessionFactory );
 
 		return this.publicationDAO;
+	}
+
+	@Override
+	public PublicationFileDAO getPublicationFileDAO()
+	{
+		if ( this.publicationFileDAO == null )
+			this.publicationFileDAO = new PublicationFileDAOHibernate( this.sessionFactory );
+
+		return this.publicationFileDAO;
 	}
 
 	@Override
