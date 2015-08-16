@@ -1,8 +1,15 @@
 package de.rwth.i9.palm.persistence.relational;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 
 import de.rwth.i9.palm.model.Source;
+import de.rwth.i9.palm.model.SourceType;
 import de.rwth.i9.palm.persistence.SourceDAO;
 
 public class SourceDAOHibernate extends GenericDAOHibernate<Source> implements SourceDAO
@@ -11,6 +18,28 @@ public class SourceDAOHibernate extends GenericDAOHibernate<Source> implements S
 	public SourceDAOHibernate( SessionFactory sessionFactory )
 	{
 		super( sessionFactory );
+	}
+
+	@Override
+	public Map<SourceType, Boolean> getActiveSourceMap()
+	{
+		Query query = getCurrentSession().createQuery( "FROM Source" );
+		
+		@SuppressWarnings( "unchecked" )
+		List<Source> sources = query.list();
+		
+		if( sources == null )
+			return Collections.emptyMap();
+		
+		Map<SourceType, Boolean> activeSourceMap = new HashMap<SourceType, Boolean>();
+		for( Source source : sources){
+			activeSourceMap.put( source.getSourceType(), source.isActive() );
+		}
+
+		if ( activeSourceMap.isEmpty() )
+			return Collections.emptyMap();
+
+		return activeSourceMap;
 	}
 
 }
