@@ -11,6 +11,7 @@ import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
 import org.hibernate.search.query.dsl.QueryBuilder;
 
+import de.rwth.i9.palm.model.Author;
 import de.rwth.i9.palm.model.Event;
 import de.rwth.i9.palm.model.Publication;
 import de.rwth.i9.palm.persistence.PublicationDAO;
@@ -144,6 +145,10 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		return resultMap;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * 
+	 */
 	@Override
 	public Map<String, Object> getPublicationByEventWithPaging( Event event, int pageNo, int maxResult )
 	{
@@ -168,6 +173,10 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		return resultMap;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * 
+	 */
 	@Override
 	public List<Publication> getPublicationViaPhraseSlopQuery( String publicationTitle , int slope)
 	{
@@ -200,6 +209,40 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		if( publications ==  null || publications.isEmpty() )
 			return Collections.emptyList();
 		
+		return publications;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * 
+	 */
+	@Override
+	public List<Publication> getPublicationByCoAuthors( Author... coauthors )
+	{
+		if ( coauthors == null || coauthors.length == 0 )
+			return Collections.emptyList();
+
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append( "SELECT DISTINCT p " );
+		stringBuilder.append( "FROM Publication p " );
+		for ( int i = 0; i < coauthors.length; i++ )
+		{
+			if ( i == 0 )
+				stringBuilder.append( "WHERE :author" + i + " in elements(p.coAuthors) " );
+			else
+				stringBuilder.append( "AND :author" + i + " in elements(p.coAuthors) " );
+		}
+
+		Query query = getCurrentSession().createQuery( stringBuilder.toString() );
+		for ( int i = 0; i < coauthors.length; i++ )
+			query.setParameter( "author" + i, coauthors[i] );
+
+		@SuppressWarnings( "unchecked" )
+		List<Publication> publications = query.list();
+
+		if ( publications == null || publications.isEmpty() )
+			return Collections.emptyList();
+
 		return publications;
 	}
 
