@@ -30,6 +30,7 @@ import de.rwth.i9.palm.persistence.ReferenceDAO;
 import de.rwth.i9.palm.persistence.RoleDAO;
 import de.rwth.i9.palm.persistence.SessionDataSetDAO;
 import de.rwth.i9.palm.persistence.SourceDAO;
+import de.rwth.i9.palm.persistence.SourcePropertyDAO;
 import de.rwth.i9.palm.persistence.SubjectDAO;
 import de.rwth.i9.palm.persistence.UserDAO;
 import de.rwth.i9.palm.persistence.UserRequestDAO;
@@ -127,6 +128,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	
 	@Autowired( required = false )
 	private SourceDAO sourceDAO;
+
+	@Autowired( required = false )
+	private SourcePropertyDAO sourcePropertyDAO;
 
 	@Autowired( required = false )
 	private SubjectDAO subjectDAO;
@@ -336,6 +340,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.sourceDAO = new SourceDAOHibernate( this.sessionFactory );
 
 		return this.sourceDAO;
+	}
+
+	@Override
+	public SourcePropertyDAO getSourcePropertyDAO()
+	{
+		if ( this.sourcePropertyDAO == null )
+			this.sourcePropertyDAO = new SourcePropertyDAOHibernate( this.sessionFactory );
+
+		return this.sourcePropertyDAO;
 	}
 
 	@Override
