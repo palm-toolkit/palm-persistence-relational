@@ -21,6 +21,20 @@ public class SourceDAOHibernate extends GenericDAOHibernate<Source> implements S
 	}
 
 	@Override
+	public List<Source> getAllSource()
+	{
+		Query query = getCurrentSession().createQuery( "FROM Source" );
+
+		@SuppressWarnings( "unchecked" )
+		List<Source> sources = query.list();
+
+		if ( sources == null )
+			return Collections.emptyList();
+
+		return sources;
+	}
+
+	@Override
 	public Map<SourceType, Boolean> getActiveSourceMap()
 	{
 		Query query = getCurrentSession().createQuery( "FROM Source" );
