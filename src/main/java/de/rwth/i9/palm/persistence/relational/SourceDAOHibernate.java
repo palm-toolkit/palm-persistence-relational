@@ -42,4 +42,25 @@ public class SourceDAOHibernate extends GenericDAOHibernate<Source> implements S
 		return activeSourceMap;
 	}
 
+	@Override
+	public Map<String, Source> getSourceMap()
+	{
+
+		Query query = getCurrentSession().createQuery( "FROM Source" );
+
+		@SuppressWarnings( "unchecked" )
+		List<Source> sources = query.list();
+
+		if ( sources == null )
+			return Collections.emptyMap();
+
+		Map<String, Source> sourceMap = new HashMap<String, Source>();
+		for ( Source source : sources )
+		{
+			sourceMap.put( source.getSourceType().toString(), source );
+		}
+
+		return sourceMap;
+	}
+
 }
