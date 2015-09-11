@@ -9,6 +9,7 @@ import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 
 import de.rwth.i9.palm.model.InterestProfile;
+import de.rwth.i9.palm.model.InterestProfileType;
 import de.rwth.i9.palm.persistence.InterestProfileDAO;
 
 public class InterestProfileDAOHibernate extends GenericDAOHibernate<InterestProfile>implements InterestProfileDAO
@@ -20,9 +21,29 @@ public class InterestProfileDAOHibernate extends GenericDAOHibernate<InterestPro
 	}
 
 	@Override
-	public List<InterestProfile> getAllInterestProfile()
+	public List<InterestProfile> getAllValidInterestProfile()
 	{
-		Query query = getCurrentSession().createQuery( "FROM InterestProfile" );
+		Query query = getCurrentSession().createQuery( "FROM InterestProfile WHERE valid IS true" );
+
+		@SuppressWarnings( "unchecked" )
+		List<InterestProfile> interestProfiles = query.list();
+
+		if ( interestProfiles == null )
+			return Collections.emptyList();
+
+		return interestProfiles;
+	}
+
+	@Override
+	public List<InterestProfile> getAllValidInterestProfile( InterestProfileType interestProfileType )
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append( "FROM InterestProfile " );
+		stringBuilder.append( "WHERE valid IS true " );
+		stringBuilder.append( "AND interestProfileType = :interestProfileType" );
+
+		Query query = getCurrentSession().createQuery( stringBuilder.toString() );
+		query.setParameter( "interestProfileType", interestProfileType );
 
 		@SuppressWarnings( "unchecked" )
 		List<InterestProfile> interestProfiles = query.list();
