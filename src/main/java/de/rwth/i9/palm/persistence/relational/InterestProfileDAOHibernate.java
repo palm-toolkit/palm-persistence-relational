@@ -21,9 +21,9 @@ public class InterestProfileDAOHibernate extends GenericDAOHibernate<InterestPro
 	}
 
 	@Override
-	public List<InterestProfile> getAllValidInterestProfile()
+	public List<InterestProfile> getAllInterestProfiles()
 	{
-		Query query = getCurrentSession().createQuery( "FROM InterestProfile WHERE valid IS true" );
+		Query query = getCurrentSession().createQuery( "FROM InterestProfile ORDER BY interestProfileType, name" );
 
 		@SuppressWarnings( "unchecked" )
 		List<InterestProfile> interestProfiles = query.list();
@@ -35,11 +35,25 @@ public class InterestProfileDAOHibernate extends GenericDAOHibernate<InterestPro
 	}
 
 	@Override
-	public List<InterestProfile> getAllValidInterestProfile( InterestProfileType interestProfileType )
+	public List<InterestProfile> getAllActiveInterestProfile()
+	{
+		Query query = getCurrentSession().createQuery( "FROM InterestProfile WHERE active IS true" );
+
+		@SuppressWarnings( "unchecked" )
+		List<InterestProfile> interestProfiles = query.list();
+
+		if ( interestProfiles == null )
+			return Collections.emptyList();
+
+		return interestProfiles;
+	}
+
+	@Override
+	public List<InterestProfile> getAllActiveInterestProfile( InterestProfileType interestProfileType )
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append( "FROM InterestProfile " );
-		stringBuilder.append( "WHERE valid IS true " );
+		stringBuilder.append( "WHERE active IS true " );
 		stringBuilder.append( "AND interestProfileType = :interestProfileType" );
 
 		Query query = getCurrentSession().createQuery( stringBuilder.toString() );

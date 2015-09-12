@@ -14,6 +14,7 @@ import de.rwth.i9.palm.persistence.DatasetDAO;
 import de.rwth.i9.palm.persistence.EventDAO;
 import de.rwth.i9.palm.persistence.EventGroupDAO;
 import de.rwth.i9.palm.persistence.ExtractionServiceDAO;
+import de.rwth.i9.palm.persistence.ExtractionServicePropertyDAO;
 import de.rwth.i9.palm.persistence.FunctionDAO;
 import de.rwth.i9.palm.persistence.InstantiableDAO;
 import de.rwth.i9.palm.persistence.InstitutionDAO;
@@ -88,6 +89,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private ExtractionServiceDAO extractionServiceDAO;
+
+	@Autowired( required = false )
+	private ExtractionServicePropertyDAO extractionServicePropertyDAO;
 
 	@Autowired( required = false )
 	private FunctionDAO functionDAO;
@@ -222,6 +226,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.extractionServiceDAO = new ExtractionServiceDAOHibernate( this.sessionFactory );
 
 		return this.extractionServiceDAO;
+	}
+
+	@Override
+	public ExtractionServicePropertyDAO getExtractionServicePropertyDAO()
+	{
+		if ( this.extractionServicePropertyDAO == null )
+			this.extractionServicePropertyDAO = new ExtractionServicePropertyDAOHibernate( this.sessionFactory );
+
+		return this.extractionServicePropertyDAO;
 	}
 
 	@Override
