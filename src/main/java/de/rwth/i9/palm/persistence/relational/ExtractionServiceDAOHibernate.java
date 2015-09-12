@@ -34,7 +34,7 @@ public class ExtractionServiceDAOHibernate extends GenericDAOHibernate<Extractio
 	}
 
 	@Override
-	public List<ExtractionService> getAllExtractionProfile()
+	public List<ExtractionService> getAllExtractionServices()
 	{
 		Query query = getCurrentSession().createQuery( "FROM ExtractionService ORDER BY extractionServiceType" );
 
