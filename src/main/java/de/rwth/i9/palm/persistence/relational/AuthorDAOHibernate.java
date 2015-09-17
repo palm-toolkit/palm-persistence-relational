@@ -207,7 +207,7 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		
 		org.apache.lucene.search.Query query = qb
 				  .keyword()
-				  .onFields( "lastName", "name", "institution.name" )
+				  .onFields( "lastName", "name" )
 				  .matching( queryString )
 				  .createQuery();
 		
