@@ -16,6 +16,7 @@ import org.hibernate.search.query.dsl.QueryBuilder;
 
 import de.rwth.i9.palm.helper.comparator.AuthorByNoCitationComparator;
 import de.rwth.i9.palm.model.Author;
+import de.rwth.i9.palm.model.Institution;
 import de.rwth.i9.palm.persistence.AuthorDAO;
 
 public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements AuthorDAO
@@ -206,7 +207,7 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		
 		org.apache.lucene.search.Query query = qb
 				  .keyword()
-				  .onFields( "lastName", "name", "institution.name" )
+				  .onFields( "lastName", "name" )
 				  .matching( queryString )
 				  .createQuery();
 		
@@ -239,7 +240,7 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 	}
 
 	@Override
-	public List<Author> getAuthorByNameAndInstitution( String name, String institution )
+	public List<Author> getAuthorByNameAndInstitution( String name, String institutionName )
 	{
 		StringBuilder queryString = new StringBuilder();
 		queryString.append( "FROM Author " );
@@ -257,14 +258,16 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		// if only one result
 		if ( authors.size() == 1 )
 		{
-			if ( authors.get( 0 ).getInstitution() == null )
+			if ( authors.get( 0 ).getInstitutions().isEmpty() )
 				return authors;
 			else
 			{
-				if ( authors.get( 0 ).getInstitution().getName().contains( institution ) )
-					return authors;
-				else
-					return Collections.emptyList();
+				for ( Institution institution : authors.get( 0 ).getInstitutions() )
+				{
+					if ( institution.getName().contains( institutionName.toLowerCase() ) )
+						return authors;
+				}
+				return Collections.emptyList();
 			}
 		}
 		else
@@ -273,7 +276,13 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 			while ( i.hasNext() )
 			{
 				Author author = i.next();
-				if ( !author.getInstitution().getName().contains( institution ) )
+				boolean removeAuthor = true;
+				for ( Institution institution : author.getInstitutions() )
+				{
+					if ( institution.getName().contains( institutionName.toLowerCase() ) )
+						removeAuthor = false;
+				}
+				if ( removeAuthor )
 					i.remove();
 			}
 		}

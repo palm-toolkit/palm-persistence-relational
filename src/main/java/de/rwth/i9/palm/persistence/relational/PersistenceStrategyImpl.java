@@ -14,14 +14,18 @@ import de.rwth.i9.palm.persistence.DatasetDAO;
 import de.rwth.i9.palm.persistence.EventDAO;
 import de.rwth.i9.palm.persistence.EventGroupDAO;
 import de.rwth.i9.palm.persistence.ExtractionServiceDAO;
+import de.rwth.i9.palm.persistence.ExtractionServicePropertyDAO;
 import de.rwth.i9.palm.persistence.FunctionDAO;
 import de.rwth.i9.palm.persistence.InstantiableDAO;
 import de.rwth.i9.palm.persistence.InstitutionDAO;
 import de.rwth.i9.palm.persistence.InterestDAO;
+import de.rwth.i9.palm.persistence.InterestProfileDAO;
+import de.rwth.i9.palm.persistence.InterestProfilePropertyDAO;
 import de.rwth.i9.palm.persistence.LocationDAO;
 import de.rwth.i9.palm.persistence.PalmConfigurationDAO;
 import de.rwth.i9.palm.persistence.PersistenceStrategy;
 import de.rwth.i9.palm.persistence.PublicationDAO;
+import de.rwth.i9.palm.persistence.PublicationFileDAO;
 import de.rwth.i9.palm.persistence.PublicationHistoryDAO;
 import de.rwth.i9.palm.persistence.PublicationSourceDAO;
 import de.rwth.i9.palm.persistence.PublicationTopicDAO;
@@ -29,6 +33,7 @@ import de.rwth.i9.palm.persistence.ReferenceDAO;
 import de.rwth.i9.palm.persistence.RoleDAO;
 import de.rwth.i9.palm.persistence.SessionDataSetDAO;
 import de.rwth.i9.palm.persistence.SourceDAO;
+import de.rwth.i9.palm.persistence.SourcePropertyDAO;
 import de.rwth.i9.palm.persistence.SubjectDAO;
 import de.rwth.i9.palm.persistence.UserDAO;
 import de.rwth.i9.palm.persistence.UserRequestDAO;
@@ -86,6 +91,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private ExtractionServiceDAO extractionServiceDAO;
 
 	@Autowired( required = false )
+	private ExtractionServicePropertyDAO extractionServicePropertyDAO;
+
+	@Autowired( required = false )
 	private FunctionDAO functionDAO;
 
 	@Autowired( required = false )
@@ -95,6 +103,12 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private InterestDAO interestDAO;
 
 	@Autowired( required = false )
+	private InterestProfileDAO interestProfileDAO;
+
+	@Autowired( required = false )
+	private InterestProfilePropertyDAO interestProfilePropertyDAO;
+
+	@Autowired( required = false )
 	private LocationDAO locationDAO;
 
 	@Autowired( required = false )
@@ -102,6 +116,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private PublicationDAO publicationDAO;
+
+	@Autowired( required = false )
+	private PublicationFileDAO publicationFileDAO;
 
 	@Autowired( required = false )
 	private PublicationHistoryDAO publicationHistoryDAO;
@@ -123,6 +140,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	
 	@Autowired( required = false )
 	private SourceDAO sourceDAO;
+
+	@Autowired( required = false )
+	private SourcePropertyDAO sourcePropertyDAO;
 
 	@Autowired( required = false )
 	private SubjectDAO subjectDAO;
@@ -209,6 +229,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
+	public ExtractionServicePropertyDAO getExtractionServicePropertyDAO()
+	{
+		if ( this.extractionServicePropertyDAO == null )
+			this.extractionServicePropertyDAO = new ExtractionServicePropertyDAOHibernate( this.sessionFactory );
+
+		return this.extractionServicePropertyDAO;
+	}
+
+	@Override
 	public FunctionDAO getFunctionDAO()
 	{
 		if ( this.functionDAO == null )
@@ -236,6 +265,24 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
+	public InterestProfileDAO getInterestProfileDAO()
+	{
+		if ( this.interestProfileDAO == null )
+			this.interestProfileDAO = new InterestProfileDAOHibernate( this.sessionFactory );
+
+		return this.interestProfileDAO;
+	}
+
+	@Override
+	public InterestProfilePropertyDAO getInterestProfilePropertyDAO()
+	{
+		if ( this.interestProfilePropertyDAO == null )
+			this.interestProfilePropertyDAO = new InterestProfilePropertyDAOHibernate( this.sessionFactory );
+
+		return this.interestProfilePropertyDAO;
+	}
+
+	@Override
 	public LocationDAO getLocationDAO()
 	{
 		if ( this.locationDAO == null )
@@ -260,6 +307,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.publicationDAO = new PublicationDAOHibernate( this.sessionFactory );
 
 		return this.publicationDAO;
+	}
+
+	@Override
+	public PublicationFileDAO getPublicationFileDAO()
+	{
+		if ( this.publicationFileDAO == null )
+			this.publicationFileDAO = new PublicationFileDAOHibernate( this.sessionFactory );
+
+		return this.publicationFileDAO;
 	}
 
 	@Override
@@ -323,6 +379,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.sourceDAO = new SourceDAOHibernate( this.sessionFactory );
 
 		return this.sourceDAO;
+	}
+
+	@Override
+	public SourcePropertyDAO getSourcePropertyDAO()
+	{
+		if ( this.sourcePropertyDAO == null )
+			this.sourcePropertyDAO = new SourcePropertyDAOHibernate( this.sessionFactory );
+
+		return this.sourcePropertyDAO;
 	}
 
 	@Override
