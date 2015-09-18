@@ -14,10 +14,13 @@ import de.rwth.i9.palm.persistence.DatasetDAO;
 import de.rwth.i9.palm.persistence.EventDAO;
 import de.rwth.i9.palm.persistence.EventGroupDAO;
 import de.rwth.i9.palm.persistence.ExtractionServiceDAO;
+import de.rwth.i9.palm.persistence.ExtractionServicePropertyDAO;
 import de.rwth.i9.palm.persistence.FunctionDAO;
 import de.rwth.i9.palm.persistence.InstantiableDAO;
 import de.rwth.i9.palm.persistence.InstitutionDAO;
 import de.rwth.i9.palm.persistence.InterestDAO;
+import de.rwth.i9.palm.persistence.InterestProfileDAO;
+import de.rwth.i9.palm.persistence.InterestProfilePropertyDAO;
 import de.rwth.i9.palm.persistence.LocationDAO;
 import de.rwth.i9.palm.persistence.PalmConfigurationDAO;
 import de.rwth.i9.palm.persistence.PersistenceStrategy;
@@ -88,6 +91,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private ExtractionServiceDAO extractionServiceDAO;
 
 	@Autowired( required = false )
+	private ExtractionServicePropertyDAO extractionServicePropertyDAO;
+
+	@Autowired( required = false )
 	private FunctionDAO functionDAO;
 
 	@Autowired( required = false )
@@ -95,6 +101,12 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private InterestDAO interestDAO;
+
+	@Autowired( required = false )
+	private InterestProfileDAO interestProfileDAO;
+
+	@Autowired( required = false )
+	private InterestProfilePropertyDAO interestProfilePropertyDAO;
 
 	@Autowired( required = false )
 	private LocationDAO locationDAO;
@@ -217,6 +229,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
+	public ExtractionServicePropertyDAO getExtractionServicePropertyDAO()
+	{
+		if ( this.extractionServicePropertyDAO == null )
+			this.extractionServicePropertyDAO = new ExtractionServicePropertyDAOHibernate( this.sessionFactory );
+
+		return this.extractionServicePropertyDAO;
+	}
+
+	@Override
 	public FunctionDAO getFunctionDAO()
 	{
 		if ( this.functionDAO == null )
@@ -241,6 +262,24 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.interestDAO = new InterestDAOHibernate( this.sessionFactory );
 
 		return this.interestDAO;
+	}
+
+	@Override
+	public InterestProfileDAO getInterestProfileDAO()
+	{
+		if ( this.interestProfileDAO == null )
+			this.interestProfileDAO = new InterestProfileDAOHibernate( this.sessionFactory );
+
+		return this.interestProfileDAO;
+	}
+
+	@Override
+	public InterestProfilePropertyDAO getInterestProfilePropertyDAO()
+	{
+		if ( this.interestProfilePropertyDAO == null )
+			this.interestProfilePropertyDAO = new InterestProfilePropertyDAOHibernate( this.sessionFactory );
+
+		return this.interestProfilePropertyDAO;
 	}
 
 	@Override
