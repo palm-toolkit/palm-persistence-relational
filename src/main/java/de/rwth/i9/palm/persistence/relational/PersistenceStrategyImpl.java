@@ -39,6 +39,10 @@ import de.rwth.i9.palm.persistence.UserDAO;
 import de.rwth.i9.palm.persistence.UserRequestDAO;
 import de.rwth.i9.palm.persistence.WidgetDAO;
 
+/**
+ * {@inheritDoc}
+ *
+ */
 public class PersistenceStrategyImpl implements PersistenceStrategy
 {
 	@Autowired
