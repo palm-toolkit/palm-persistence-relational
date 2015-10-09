@@ -10,7 +10,6 @@ import de.rwth.i9.palm.persistence.AuthorDAO;
 import de.rwth.i9.palm.persistence.AuthorInterestDAO;
 import de.rwth.i9.palm.persistence.AuthorInterestProfileDAO;
 import de.rwth.i9.palm.persistence.AuthorSourceDAO;
-import de.rwth.i9.palm.persistence.DatasetDAO;
 import de.rwth.i9.palm.persistence.EventDAO;
 import de.rwth.i9.palm.persistence.EventGroupDAO;
 import de.rwth.i9.palm.persistence.ExtractionServiceDAO;
@@ -80,9 +79,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private AuthorSourceDAO authorSourceDAO;
-
-	@Autowired( required = false )
-	private DatasetDAO datasetDAO;
 
 	@Autowired( required = false )
 	private EventDAO eventDAO;
@@ -191,15 +187,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.authorSourceDAO = new AuthorSourceDAOHibernate( this.sessionFactory );
 
 		return this.authorSourceDAO;
-	}
-
-	@Override
-	public DatasetDAO getDatasetDAO()
-	{
-		if ( this.datasetDAO == null )
-			this.datasetDAO = new DatasetDAOHibernate( this.sessionFactory );
-
-		return this.datasetDAO;
 	}
 
 	@Override
