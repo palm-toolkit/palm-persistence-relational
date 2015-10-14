@@ -10,7 +10,6 @@ import de.rwth.i9.palm.persistence.AuthorDAO;
 import de.rwth.i9.palm.persistence.AuthorInterestDAO;
 import de.rwth.i9.palm.persistence.AuthorInterestProfileDAO;
 import de.rwth.i9.palm.persistence.AuthorSourceDAO;
-import de.rwth.i9.palm.persistence.DatasetDAO;
 import de.rwth.i9.palm.persistence.EventDAO;
 import de.rwth.i9.palm.persistence.EventGroupDAO;
 import de.rwth.i9.palm.persistence.ExtractionServiceDAO;
@@ -29,7 +28,6 @@ import de.rwth.i9.palm.persistence.PublicationFileDAO;
 import de.rwth.i9.palm.persistence.PublicationHistoryDAO;
 import de.rwth.i9.palm.persistence.PublicationSourceDAO;
 import de.rwth.i9.palm.persistence.PublicationTopicDAO;
-import de.rwth.i9.palm.persistence.ReferenceDAO;
 import de.rwth.i9.palm.persistence.RoleDAO;
 import de.rwth.i9.palm.persistence.SessionDataSetDAO;
 import de.rwth.i9.palm.persistence.SourceDAO;
@@ -83,9 +81,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private AuthorSourceDAO authorSourceDAO;
 
 	@Autowired( required = false )
-	private DatasetDAO datasetDAO;
-
-	@Autowired( required = false )
 	private EventDAO eventDAO;
 
 	@Autowired( required = false )
@@ -133,8 +128,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	@Autowired( required = false )
 	private PublicationTopicDAO publicationTopicDAO;
 
-	@Autowired( required = false )
-	private ReferenceDAO referenceDAO;
 
 	@Autowired( required = false )
 	private RoleDAO roleDAO;
@@ -194,15 +187,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.authorSourceDAO = new AuthorSourceDAOHibernate( this.sessionFactory );
 
 		return this.authorSourceDAO;
-	}
-
-	@Override
-	public DatasetDAO getDatasetDAO()
-	{
-		if ( this.datasetDAO == null )
-			this.datasetDAO = new DatasetDAOHibernate( this.sessionFactory );
-
-		return this.datasetDAO;
 	}
 
 	@Override
@@ -347,15 +331,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.publicationTopicDAO = new PublicationTopicDAOHibernate( this.sessionFactory );
 
 		return this.publicationTopicDAO;
-	}
-
-	@Override
-	public ReferenceDAO getReferenceDAO()
-	{
-		if ( this.referenceDAO == null )
-			this.referenceDAO = new ReferenceDAOHibernate( this.sessionFactory );
-
-		return this.referenceDAO;
 	}
 
 	@Override

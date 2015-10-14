@@ -147,7 +147,7 @@ FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession()
 		
 		org.apache.lucene.search.Query query = qb
 				  .keyword()
-.onFields( "eventGroup.name", "year", "thema" )
+.onFields( "eventGroup.name", "year", "eventGroup.notation" )
 				  .matching( queryString )
 				  .createQuery();
 		
@@ -208,6 +208,51 @@ FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession()
 			return Collections.emptyList();
 		
 		return publicationGroups;
+	}
+
+	@Override
+	public EventGroup getEventGroupByEventNameOrNotation( String eventNameOrNotation )
+	{
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "SELECT cg " );
+		queryString.append( "FROM EventGroup cg " );
+		queryString.append( "WHERE cg.name = :eventNameOrNotation " );
+		queryString.append( "OR cg.notation = :eventNameOrNotation " );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+		query.setParameter( "eventNameOrNotation", eventNameOrNotation );
+
+		@SuppressWarnings( "unchecked" )
+		List<EventGroup> eventGroups = query.list();
+
+		if ( eventGroups == null || eventGroups.isEmpty() )
+			return null;
+
+		return eventGroups.get( 0 );
+	}
+
+	@Override
+	public Event getEventByEventNameOrNotationAndYear( String eventNameOrNotation, String year )
+	{
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "SELECT c " );
+		queryString.append( "FROM EventGroup cg " );
+		queryString.append( "JOIN cg.events c " );
+		queryString.append( "WHERE cg.name = :eventNameOrNotation " );
+		queryString.append( "OR cg.notation = :eventNameOrNotation " );
+		queryString.append( "AND c.year = :year " );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+		query.setParameter( "eventNameOrNotation", eventNameOrNotation );
+		query.setParameter( "year", year );
+
+		@SuppressWarnings( "unchecked" )
+		List<Event> events = query.list();
+
+		if ( events == null || events.isEmpty() )
+			return null;
+
+		return events.get( 0 );
 	}
 
 }
