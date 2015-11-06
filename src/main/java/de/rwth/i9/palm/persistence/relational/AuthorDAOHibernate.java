@@ -121,12 +121,12 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append( "FROM Author " );
+//		if ( !queryString.equals( "" ) )
+//			stringBuilder.append( "WHERE name LIKE :queryString " );
 		if ( !queryString.equals( "" ) )
 			stringBuilder.append( "WHERE name LIKE :queryString " );
-//		if ( !queryString.equals( "" ) )
-//			stringBuilder.append( "WHERE name LIKE :queryString AND requestDate IS NOT NULL " );
-//		else
-//			stringBuilder.append( "WHERE requestDate IS NOT NULL " );
+		else
+			stringBuilder.append( "WHERE requestDate IS NOT NULL " );
 		stringBuilder.append( "ORDER BY citedBy desc, name asc" );
 		
 		Query query = getCurrentSession().createQuery( stringBuilder.toString() );
