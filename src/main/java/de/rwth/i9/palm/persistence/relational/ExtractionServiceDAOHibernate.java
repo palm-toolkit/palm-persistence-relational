@@ -50,7 +50,7 @@ public class ExtractionServiceDAOHibernate extends GenericDAOHibernate<Extractio
 	@Override
 	public Map<String, ExtractionService> getExtractionServiceMap()
 	{
-		Query query = getCurrentSession().createQuery( "FROM ExtractionService" );
+		Query query = getCurrentSession().createQuery( "FROM ExtractionService WHERE active IS true" );
 
 		@SuppressWarnings( "unchecked" )
 		List<ExtractionService> extractionServices = query.list();
