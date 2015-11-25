@@ -156,6 +156,35 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		return resultMap;
 	}
 
+	@Override
+	public List<Author> getAuthorListWithPaging( String queryString, int pageNo, int maxResult )
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append( "FROM Author " );
+		// if ( !queryString.equals( "" ) )
+		// stringBuilder.append( "WHERE name LIKE :queryString " );
+		if ( !queryString.equals( "" ) )
+			stringBuilder.append( "WHERE name LIKE :queryString " );
+		else
+			stringBuilder.append( "WHERE requestDate IS NOT NULL " );
+		stringBuilder.append( "ORDER BY citedBy desc, name asc" );
+
+		Query query = getCurrentSession().createQuery( stringBuilder.toString() );
+		if ( !queryString.equals( "" ) )
+			query.setParameter( "queryString", "%" + queryString + "%" );
+		query.setFirstResult( pageNo * maxResult );
+		query.setMaxResults( maxResult );
+
+		// prepare the container for result
+		@SuppressWarnings( "unchecked" )
+		List<Author> authors = query.list();
+
+		if ( authors == null || authors.isEmpty() )
+			return Collections.emptyList();
+
+		return authors;
+	}
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -241,6 +270,44 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		resultMap.put( "result", authors);
 
 		return resultMap;
+	}
+
+	@Override
+	public List<Author> getAuthorListByFullTextSearchWithPaging( String queryString, int page, int maxResult )
+	{
+		if ( queryString.equals( "" ) )
+			return this.getAuthorListWithPaging( "", page, maxResult );
+
+		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
+
+		// create native Lucene query using the query DSL
+		// alternatively you can write the Lucene query using the Lucene query
+		// parser
+		// or the Lucene programmatic API. The Hibernate Search DSL is
+		// recommended though
+		QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity( Author.class ).get();
+
+		org.apache.lucene.search.Query query = qb.keyword().onFields( "lastName", "name" ).matching( queryString ).createQuery();
+
+		// wrap Lucene query in a org.hibernate.Query
+		org.hibernate.search.FullTextQuery hibQuery = fullTextSession.createFullTextQuery( query, Author.class );
+
+		// apply limit
+		hibQuery.setFirstResult( page * maxResult );
+		hibQuery.setMaxResults( maxResult );
+
+		// prepare the container for result
+		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+
+		@SuppressWarnings( "unchecked" )
+		List<Author> authors = hibQuery.list();
+
+		if ( authors == null || authors.isEmpty() )
+			return Collections.emptyList();
+
+		Collections.sort( authors, new AuthorByNoCitationComparator() );
+
+		return authors;
 	}
 
 	@Override
