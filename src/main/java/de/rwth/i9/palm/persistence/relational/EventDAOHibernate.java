@@ -1,5 +1,6 @@
 package de.rwth.i9.palm.persistence.relational;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -92,6 +93,33 @@ public class EventDAOHibernate extends GenericDAOHibernate<Event> implements Eve
 		resultMap.put( "result", query.list() );
 
 		return resultMap;
+	}
+
+	@Override
+	public List<EventGroup> getEventGroupListWithPaging( String queryString, int pageNo, int maxResult )
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append( "SELECT cg " );
+		stringBuilder.append( "FROM EventGroup cg " );
+		if ( !queryString.equals( "" ) )
+			stringBuilder.append( "WHERE cg.name LIKE :queryString " );
+		else
+			stringBuilder.append( "WHERE cg.requestDate IS NOT NULL " );
+		stringBuilder.append( "ORDER BY cg.name" );
+
+		Query query = getCurrentSession().createQuery( stringBuilder.toString() );
+		if ( !queryString.equals( "" ) )
+			query.setParameter( "queryString", "%" + queryString + "%" );
+
+		query.setFirstResult( pageNo * maxResult );
+		query.setMaxResults( maxResult );
+
+		// prepare the container for result
+		List<EventGroup> eventGroup = new ArrayList<EventGroup>();
+
+		eventGroup = query.list();
+
+		return eventGroup;
 	}
 
 	/**
