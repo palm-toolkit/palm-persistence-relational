@@ -6,6 +6,7 @@ import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 
+import de.rwth.i9.palm.model.Country;
 import de.rwth.i9.palm.model.Location;
 import de.rwth.i9.palm.persistence.LocationDAO;
 
@@ -37,7 +38,7 @@ public class LocationDAOHibernate extends GenericDAOHibernate<Location> implemen
 	}
 
 	@Override
-	public Location getByCountryAndCity( String country, String city )
+	public Location getByCountryAndCity( Country country, String city )
 	{
 		StringBuilder queryString = new StringBuilder();
 		queryString.append( "FROM Location " );

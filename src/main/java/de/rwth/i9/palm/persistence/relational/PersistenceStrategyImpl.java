@@ -10,6 +10,9 @@ import de.rwth.i9.palm.persistence.AuthorDAO;
 import de.rwth.i9.palm.persistence.AuthorInterestDAO;
 import de.rwth.i9.palm.persistence.AuthorInterestProfileDAO;
 import de.rwth.i9.palm.persistence.AuthorSourceDAO;
+import de.rwth.i9.palm.persistence.CircleAuthorDAO;
+import de.rwth.i9.palm.persistence.CirclePublicationDAO;
+import de.rwth.i9.palm.persistence.CountryDAO;
 import de.rwth.i9.palm.persistence.EventDAO;
 import de.rwth.i9.palm.persistence.EventGroupDAO;
 import de.rwth.i9.palm.persistence.ExtractionServiceDAO;
@@ -81,6 +84,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private AuthorSourceDAO authorSourceDAO;
 
 	@Autowired( required = false )
+	private CircleAuthorDAO circleAuthorDAO;
+
+	@Autowired( required = false )
+	private CirclePublicationDAO circlePublicationDAO;
+
+	@Autowired( required = false )
+	private CountryDAO countryDAO;
+
+	@Autowired( required = false )
 	private EventDAO eventDAO;
 
 	@Autowired( required = false )
@@ -127,7 +139,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private PublicationTopicDAO publicationTopicDAO;
-
 
 	@Autowired( required = false )
 	private RoleDAO roleDAO;
@@ -187,6 +198,33 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.authorSourceDAO = new AuthorSourceDAOHibernate( this.sessionFactory );
 
 		return this.authorSourceDAO;
+	}
+
+	@Override
+	public CircleAuthorDAO getCircleAuthorDAO()
+	{
+		if ( this.circleAuthorDAO == null )
+			this.circleAuthorDAO = new CircleAuthorDAOHibernate( this.sessionFactory );
+
+		return this.circleAuthorDAO;
+	}
+
+	@Override
+	public CirclePublicationDAO getCirclePublicationDAO()
+	{
+		if ( this.circlePublicationDAO == null )
+			this.circlePublicationDAO = new CirclePublicationDAOHibernate( this.sessionFactory );
+
+		return this.circlePublicationDAO;
+	}
+
+	@Override
+	public CountryDAO getCountryDAO()
+	{
+		if ( this.countryDAO == null )
+			this.countryDAO = new CountryDAOHibernate( this.sessionFactory );
+
+		return this.countryDAO;
 	}
 
 	@Override
