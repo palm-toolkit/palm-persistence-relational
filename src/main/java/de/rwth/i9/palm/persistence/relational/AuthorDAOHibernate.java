@@ -84,7 +84,7 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 			return Collections.emptyList();
 
 		StringBuilder queryString = new StringBuilder();
-		queryString.append( "SELECT a " );
+		queryString.append( "SELECT DISTINCT a " );
 		queryString.append( "FROM Author a " );
 		queryString.append( "LEFT JOIN a.aliases aa " );
 		queryString.append( "WHERE a.name = :name " );
@@ -166,7 +166,7 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		if ( !queryString.equals( "" ) )
 			stringBuilder.append( "WHERE name LIKE :queryString " );
 		else
-			stringBuilder.append( "WHERE requestDate IS NOT NULL " );
+			stringBuilder.append( "WHERE added IS TRUE " );
 		stringBuilder.append( "ORDER BY citedBy desc, name asc" );
 
 		Query query = getCurrentSession().createQuery( stringBuilder.toString() );
@@ -314,11 +314,16 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 	public List<Author> getAuthorByNameAndInstitution( String name, String institutionName )
 	{
 		StringBuilder queryString = new StringBuilder();
-		queryString.append( "FROM Author " );
-		queryString.append( "WHERE name = :name " );
+
+		queryString.append( "SELECT DISTINCT a " );
+		queryString.append( "FROM Author a " );
+		queryString.append( "LEFT JOIN a.aliases aa " );
+		queryString.append( "WHERE a.name = :name " );
+		queryString.append( "OR aa.name = :aname " );
 
 		Query query = getCurrentSession().createQuery( queryString.toString() );
 		query.setParameter( "name", name );
+		query.setParameter( "aname", name );
 
 		@SuppressWarnings( "unchecked" )
 		List<Author> authors = query.list();
