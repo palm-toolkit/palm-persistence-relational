@@ -20,7 +20,7 @@ public class CountryDAOHibernate extends GenericDAOHibernate<Country> implements
 	public Country getCountryByName( String name )
 	{
 		StringBuilder queryString = new StringBuilder();
-		queryString.append( "FROM COuntry " );
+		queryString.append( "FROM Country " );
 		queryString.append( "WHERE name = :name " );
 
 		Query query = getCurrentSession().createQuery( queryString.toString() );

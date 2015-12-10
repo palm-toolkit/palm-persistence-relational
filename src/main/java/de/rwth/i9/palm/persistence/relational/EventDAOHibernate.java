@@ -1,6 +1,5 @@
 package de.rwth.i9.palm.persistence.relational;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -93,33 +92,6 @@ public class EventDAOHibernate extends GenericDAOHibernate<Event> implements Eve
 		resultMap.put( "result", query.list() );
 
 		return resultMap;
-	}
-
-	@Override
-	public List<EventGroup> getEventGroupListWithPaging( String queryString, int pageNo, int maxResult )
-	{
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append( "SELECT cg " );
-		stringBuilder.append( "FROM EventGroup cg " );
-		if ( !queryString.equals( "" ) )
-			stringBuilder.append( "WHERE cg.name LIKE :queryString " );
-		else
-			stringBuilder.append( "WHERE cg.requestDate IS NOT NULL " );
-		stringBuilder.append( "ORDER BY cg.name" );
-
-		Query query = getCurrentSession().createQuery( stringBuilder.toString() );
-		if ( !queryString.equals( "" ) )
-			query.setParameter( "queryString", "%" + queryString + "%" );
-
-		query.setFirstResult( pageNo * maxResult );
-		query.setMaxResults( maxResult );
-
-		// prepare the container for result
-		List<EventGroup> eventGroup = new ArrayList<EventGroup>();
-
-		eventGroup = query.list();
-
-		return eventGroup;
 	}
 
 	/**
@@ -238,26 +210,6 @@ FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession()
 		return publicationGroups;
 	}
 
-	@Override
-	public EventGroup getEventGroupByEventNameOrNotation( String eventNameOrNotation )
-	{
-		StringBuilder queryString = new StringBuilder();
-		queryString.append( "SELECT cg " );
-		queryString.append( "FROM EventGroup cg " );
-		queryString.append( "WHERE cg.name = :eventNameOrNotation " );
-		queryString.append( "OR cg.notation = :eventNameOrNotation " );
-
-		Query query = getCurrentSession().createQuery( queryString.toString() );
-		query.setParameter( "eventNameOrNotation", eventNameOrNotation );
-
-		@SuppressWarnings( "unchecked" )
-		List<EventGroup> eventGroups = query.list();
-
-		if ( eventGroups == null || eventGroups.isEmpty() )
-			return null;
-
-		return eventGroups.get( 0 );
-	}
 
 	@Override
 	public Event getEventByEventNameOrNotationAndYear( String eventNameOrNotation, String year )
