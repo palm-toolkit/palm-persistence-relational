@@ -10,8 +10,7 @@ import de.rwth.i9.palm.persistence.AuthorDAO;
 import de.rwth.i9.palm.persistence.AuthorInterestDAO;
 import de.rwth.i9.palm.persistence.AuthorInterestProfileDAO;
 import de.rwth.i9.palm.persistence.AuthorSourceDAO;
-import de.rwth.i9.palm.persistence.CircleAuthorDAO;
-import de.rwth.i9.palm.persistence.CirclePublicationDAO;
+import de.rwth.i9.palm.persistence.CircleDAO;
 import de.rwth.i9.palm.persistence.CountryDAO;
 import de.rwth.i9.palm.persistence.EventDAO;
 import de.rwth.i9.palm.persistence.EventGroupDAO;
@@ -84,10 +83,7 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private AuthorSourceDAO authorSourceDAO;
 
 	@Autowired( required = false )
-	private CircleAuthorDAO circleAuthorDAO;
-
-	@Autowired( required = false )
-	private CirclePublicationDAO circlePublicationDAO;
+	private CircleDAO circleDAO;
 
 	@Autowired( required = false )
 	private CountryDAO countryDAO;
@@ -201,21 +197,12 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
-	public CircleAuthorDAO getCircleAuthorDAO()
+	public CircleDAO getCircleDAO()
 	{
-		if ( this.circleAuthorDAO == null )
-			this.circleAuthorDAO = new CircleAuthorDAOHibernate( this.sessionFactory );
+		if ( this.circleDAO == null )
+			this.circleDAO = new CircleDAOHibernate( this.sessionFactory );
 
-		return this.circleAuthorDAO;
-	}
-
-	@Override
-	public CirclePublicationDAO getCirclePublicationDAO()
-	{
-		if ( this.circlePublicationDAO == null )
-			this.circlePublicationDAO = new CirclePublicationDAOHibernate( this.sessionFactory );
-
-		return this.circlePublicationDAO;
+		return this.circleDAO;
 	}
 
 	@Override
