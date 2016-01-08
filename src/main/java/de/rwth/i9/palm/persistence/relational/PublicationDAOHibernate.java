@@ -11,6 +11,7 @@ import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
+import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
 
 import de.rwth.i9.palm.model.Author;
@@ -244,6 +245,27 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	{
 		// container
 		Map<String, Object> publicationMap = new LinkedHashMap<String, Object>();
+		
+		// publication types
+		Set<PublicationType> publicationTypes = new HashSet<PublicationType>();
+		if ( !publicationType.equals( "all" ) )
+		{
+			String[] publicationTypeArray = publicationType.split( "-" );
+
+			if ( publicationTypeArray.length > 0 )
+			{
+				for ( String eachPublicatonType : publicationTypeArray )
+				{
+					try
+					{
+						publicationTypes.add( PublicationType.valueOf( eachPublicatonType.toUpperCase() ) );
+					}
+					catch ( Exception e )
+					{
+					}
+				}
+			}
+		}
 
 		if ( query.equals( "" ) )
 			return this.getPublicationWithPaging( query, publicationType, author, event, page, maxResult, orderBy );
@@ -256,23 +278,62 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		QueryBuilder qb = fullTextSession.getSearchFactory()
 				.buildQueryBuilder().forEntity( Publication.class ).get();
 		
-		org.apache.lucene.search.Query luceneQuery = qb
-				.bool()
+		// query builder for specific 
+		
+		@SuppressWarnings( "rawtypes" )
+		BooleanJunction combinedBooleanJunction = qb.bool();
+		
+		combinedBooleanJunction
 					.must( qb
 					  .keyword()
 					  .onFields("title", "abstractText", "contentText")
 					  .matching( query )
-					  .createQuery() )
+					  .createQuery() );
+					/*
 					.must( qb
 						  .keyword()
 						  .onFields("publicationType")
 						  .matching( PublicationType.CONFERENCE )
 						  .createQuery() )
+					.must( qb
+						  .keyword()
+						  .onFields("publicationType")
+						  .matching( PublicationType.BOOK )
+						  .createQuery() )
 				  .createQuery();
+					*/
+		
+		/* unfortunately not working
+		@SuppressWarnings( "rawtypes" )
+		BooleanJunction authorBooleanJunction = qb.bool();
+		
+		if( author != null ){
+			org.apache.lucene.search.Query mustAuthorQuery = qb
+					  .keyword()
+.onFields( "publication_author.author" )
+					  .matching( author )
+					  .createQuery();
+			
+			authorBooleanJunction.must( mustAuthorQuery );
+		}
+		
+		if( !authorBooleanJunction.isEmpty() )
+			combinedBooleanJunction.must( authorBooleanJunction.createQuery() );
+		
+		*/
+		
+		if ( !publicationTypes.isEmpty() )
+		{
+			int publicationTypeIndex = 1;
+			for ( PublicationType eachPublicationType : publicationTypes )
+			{
+				publicationTypeIndex++;
+			}
+		}
 		
 		// wrap Lucene query in a org.hibernate.Query
 		org.hibernate.search.FullTextQuery hibQuery =
-		    fullTextSession.createFullTextQuery(luceneQuery, Publication.class);
+		    fullTextSession.createFullTextQuery(combinedBooleanJunction.createQuery(), Publication.class);
 		
 		// get the total number of matching elements
 		int totalRows = hibQuery.getResultSize();
