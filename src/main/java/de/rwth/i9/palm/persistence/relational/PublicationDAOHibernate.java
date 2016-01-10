@@ -243,6 +243,11 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	@Override
 	public Map<String, Object> getPublicationByFullTextSearchWithPaging( String query, String publicationType, Author author, Event event, int page, int maxResult, String orderBy )
 	{
+		// Due to difficulties connecting author with publication on Hibernate Search
+		// if author is not null, then use standard search
+		if( author != null )
+			this.getPublicationWithPaging( query, publicationType, author, event, page, maxResult, orderBy );
+
 		// container
 		Map<String, Object> publicationMap = new LinkedHashMap<String, Object>();
 		
