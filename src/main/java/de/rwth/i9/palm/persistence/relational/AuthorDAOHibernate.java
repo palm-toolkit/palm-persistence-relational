@@ -164,7 +164,7 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		// if ( !queryString.equals( "" ) )
 		// stringBuilder.append( "WHERE name LIKE :queryString " );
 		if ( !queryString.equals( "" ) )
-			stringBuilder.append( "WHERE name LIKE :queryString " );
+			stringBuilder.append( "WHERE name LIKE :queryString AND added IS TRUE " );
 		else
 			stringBuilder.append( "WHERE added IS TRUE " );
 		stringBuilder.append( "ORDER BY citedBy desc, name asc" );
