@@ -66,7 +66,7 @@ public class AuthorDAOHibernateTest
 	@Ignore
 	public void fullTextSearchPaging()
 	{
-		Map<String, Object> results = persistenceStrategy.getAuthorDAO().getAuthorByFullTextSearchWithPaging( "rwth aachen", 0, 20 );
+		Map<String, Object> results = persistenceStrategy.getAuthorDAO().getAuthorByFullTextSearchWithPaging( "rwth aachen", "no", 0, 20 );
 
 		System.out.println( "total record " + results.get( "count" ) );
 		@SuppressWarnings( "unchecked" )
