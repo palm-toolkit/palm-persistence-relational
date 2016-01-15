@@ -37,6 +37,7 @@ import de.rwth.i9.palm.persistence.SourcePropertyDAO;
 import de.rwth.i9.palm.persistence.SubjectDAO;
 import de.rwth.i9.palm.persistence.UserDAO;
 import de.rwth.i9.palm.persistence.UserRequestDAO;
+import de.rwth.i9.palm.persistence.UserWidgetDAO;
 import de.rwth.i9.palm.persistence.WidgetDAO;
 
 /**
@@ -156,6 +157,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private UserRequestDAO userRequestDAO;
+
+	@Autowired( required = false )
+	private UserWidgetDAO userWidgetDAO;
 
 	@Autowired( required = false )
 	private WidgetDAO widgetDAO;
@@ -419,6 +423,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.userRequestDAO = new UserRequestDAOHibernate( this.sessionFactory );
 
 		return this.userRequestDAO;
+	}
+
+	@Override
+	public UserWidgetDAO getUserWidgetDAO()
+	{
+		if ( this.userWidgetDAO == null )
+			this.userWidgetDAO = new UserWidgetDAOHibernate( this.sessionFactory );
+
+		return this.userWidgetDAO;
 	}
 
 	@Override
