@@ -8,13 +8,12 @@ import org.hibernate.SessionFactory;
 
 import de.rwth.i9.palm.model.User;
 import de.rwth.i9.palm.model.UserWidget;
-import de.rwth.i9.palm.model.Widget;
 import de.rwth.i9.palm.model.WidgetStatus;
 import de.rwth.i9.palm.model.WidgetType;
 import de.rwth.i9.palm.persistence.InstantiableDAO;
 import de.rwth.i9.palm.persistence.UserWidgetDAO;
 
-public class UserWidgetDAOHibernate extends GenericDAOHibernate<Widget> implements UserWidgetDAO, InstantiableDAO
+public class UserWidgetDAOHibernate extends GenericDAOHibernate<UserWidget> implements UserWidgetDAO, InstantiableDAO
 {
 
 	public UserWidgetDAOHibernate( SessionFactory sessionFactory )
@@ -34,19 +33,39 @@ public class UserWidgetDAOHibernate extends GenericDAOHibernate<Widget> implemen
 		queryString.append( "JOIN uw.widget w " );
 		queryString.append( "WHERE w.widgetType = :widgetType " );
 		queryString.append( "AND uw.user = :user " );
-		for ( int i = 0; i < widgetStatuses.length; i++ )
+		queryString.append( "AND ( w.widgetStatus = :wwidgetStatus1 OR w.widgetStatus = :wwidgetStatus2 ) " );
+		if ( widgetStatuses.length > 0 )
 		{
-			queryString.append( "AND uw.widgetStatus = :widgetStatus" + i + " " );
+			if ( widgetStatuses.length == 1 )
+			{
+				queryString.append( "AND uw.widgetStatus = :widgetStatus0 " );
+			}
+			else
+			{
+				for ( int i = 0; i < widgetStatuses.length; i++ )
+				{
+					if ( i == 0 )
+						queryString.append( "AND ( " );
+					else
+						queryString.append( "OR " );
+					queryString.append( "uw.widgetStatus = :widgetStatus" + i + " " );
+				}
+				queryString.append( ") " );
+			}
 		}
 		queryString.append( "ORDER BY uw.position ASC" );
 
 		Query query = getCurrentSession().createQuery( queryString.toString() );
 		query.setParameter( "widgetType", widgetType );
 		query.setParameter( "user", user );
-		for ( int i = 0; i < widgetStatuses.length; i++ )
-		{
-			query.setParameter( "widgetStatus" + i, widgetStatuses[i] );
-		}
+		// only include widget with DEFAULT and ACTIVE from original Widget
+		// entity
+		query.setParameter( "wwidgetStatus1", WidgetStatus.DEFAULT );
+		query.setParameter( "wwidgetStatus2", WidgetStatus.ACTIVE );
+
+		if ( widgetStatuses.length > 0 )
+			for ( int i = 0; i < widgetStatuses.length; i++ )
+				query.setParameter( "widgetStatus" + i, widgetStatuses[i] );
 
 		@SuppressWarnings( "unchecked" )
 		List<UserWidget> userWidgets = query.list();
@@ -70,9 +89,25 @@ public class UserWidgetDAOHibernate extends GenericDAOHibernate<Widget> implemen
 		queryString.append( "WHERE w.widgetType = :widgetType " );
 		queryString.append( "AND w.widgetGroup = :widgetGroup " );
 		queryString.append( "AND uw.user = :user " );
-		for ( int i = 0; i < widgetStatuses.length; i++ )
+		queryString.append( "AND ( w.widgetStatus = :wwidgetStatus1 OR w.widgetStatus = :wwidgetStatus2 ) " );
+		if ( widgetStatuses.length > 0 )
 		{
-			queryString.append( "AND uw.widgetStatus = :widgetStatus" + i + " " );
+			if ( widgetStatuses.length == 1 )
+			{
+				queryString.append( "AND uw.widgetStatus = :widgetStatus0 " );
+			}
+			else
+			{
+				for ( int i = 0; i < widgetStatuses.length; i++ )
+				{
+					if ( i == 0 )
+						queryString.append( "AND ( " );
+					else
+						queryString.append( "OR " );
+					queryString.append( "uw.widgetStatus = :widgetStatus" + i + " " );
+				}
+				queryString.append( ") " );
+			}
 		}
 		queryString.append( "ORDER BY uw.position ASC" );
 
@@ -80,11 +115,14 @@ public class UserWidgetDAOHibernate extends GenericDAOHibernate<Widget> implemen
 		query.setParameter( "widgetType", widgetType );
 		query.setParameter( "widgetGroup", widgetGroup );
 		query.setParameter( "user", user );
+		// only include widget with DEFAULT and ACTIVE from original Widget
+		// entity
+		query.setParameter( "wwidgetStatus1", WidgetStatus.DEFAULT );
+		query.setParameter( "wwidgetStatus2", WidgetStatus.ACTIVE );
 
-		for ( int i = 0; i < widgetStatuses.length; i++ )
-		{
-			query.setParameter( "widgetStatus" + i, widgetStatuses[i] );
-		}
+		if ( widgetStatuses.length > 0 )
+			for ( int i = 0; i < widgetStatuses.length; i++ )
+				query.setParameter( "widgetStatus" + i, widgetStatuses[i] );
 
 		@SuppressWarnings( "unchecked" )
 		List<UserWidget> userWidgets = query.list();
