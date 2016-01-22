@@ -11,6 +11,8 @@ import de.rwth.i9.palm.persistence.AuthorInterestDAO;
 import de.rwth.i9.palm.persistence.AuthorInterestProfileDAO;
 import de.rwth.i9.palm.persistence.AuthorSourceDAO;
 import de.rwth.i9.palm.persistence.CircleDAO;
+import de.rwth.i9.palm.persistence.ConfigDAO;
+import de.rwth.i9.palm.persistence.ConfigPropertyDAO;
 import de.rwth.i9.palm.persistence.CountryDAO;
 import de.rwth.i9.palm.persistence.EventDAO;
 import de.rwth.i9.palm.persistence.EventGroupDAO;
@@ -23,7 +25,6 @@ import de.rwth.i9.palm.persistence.InterestDAO;
 import de.rwth.i9.palm.persistence.InterestProfileDAO;
 import de.rwth.i9.palm.persistence.InterestProfilePropertyDAO;
 import de.rwth.i9.palm.persistence.LocationDAO;
-import de.rwth.i9.palm.persistence.PalmConfigurationDAO;
 import de.rwth.i9.palm.persistence.PersistenceStrategy;
 import de.rwth.i9.palm.persistence.PublicationDAO;
 import de.rwth.i9.palm.persistence.PublicationFileDAO;
@@ -90,6 +91,12 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private CountryDAO countryDAO;
 
 	@Autowired( required = false )
+	private ConfigDAO configDAO;
+
+	@Autowired( required = false )
+	private ConfigPropertyDAO configPropertyDAO;
+
+	@Autowired( required = false )
 	private EventDAO eventDAO;
 
 	@Autowired( required = false )
@@ -118,9 +125,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private LocationDAO locationDAO;
-
-	@Autowired( required = false )
-	private PalmConfigurationDAO palmConfigurationDAO;
 
 	@Autowired( required = false )
 	private PublicationDAO publicationDAO;
@@ -207,6 +211,24 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.circleDAO = new CircleDAOHibernate( this.sessionFactory );
 
 		return this.circleDAO;
+	}
+
+	@Override
+	public ConfigDAO getConfigDAO()
+	{
+		if ( this.configDAO == null )
+			this.configDAO = new ConfigDAOHibernate( this.sessionFactory );
+
+		return this.configDAO;
+	}
+
+	@Override
+	public ConfigPropertyDAO getConfigPropertyDAO()
+	{
+		if ( this.configPropertyDAO == null )
+			this.configPropertyDAO = new ConfigPropertyDAOHibernate( this.sessionFactory );
+
+		return this.configPropertyDAO;
 	}
 
 	@Override
@@ -306,15 +328,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.locationDAO = new LocationDAOHibernate( this.sessionFactory );
 
 		return this.locationDAO;
-	}
-
-	@Override
-	public PalmConfigurationDAO getPalmConfigurationDAO()
-	{
-		if ( this.palmConfigurationDAO == null )
-			this.palmConfigurationDAO = new PalmConfigurationDAOHibernate( this.sessionFactory );
-
-		return this.palmConfigurationDAO;
 	}
 
 	@Override
