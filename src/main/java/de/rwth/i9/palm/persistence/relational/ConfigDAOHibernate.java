@@ -1,6 +1,9 @@
 package de.rwth.i9.palm.persistence.relational;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
@@ -33,6 +36,40 @@ public class ConfigDAOHibernate extends GenericDAOHibernate<Config> implements C
 			return null;
 
 		return configs.get( 0 );
+	}
+
+	@Override
+	public List<Config> getAllConfig()
+	{
+		Query query = getCurrentSession().createQuery( "FROM Config" );
+
+		@SuppressWarnings( "unchecked" )
+		List<Config> configs = query.list();
+
+		if ( configs == null )
+			return Collections.emptyList();
+
+		return configs;
+	}
+
+	@Override
+	public Map<String, Config> getConfigMap()
+	{
+		Query query = getCurrentSession().createQuery( "FROM Config" );
+
+		@SuppressWarnings( "unchecked" )
+		List<Config> configs = query.list();
+
+		if ( configs == null )
+			return Collections.emptyMap();
+
+		Map<String, Config> configMap = new HashMap<String, Config>();
+		for ( Config config : configs )
+		{
+			configMap.put( config.getName(), config );
+		}
+
+		return configMap;
 	}
 
 }
