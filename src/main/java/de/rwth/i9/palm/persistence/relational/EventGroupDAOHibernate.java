@@ -2,7 +2,9 @@ package de.rwth.i9.palm.persistence.relational;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
@@ -64,6 +66,65 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 	}
 
 	@Override
+	public Map<String, Object> getEventGroupMapWithPaging( String queryString, String type, int pageNo, int maxResult )
+	{
+		StringBuilder mainQuery = new StringBuilder();
+		mainQuery.append( "SELECT cg " );
+
+		StringBuilder countQuery = new StringBuilder();
+		countQuery.append( "SELECT COUNT(DISTINCT cg) " );
+
+		StringBuilder restQuery = new StringBuilder();
+		restQuery.append( "FROM EventGroup cg " );
+		if ( !queryString.equals( "" ) )
+			restQuery.append( "WHERE cg.name LIKE :queryString AND cg.added IS TRUE " );
+		else
+			restQuery.append( "WHERE cg.added IS TRUE " );
+
+		if ( type.equals( "conference" ) || type.equals( "workshop" ) )
+			restQuery.append( "AND ( cg.publicationType = :pubTypeConference OR cg.publicationType = :pubTypeWorkshop ) " );
+		if ( type.equals( "journal" ) )
+			restQuery.append( "AND cg.publicationType = :pubTypeJournal " );
+
+		restQuery.append( "ORDER BY cg.name" );
+
+		Query query = getCurrentSession().createQuery( mainQuery.toString() + restQuery.toString() );
+		if ( !queryString.equals( "" ) )
+			query.setParameter( "queryString", "%" + queryString + "%" );
+		if ( type.equals( "conference" ) || type.equals( "workshop" ) )
+		{
+			query.setParameter( "pubTypeConference", PublicationType.CONFERENCE );
+			query.setParameter( "pubTypeWorkshop", PublicationType.WORKSHOP );
+		}
+		if ( type.equals( "journal" ) )
+			query.setParameter( "pubTypeJournal", PublicationType.JOURNAL );
+
+		query.setFirstResult( pageNo * maxResult );
+		query.setMaxResults( maxResult );
+
+		/* Executes count query */
+		Query hibQueryCount = getCurrentSession().createQuery( countQuery.toString() + restQuery.toString() );
+		if ( !queryString.equals( "" ) )
+			query.setParameter( "queryString", "%" + queryString + "%" );
+		if ( type.equals( "conference" ) || type.equals( "workshop" ) )
+		{
+			query.setParameter( "pubTypeConference", PublicationType.CONFERENCE );
+			query.setParameter( "pubTypeWorkshop", PublicationType.WORKSHOP );
+		}
+		if ( type.equals( "journal" ) )
+			query.setParameter( "pubTypeJournal", PublicationType.JOURNAL );
+
+		int count = ( (Long) hibQueryCount.uniqueResult() ).intValue();
+
+		// prepare the container for result
+		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+		resultMap.put( "totalCount", count );
+		resultMap.put( "eventGroups", query.list() );
+
+		return resultMap;
+	}
+
+	@Override
 	public EventGroup getEventGroupByEventNameOrNotation( String eventNameOrNotation )
 	{
 		StringBuilder queryString = new StringBuilder();
@@ -108,17 +169,65 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 		org.hibernate.search.FullTextQuery hibQuery =
 		    fullTextSession.createFullTextQuery(query, EventGroup.class);
 		
+		// apply limit
+		hibQuery.setFirstResult( pageNo * maxResult );
+		hibQuery.setMaxResults( maxResult );
+		
 		// org.apache.lucene.search.Sort sort = new Sort( new SortField(
 		// "title", (Type) SortField.STRING_FIRST ) );
 		// hibQuery.setSort( sort );
 
 		@SuppressWarnings( "unchecked" )
-		List<EventGroup> publicationGroups = hibQuery.list();
+		List<EventGroup> eventGroups = hibQuery.list();
 		
-		if( publicationGroups ==  null || publicationGroups.isEmpty() )
+		if( eventGroups ==  null || eventGroups.isEmpty() )
 			return Collections.emptyList();
 		
-		return publicationGroups;
+		return eventGroups;
+	}
+
+	@Override
+	public Map<String, Object> getEventGroupMapFullTextSearchWithPaging( String queryString, String type, int pageNo, int maxResult )
+	{
+		if ( queryString.equals( "" ) )
+			return this.getEventGroupMapWithPaging( queryString, type, pageNo, maxResult );
+
+		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
+		
+		// create native Lucene query using the query DSL
+		// alternatively you can write the Lucene query using the Lucene query parser
+		// or the Lucene programmatic API. The Hibernate Search DSL is recommended though
+		QueryBuilder qb = fullTextSession.getSearchFactory()
+				.buildQueryBuilder().forEntity( EventGroup.class ).get();
+		
+		org.apache.lucene.search.Query query = qb
+				  .keyword()
+				  .onFields("name", "notation")
+				  .matching( queryString )
+				  .createQuery();
+		
+		// wrap Lucene query in a org.hibernate.Query
+		org.hibernate.search.FullTextQuery hibQuery =
+		    fullTextSession.createFullTextQuery(query, EventGroup.class);
+		
+		// org.apache.lucene.search.Sort sort = new Sort( new SortField(
+		// "title", (Type) SortField.STRING_FIRST ) );
+		// hibQuery.setSort( sort );
+		
+		// get the total number of matching elements
+		int totalRows = hibQuery.getResultSize();
+		
+		// apply limit
+		hibQuery.setFirstResult( pageNo * maxResult );
+		hibQuery.setMaxResults( maxResult );
+		
+		// prepare the container for result
+		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+				
+		resultMap.put( "totalCount", totalRows );
+		resultMap.put( "eventGroups", hibQuery.list() );
+
+		return resultMap;
 	}
 
 }
