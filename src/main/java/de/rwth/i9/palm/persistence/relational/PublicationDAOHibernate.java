@@ -44,7 +44,7 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Map<String, Object> getPublicationWithPaging( String query, String publicationType, Author author, Event event, int pageNo, int maxResult, String orderBy )
+	public Map<String, Object> getPublicationWithPaging( String query, String publicationType, Author author, Event event, Integer pageNo, Integer maxResult, String year, String orderBy )
 	{
 		// container
 		Map<String, Object> publicationMap = new LinkedHashMap<String, Object>();
@@ -96,7 +96,20 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 			}
 			else
 				stringBuilder.append( "AND " );
-			stringBuilder.append( "name LIKE :query " );
+			stringBuilder.append( "(p.title LIKE :query " );
+			stringBuilder.append( "OR p.abstractText LIKE :query1 " );
+			stringBuilder.append( "OR p.keywordText LIKE :query2) " );
+		}
+		if ( !year.equals( "all" ) )
+		{
+			if ( !isWhereClauseEvoked )
+			{
+				stringBuilder.append( "WHERE " );
+				isWhereClauseEvoked = true;
+			}
+			else
+				stringBuilder.append( "AND " );
+			stringBuilder.append( "p.year = :year " );
 		}
 		if ( !publicationTypes.isEmpty() )
 		{
@@ -142,8 +155,15 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 			hibQueryMain.setParameter( "author", author );
 
 		if ( !query.equals( "" ) )
+		{
 			hibQueryMain.setParameter( "query", "%" + query + "%" );
-
+			hibQueryMain.setParameter( "query1", "%" + query + "%" );
+			hibQueryMain.setParameter( "query2", "%" + query + "%" );
+		}
+		if ( !year.equals( "all" ) )
+		{
+			hibQueryMain.setParameter( "year", year );
+		}
 		if ( !publicationTypes.isEmpty() )
 		{
 			int publicationTypeIndex = 1;
@@ -157,8 +177,10 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		if ( event != null )
 			hibQueryMain.setParameter( "event", event );
 
-		hibQueryMain.setFirstResult( pageNo * maxResult );
-		hibQueryMain.setMaxResults( maxResult );
+		if ( pageNo != null )
+			hibQueryMain.setFirstResult( pageNo * maxResult );
+		if ( maxResult != null )
+			hibQueryMain.setMaxResults( maxResult );
 
 		@SuppressWarnings( "unchecked" )
 		List<Publication> publications = hibQueryMain.list();
@@ -177,7 +199,14 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 			hibQueryCount.setParameter( "author", author );
 
 		if ( !query.equals( "" ) )
+		{
 			hibQueryCount.setParameter( "query", "%" + query + "%" );
+			hibQueryCount.setParameter( "query1", "%" + query + "%" );
+			hibQueryCount.setParameter( "query2", "%" + query + "%" );
+		}
+
+		if ( !year.equals( "all" ) )
+			hibQueryCount.setParameter( "year", year );
 
 		if ( !publicationTypes.isEmpty() )
 		{
@@ -241,39 +270,39 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	 * 
 	 */
 	@Override
-	public Map<String, Object> getPublicationByFullTextSearchWithPaging( String query, String publicationType, Author author, Event event, int page, int maxResult, String orderBy )
+	public Map<String, Object> getPublicationByFullTextSearchWithPaging( String query, String publicationType, Author author, Event event, Integer page, Integer maxResult, String year, String orderBy )
 	{
 		// Due to difficulties connecting author with publication on Hibernate Search
 		// if author is not null, then use standard search
-		if( author != null )
-			this.getPublicationWithPaging( query, publicationType, author, event, page, maxResult, orderBy );
-
-		// container
-		Map<String, Object> publicationMap = new LinkedHashMap<String, Object>();
-		
-		// publication types
-		Set<PublicationType> publicationTypes = new HashSet<PublicationType>();
-		if ( !publicationType.equals( "all" ) )
-		{
-			String[] publicationTypeArray = publicationType.split( "-" );
-
-			if ( publicationTypeArray.length > 0 )
-			{
-				for ( String eachPublicatonType : publicationTypeArray )
-				{
-					try
-					{
-						publicationTypes.add( PublicationType.valueOf( eachPublicatonType.toUpperCase() ) );
-					}
-					catch ( Exception e )
-					{
-					}
-				}
-			}
-		}
+		if ( author != null )
+			return this.getPublicationWithPaging( query, publicationType, author, event, page, maxResult, year, orderBy );
 
 		if ( query.equals( "" ) )
-			return this.getPublicationWithPaging( query, publicationType, author, event, page, maxResult, orderBy );
+			return this.getPublicationWithPaging( query, publicationType, author, event, page, maxResult, year, orderBy );
+		
+		// container
+				Map<String, Object> publicationMap = new LinkedHashMap<String, Object>();
+				
+				// publication types, collect as Enun list
+				Set<PublicationType> publicationTypes = new HashSet<PublicationType>();
+				if ( !publicationType.equals( "all" ) )
+				{
+					String[] publicationTypeArray = publicationType.split( "-" );
+
+					if ( publicationTypeArray.length > 0 )
+					{
+						for ( String eachPublicatonType : publicationTypeArray )
+						{
+							try
+							{
+								publicationTypes.add( PublicationType.valueOf( eachPublicatonType.toUpperCase() ) );
+							}
+							catch ( Exception e )
+							{
+							}
+						}
+					}
+				}
 
 		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
 		
@@ -294,28 +323,14 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 					  .onFields("title", "abstractText", "contentText")
 					  .matching( query )
 					  .createQuery() );
-					/*
-					.must( qb
-						  .keyword()
-						  .onFields("publicationType")
-						  .matching( PublicationType.CONFERENCE )
-						  .createQuery() )
-					.must( qb
-						  .keyword()
-						  .onFields("publicationType")
-						  .matching( PublicationType.BOOK )
-						  .createQuery() )
-				  .createQuery();
-					*/
 		
-		/* unfortunately not working
 		@SuppressWarnings( "rawtypes" )
 		BooleanJunction authorBooleanJunction = qb.bool();
 		
 		if( author != null ){
 			org.apache.lucene.search.Query mustAuthorQuery = qb
 					  .keyword()
-.onFields( "publication_author.author" )
+					  .onFields( "publicationAuthors.author" )
 					  .matching( author )
 					  .createQuery();
 			
@@ -325,14 +340,41 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		if( !authorBooleanJunction.isEmpty() )
 			combinedBooleanJunction.must( authorBooleanJunction.createQuery() );
 		
-		*/
+		@SuppressWarnings( "rawtypes" )
+		BooleanJunction yearBooleanJunction = qb.bool();
+		
+		if( !year.equals( "all" ) ){
+			org.apache.lucene.search.Query mustAuthorQuery = qb
+					  .keyword()
+					  .onFields( "year" )
+					  .matching( year )
+					  .createQuery();
+			
+			yearBooleanJunction.must( mustAuthorQuery );
+		}
+		
+		if( !yearBooleanJunction.isEmpty() )
+			combinedBooleanJunction.must( yearBooleanJunction.createQuery() );
 		
 		if ( !publicationTypes.isEmpty() )
 		{
-			int publicationTypeIndex = 1;
 			for ( PublicationType eachPublicationType : publicationTypes )
 			{
-				publicationTypeIndex++;
+				@SuppressWarnings( "rawtypes" )
+				BooleanJunction publicationTypeBooleanJunction = qb.bool();
+				// TODO : change must with should
+				if( author != null ){
+					org.apache.lucene.search.Query mustAuthorQuery = qb
+							  .keyword()
+							  .onFields("publicationType")
+							  .matching( eachPublicationType )
+							  .createQuery();
+					
+					publicationTypeBooleanJunction.must( mustAuthorQuery );
+				}
+				
+				combinedBooleanJunction.must( publicationTypeBooleanJunction.createQuery() );
+				
 			}
 		}
 		
@@ -344,8 +386,10 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		int totalRows = hibQuery.getResultSize();
 		
 		// apply limit
-		hibQuery.setFirstResult( page * maxResult );
-		hibQuery.setMaxResults( maxResult );
+		if ( page != null )
+			hibQuery.setFirstResult( page * maxResult );
+		if ( maxResult != null )
+			hibQuery.setMaxResults( maxResult );
 		
 		// org.apache.lucene.search.Sort sort = new Sort( new SortField(
 		// "title", (Type) SortField.STRING_FIRST ) );
@@ -363,7 +407,7 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 
 		publicationMap.put( "publications", publications );
 
-		if ( publications.size() < maxResult && publications.size() < totalRows )
+		if ( maxResult != null && publications.size() < maxResult && publications.size() < totalRows )
 			totalRows = publications.size();
 
 		publicationMap.put( "totalCount", totalRows );
@@ -468,6 +512,28 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 			return Collections.emptyList();
 
 		return publications;
+	}
+
+	@Override
+	public List<String> getDistinctPublicationYearByAuthor( Author author )
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append( "SELECT DISTINCT p.year " );
+		stringBuilder.append( "FROM Publication p " );
+		stringBuilder.append( "LEFT JOIN p.publicationAuthors pa " );
+		stringBuilder.append( "WHERE pa.author = :author " );
+		stringBuilder.append( "AND p.year IS NOT NULL " );
+		stringBuilder.append( "ORDER BY p.year DESC" );
+
+		/* Executes main query */
+		Query hibQueryMain = getCurrentSession().createQuery( stringBuilder.toString() );
+		if ( author != null )
+			hibQueryMain.setParameter( "author", author );
+
+		@SuppressWarnings( "unchecked" )
+		List<String> yearList = hibQueryMain.list();
+
+		return yearList;
 	}
 
 }

@@ -136,7 +136,7 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 			isWhereClauseEvoked = true;
 			restQuery.append( "WHERE name LIKE :queryString " );
 		}
-		if ( !addedAuthor.equals( "yes" ) )
+		if ( addedAuthor.equals( "yes" ) )
 		{
 			if ( !isWhereClauseEvoked )
 			{

@@ -61,7 +61,7 @@ public class PublicationDAOHibernateTest
 	@Ignore
 	public void fullTextSearchPagging()
 	{
-		Map<String, Object> publicationMap = persistenceStrategy.getPublicationDAO().getPublicationByFullTextSearchWithPaging( "social network analysis", null, null, null, 0, 20, null );
+		Map<String, Object> publicationMap = persistenceStrategy.getPublicationDAO().getPublicationByFullTextSearchWithPaging( "social network analysis", null, null, null, 0, 20, null, null );
 
 		if ( (Long) publicationMap.get( "totalCount" ) > 0 )
 			for ( Publication publication : (List<Publication>) publicationMap.get( "publications" ) )
