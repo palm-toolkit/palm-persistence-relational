@@ -90,6 +90,7 @@ public class InstitutionDAOHibernateTest
 	}
 
 	@Test
+	@Ignore
 	public void getByFullTextTest() throws InterruptedException
 	{
 		// do reindexing first
