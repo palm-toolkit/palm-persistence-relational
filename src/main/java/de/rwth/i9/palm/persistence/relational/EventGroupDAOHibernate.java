@@ -24,6 +24,13 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 		super( sessionFactory );
 	}
 
+	@Override
+	public void doReindexing() throws InterruptedException
+	{
+		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
+		fullTextSession.createIndexer().startAndWait();
+	}
+
 	@SuppressWarnings( "unchecked" )
 	@Override
 	public List<EventGroup> getEventGroupListWithPaging( String queryString, String type, int pageNo, int maxResult )
