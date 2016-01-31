@@ -358,24 +358,23 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		
 		if ( !publicationTypes.isEmpty() )
 		{
+			@SuppressWarnings( "rawtypes" )
+			BooleanJunction publicationTypeBooleanJunction = qb.bool();
 			for ( PublicationType eachPublicationType : publicationTypes )
 			{
-				@SuppressWarnings( "rawtypes" )
-				BooleanJunction publicationTypeBooleanJunction = qb.bool();
+
 				// TODO : change must with should
-				if( author != null ){
-					org.apache.lucene.search.Query mustAuthorQuery = qb
+				org.apache.lucene.search.Query mustPublicationTypeQuery = qb
 							  .keyword()
 							  .onFields("publicationType")
 							  .matching( eachPublicationType )
 							  .createQuery();
 					
-					publicationTypeBooleanJunction.must( mustAuthorQuery );
-				}
+				publicationTypeBooleanJunction.should( mustPublicationTypeQuery );
 				
-				combinedBooleanJunction.must( publicationTypeBooleanJunction.createQuery() );
-				
+
 			}
+			combinedBooleanJunction.must( publicationTypeBooleanJunction.createQuery() );
 		}
 		
 		// wrap Lucene query in a org.hibernate.Query
