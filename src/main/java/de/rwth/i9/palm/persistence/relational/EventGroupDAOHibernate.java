@@ -112,14 +112,14 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 		/* Executes count query */
 		Query hibQueryCount = getCurrentSession().createQuery( countQuery.toString() + restQuery.toString() );
 		if ( !queryString.equals( "" ) )
-			query.setParameter( "queryString", "%" + queryString + "%" );
+			hibQueryCount.setParameter( "queryString", "%" + queryString + "%" );
 		if ( type.equals( "conference" ) || type.equals( "workshop" ) )
 		{
-			query.setParameter( "pubTypeConference", PublicationType.CONFERENCE );
-			query.setParameter( "pubTypeWorkshop", PublicationType.WORKSHOP );
+			hibQueryCount.setParameter( "pubTypeConference", PublicationType.CONFERENCE );
+			hibQueryCount.setParameter( "pubTypeWorkshop", PublicationType.WORKSHOP );
 		}
 		if ( type.equals( "journal" ) )
-			query.setParameter( "pubTypeJournal", PublicationType.JOURNAL );
+			hibQueryCount.setParameter( "pubTypeJournal", PublicationType.JOURNAL );
 
 		int count = ( (Long) hibQueryCount.uniqueResult() ).intValue();
 
@@ -194,10 +194,16 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 	}
 
 	@Override
-	public Map<String, Object> getEventGroupMapFullTextSearchWithPaging( String queryString, String type, int pageNo, int maxResult )
+	public Map<String, Object> getEventGroupMapFullTextSearchWithPaging( String queryString, String notation, String type, int pageNo, int maxResult )
 	{
 		if ( queryString.equals( "" ) )
 			return this.getEventGroupMapWithPaging( queryString, type, pageNo, maxResult );
+
+		// remove any common words
+		queryString = queryString.toLowerCase().replace( "conference", "" );
+		queryString = queryString.toLowerCase().replace( "journal", "" );
+		queryString = queryString.toLowerCase().replace( "proceedings", "" );
+		queryString = queryString.toLowerCase().replace( "international", "" );
 
 		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
 		
