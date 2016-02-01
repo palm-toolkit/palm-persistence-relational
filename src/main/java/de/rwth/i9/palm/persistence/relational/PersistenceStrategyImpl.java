@@ -11,6 +11,9 @@ import de.rwth.i9.palm.persistence.AuthorInterestDAO;
 import de.rwth.i9.palm.persistence.AuthorInterestProfileDAO;
 import de.rwth.i9.palm.persistence.AuthorSourceDAO;
 import de.rwth.i9.palm.persistence.CircleDAO;
+import de.rwth.i9.palm.persistence.CircleInterestDAO;
+import de.rwth.i9.palm.persistence.CircleInterestProfileDAO;
+import de.rwth.i9.palm.persistence.CircleWidgetDAO;
 import de.rwth.i9.palm.persistence.ConfigDAO;
 import de.rwth.i9.palm.persistence.ConfigPropertyDAO;
 import de.rwth.i9.palm.persistence.CountryDAO;
@@ -86,6 +89,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private CircleDAO circleDAO;
+
+	@Autowired( required = false )
+	private CircleInterestDAO circleInterestDAO;
+
+	@Autowired( required = false )
+	private CircleInterestProfileDAO circleInterestProfileDAO;
+
+	@Autowired( required = false )
+	private CircleWidgetDAO circleWidgetDAO;
 
 	@Autowired( required = false )
 	private CountryDAO countryDAO;
@@ -211,6 +223,33 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.circleDAO = new CircleDAOHibernate( this.sessionFactory );
 
 		return this.circleDAO;
+	}
+
+	@Override
+	public CircleInterestDAO getCircleInterestDAO()
+	{
+		if ( this.circleInterestDAO == null )
+			this.circleInterestDAO = new CircleInterestDAOHibernate( this.sessionFactory );
+
+		return this.circleInterestDAO;
+	}
+
+	@Override
+	public CircleInterestProfileDAO getCircleInterestProfileDAO()
+	{
+		if ( this.circleInterestProfileDAO == null )
+			this.circleInterestProfileDAO = new CircleInterestProfileDAOHibernate( this.sessionFactory );
+
+		return this.circleInterestProfileDAO;
+	}
+
+	@Override
+	public CircleWidgetDAO getCircleWidgetDAO()
+	{
+		if ( this.circleWidgetDAO == null )
+			this.circleWidgetDAO = new CircleWidgetDAOHibernate( this.sessionFactory );
+
+		return this.circleWidgetDAO;
 	}
 
 	@Override
