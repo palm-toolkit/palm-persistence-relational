@@ -23,7 +23,13 @@ import de.rwth.i9.palm.model.Author;
 import de.rwth.i9.palm.model.AuthorAlias;
 import de.rwth.i9.palm.model.AuthorInterest;
 import de.rwth.i9.palm.model.AuthorInterestProfile;
-import de.rwth.i9.palm.model.Dataset;
+import de.rwth.i9.palm.model.Circle;
+import de.rwth.i9.palm.model.CircleInterest;
+import de.rwth.i9.palm.model.CircleInterestProfile;
+import de.rwth.i9.palm.model.CircleWidget;
+import de.rwth.i9.palm.model.Config;
+import de.rwth.i9.palm.model.ConfigProperty;
+import de.rwth.i9.palm.model.Country;
 import de.rwth.i9.palm.model.Event;
 import de.rwth.i9.palm.model.EventGroup;
 import de.rwth.i9.palm.model.ExtractionService;
@@ -35,14 +41,12 @@ import de.rwth.i9.palm.model.InterestAuthor;
 import de.rwth.i9.palm.model.InterestProfile;
 import de.rwth.i9.palm.model.InterestProfileProperty;
 import de.rwth.i9.palm.model.Location;
-import de.rwth.i9.palm.model.PalmConfiguration;
 import de.rwth.i9.palm.model.Publication;
 import de.rwth.i9.palm.model.PublicationAuthor;
 import de.rwth.i9.palm.model.PublicationFile;
 import de.rwth.i9.palm.model.PublicationHistory;
 import de.rwth.i9.palm.model.PublicationSource;
 import de.rwth.i9.palm.model.PublicationTopic;
-import de.rwth.i9.palm.model.Reference;
 import de.rwth.i9.palm.model.Role;
 import de.rwth.i9.palm.model.Source;
 import de.rwth.i9.palm.model.SourceProperty;
@@ -139,9 +143,15 @@ public class DatabaseConfigTest
 				AuthorAlias.class,
 				AuthorInterest.class,
 				AuthorInterestProfile.class,
+				Circle.class,
+				CircleInterest.class,
+				CircleInterestProfile.class,
+				CircleWidget.class,
+				Country.class,
+				Config.class,
+				ConfigProperty.class,
 				Event.class,
 				EventGroup.class,
-				Dataset.class,
 				ExtractionService.class,
 				ExtractionServiceProperty.class,
 				Function.class,
@@ -154,15 +164,13 @@ public class DatabaseConfigTest
 				Publication.class,
 				PublicationAuthor.class,
 				PublicationFile.class,
-				PalmConfiguration.class,
 				PublicationHistory.class,
 				PublicationSource.class,
 				PublicationTopic.class,
-				Reference.class,
 				Role.class,
- 				Source.class,
- 				SourceProperty.class,
- 				Subject.class,
+				Source.class,
+				SourceProperty.class,
+				Subject.class,
 				User.class,
 				UserRequest.class,
 				UserWidget.class,

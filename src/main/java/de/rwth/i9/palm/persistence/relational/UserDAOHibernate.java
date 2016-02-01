@@ -5,7 +5,10 @@ import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.joda.time.DateTime;
+import org.springframework.util.StringUtils;
 
+import de.rwth.i9.palm.model.Function;
+import de.rwth.i9.palm.model.Role;
 import de.rwth.i9.palm.model.User;
 import de.rwth.i9.palm.persistence.UserDAO;
 
@@ -20,8 +23,26 @@ public class UserDAOHibernate extends GenericDAOHibernate<User> implements UserD
 	@Override
 	public boolean isAuthorizedForFunction( User user, String functionName )
 	{
-		// TODO Auto-generated method stub
-		return false;
+		if ( user == null || StringUtils.isEmpty( functionName ) )
+			return false;
+
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "SELECT fn FROM User user " );
+		queryString.append( "JOIN user.functions fn " );
+		queryString.append( "WHERE user = :user " );
+		queryString.append( "AND fn.name = :fnName" );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+		query.setParameter( "user", user );
+		query.setParameter( "fnName", functionName );
+
+		@SuppressWarnings( "unchecked" )
+		List<Function> functions = query.list();
+
+		if ( functions == null || functions.size() == 0 )
+			return false;
+
+		return true;
 	}
 
 	@Override
@@ -56,6 +77,31 @@ public class UserDAOHibernate extends GenericDAOHibernate<User> implements UserD
 		user.setLastLogin( DateTime.now().toDate() );
 
 		return this.persist( user );
+	}
+
+	@Override
+	public boolean isAuthorizedForRole( User user, String roleName )
+	{
+		if ( user == null || StringUtils.isEmpty( roleName ) )
+			return false;
+
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "SELECT role FROM User user " );
+		queryString.append( "JOIN user.role role " );
+		queryString.append( "WHERE user = :user " );
+		queryString.append( "AND role.name = :rlName" );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+		query.setParameter( "user", user );
+		query.setParameter( "rlName", roleName );
+
+		@SuppressWarnings( "unchecked" )
+		List<Role> roles = query.list();
+
+		if ( roles == null || roles.size() == 0 )
+			return false;
+
+		return true;
 	}
 
 }

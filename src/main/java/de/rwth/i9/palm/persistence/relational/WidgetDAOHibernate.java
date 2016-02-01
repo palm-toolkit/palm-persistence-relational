@@ -77,18 +77,32 @@ public class WidgetDAOHibernate extends GenericDAOHibernate<Widget> implements W
 		StringBuilder queryString = new StringBuilder();
 		queryString.append( "FROM Widget " );
 		queryString.append( "WHERE widgetType = :widgetType " );
-		for ( int i = 0; i < widgetStatuses.length; i++ )
+		if ( widgetStatuses.length > 0 )
 		{
-			queryString.append( "AND widgetStatus = :widgetStatus" + i + " " );
+			if ( widgetStatuses.length == 1 )
+			{
+				queryString.append( "AND widgetStatus = :widgetStatus0 " );
+			}
+			else
+			{
+				for ( int i = 0; i < widgetStatuses.length; i++ )
+				{
+					if ( i == 0 )
+						queryString.append( "AND ( " );
+					else
+						queryString.append( "OR " );
+					queryString.append( "widgetStatus = :widgetStatus" + i + " " );
+				}
+				queryString.append( ") " );
+			}
 		}
 		queryString.append( "ORDER BY position ASC" );
 
 		Query query = getCurrentSession().createQuery( queryString.toString() );
 		query.setParameter( "widgetType", widgetType );
-		for ( int i = 0; i < widgetStatuses.length; i++ )
-		{
-			query.setParameter( "widgetStatus" + i, widgetStatuses[i] );
-		}
+		if ( widgetStatuses.length > 0 )
+			for ( int i = 0; i < widgetStatuses.length; i++ )
+				query.setParameter( "widgetStatus" + i, widgetStatuses[i] );
 
 		@SuppressWarnings( "unchecked" )
 		List<Widget> widgets = query.list();
@@ -109,19 +123,33 @@ public class WidgetDAOHibernate extends GenericDAOHibernate<Widget> implements W
 		queryString.append( "FROM Widget " );
 		queryString.append( "WHERE widgetType = :widgetType " );
 		queryString.append( "AND widgetGroup = :widgetGroup " );
-		for ( int i = 0; i < widgetStatuses.length; i++ )
+		if ( widgetStatuses.length > 0 )
 		{
-			queryString.append( "AND widgetStatus = :widgetStatus" + i + " " );
+			if ( widgetStatuses.length == 1 )
+			{
+				queryString.append( "AND widgetStatus = :widgetStatus0 " );
+			}
+			else
+			{
+				for ( int i = 0; i < widgetStatuses.length; i++ )
+				{
+					if ( i == 0 )
+						queryString.append( "AND ( " );
+					else
+						queryString.append( "OR " );
+					queryString.append( "widgetStatus = :widgetStatus" + i + " " );
+				}
+				queryString.append( ") " );
+			}
 		}
 		queryString.append( "ORDER BY position ASC" );
 
 		Query query = getCurrentSession().createQuery( queryString.toString() );
 		query.setParameter( "widgetType", widgetType );
 		query.setParameter( "widgetGroup", widgetGroup );
-		for ( int i = 0; i < widgetStatuses.length; i++ )
-		{
-			query.setParameter( "widgetStatus" + i, widgetStatuses[i] );
-		}
+		if ( widgetStatuses.length > 0 )
+			for ( int i = 0; i < widgetStatuses.length; i++ )
+				query.setParameter( "widgetStatus" + i, widgetStatuses[i] );
 
 		@SuppressWarnings( "unchecked" )
 		List<Widget> widgets = query.list();

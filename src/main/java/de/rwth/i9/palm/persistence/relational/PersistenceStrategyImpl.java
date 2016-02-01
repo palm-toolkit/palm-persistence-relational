@@ -10,7 +10,13 @@ import de.rwth.i9.palm.persistence.AuthorDAO;
 import de.rwth.i9.palm.persistence.AuthorInterestDAO;
 import de.rwth.i9.palm.persistence.AuthorInterestProfileDAO;
 import de.rwth.i9.palm.persistence.AuthorSourceDAO;
-import de.rwth.i9.palm.persistence.DatasetDAO;
+import de.rwth.i9.palm.persistence.CircleDAO;
+import de.rwth.i9.palm.persistence.CircleInterestDAO;
+import de.rwth.i9.palm.persistence.CircleInterestProfileDAO;
+import de.rwth.i9.palm.persistence.CircleWidgetDAO;
+import de.rwth.i9.palm.persistence.ConfigDAO;
+import de.rwth.i9.palm.persistence.ConfigPropertyDAO;
+import de.rwth.i9.palm.persistence.CountryDAO;
 import de.rwth.i9.palm.persistence.EventDAO;
 import de.rwth.i9.palm.persistence.EventGroupDAO;
 import de.rwth.i9.palm.persistence.ExtractionServiceDAO;
@@ -22,14 +28,12 @@ import de.rwth.i9.palm.persistence.InterestDAO;
 import de.rwth.i9.palm.persistence.InterestProfileDAO;
 import de.rwth.i9.palm.persistence.InterestProfilePropertyDAO;
 import de.rwth.i9.palm.persistence.LocationDAO;
-import de.rwth.i9.palm.persistence.PalmConfigurationDAO;
 import de.rwth.i9.palm.persistence.PersistenceStrategy;
 import de.rwth.i9.palm.persistence.PublicationDAO;
 import de.rwth.i9.palm.persistence.PublicationFileDAO;
 import de.rwth.i9.palm.persistence.PublicationHistoryDAO;
 import de.rwth.i9.palm.persistence.PublicationSourceDAO;
 import de.rwth.i9.palm.persistence.PublicationTopicDAO;
-import de.rwth.i9.palm.persistence.ReferenceDAO;
 import de.rwth.i9.palm.persistence.RoleDAO;
 import de.rwth.i9.palm.persistence.SessionDataSetDAO;
 import de.rwth.i9.palm.persistence.SourceDAO;
@@ -37,6 +41,7 @@ import de.rwth.i9.palm.persistence.SourcePropertyDAO;
 import de.rwth.i9.palm.persistence.SubjectDAO;
 import de.rwth.i9.palm.persistence.UserDAO;
 import de.rwth.i9.palm.persistence.UserRequestDAO;
+import de.rwth.i9.palm.persistence.UserWidgetDAO;
 import de.rwth.i9.palm.persistence.WidgetDAO;
 
 /**
@@ -83,7 +88,25 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private AuthorSourceDAO authorSourceDAO;
 
 	@Autowired( required = false )
-	private DatasetDAO datasetDAO;
+	private CircleDAO circleDAO;
+
+	@Autowired( required = false )
+	private CircleInterestDAO circleInterestDAO;
+
+	@Autowired( required = false )
+	private CircleInterestProfileDAO circleInterestProfileDAO;
+
+	@Autowired( required = false )
+	private CircleWidgetDAO circleWidgetDAO;
+
+	@Autowired( required = false )
+	private CountryDAO countryDAO;
+
+	@Autowired( required = false )
+	private ConfigDAO configDAO;
+
+	@Autowired( required = false )
+	private ConfigPropertyDAO configPropertyDAO;
 
 	@Autowired( required = false )
 	private EventDAO eventDAO;
@@ -116,9 +139,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private LocationDAO locationDAO;
 
 	@Autowired( required = false )
-	private PalmConfigurationDAO palmConfigurationDAO;
-
-	@Autowired( required = false )
 	private PublicationDAO publicationDAO;
 
 	@Autowired( required = false )
@@ -132,9 +152,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private PublicationTopicDAO publicationTopicDAO;
-
-	@Autowired( required = false )
-	private ReferenceDAO referenceDAO;
 
 	@Autowired( required = false )
 	private RoleDAO roleDAO;
@@ -156,6 +173,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private UserRequestDAO userRequestDAO;
+
+	@Autowired( required = false )
+	private UserWidgetDAO userWidgetDAO;
 
 	@Autowired( required = false )
 	private WidgetDAO widgetDAO;
@@ -197,12 +217,66 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
-	public DatasetDAO getDatasetDAO()
+	public CircleDAO getCircleDAO()
 	{
-		if ( this.datasetDAO == null )
-			this.datasetDAO = new DatasetDAOHibernate( this.sessionFactory );
+		if ( this.circleDAO == null )
+			this.circleDAO = new CircleDAOHibernate( this.sessionFactory );
 
-		return this.datasetDAO;
+		return this.circleDAO;
+	}
+
+	@Override
+	public CircleInterestDAO getCircleInterestDAO()
+	{
+		if ( this.circleInterestDAO == null )
+			this.circleInterestDAO = new CircleInterestDAOHibernate( this.sessionFactory );
+
+		return this.circleInterestDAO;
+	}
+
+	@Override
+	public CircleInterestProfileDAO getCircleInterestProfileDAO()
+	{
+		if ( this.circleInterestProfileDAO == null )
+			this.circleInterestProfileDAO = new CircleInterestProfileDAOHibernate( this.sessionFactory );
+
+		return this.circleInterestProfileDAO;
+	}
+
+	@Override
+	public CircleWidgetDAO getCircleWidgetDAO()
+	{
+		if ( this.circleWidgetDAO == null )
+			this.circleWidgetDAO = new CircleWidgetDAOHibernate( this.sessionFactory );
+
+		return this.circleWidgetDAO;
+	}
+
+	@Override
+	public ConfigDAO getConfigDAO()
+	{
+		if ( this.configDAO == null )
+			this.configDAO = new ConfigDAOHibernate( this.sessionFactory );
+
+		return this.configDAO;
+	}
+
+	@Override
+	public ConfigPropertyDAO getConfigPropertyDAO()
+	{
+		if ( this.configPropertyDAO == null )
+			this.configPropertyDAO = new ConfigPropertyDAOHibernate( this.sessionFactory );
+
+		return this.configPropertyDAO;
+	}
+
+	@Override
+	public CountryDAO getCountryDAO()
+	{
+		if ( this.countryDAO == null )
+			this.countryDAO = new CountryDAOHibernate( this.sessionFactory );
+
+		return this.countryDAO;
 	}
 
 	@Override
@@ -296,15 +370,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
-	public PalmConfigurationDAO getPalmConfigurationDAO()
-	{
-		if ( this.palmConfigurationDAO == null )
-			this.palmConfigurationDAO = new PalmConfigurationDAOHibernate( this.sessionFactory );
-
-		return this.palmConfigurationDAO;
-	}
-
-	@Override
 	public PublicationDAO getPublicationDAO()
 	{
 		if ( this.publicationDAO == null )
@@ -347,15 +412,6 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.publicationTopicDAO = new PublicationTopicDAOHibernate( this.sessionFactory );
 
 		return this.publicationTopicDAO;
-	}
-
-	@Override
-	public ReferenceDAO getReferenceDAO()
-	{
-		if ( this.referenceDAO == null )
-			this.referenceDAO = new ReferenceDAOHibernate( this.sessionFactory );
-
-		return this.referenceDAO;
 	}
 
 	@Override
@@ -419,6 +475,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.userRequestDAO = new UserRequestDAOHibernate( this.sessionFactory );
 
 		return this.userRequestDAO;
+	}
+
+	@Override
+	public UserWidgetDAO getUserWidgetDAO()
+	{
+		if ( this.userWidgetDAO == null )
+			this.userWidgetDAO = new UserWidgetDAOHibernate( this.sessionFactory );
+
+		return this.userWidgetDAO;
 	}
 
 	@Override

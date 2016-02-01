@@ -56,20 +56,18 @@ public class PublicationDAOHibernateTest
 		System.out.println( "total record : " + totalPublications );
 	}
 
+	@SuppressWarnings( "unchecked" )
 	@Test
 	@Ignore
 	public void fullTextSearchPagging()
 	{
-		Map<String, Object> results = persistenceStrategy.getPublicationDAO().getPublicationByFullTextSearchWithPaging( "social network analysis", 0, 20 );
+		Map<String, Object> publicationMap = persistenceStrategy.getPublicationDAO().getPublicationByFullTextSearchWithPaging( "social network analysis", null, null, null, 0, 20, null, null );
 
-		System.out.println( "total record " + results.get( "count" ) );
-		@SuppressWarnings( "unchecked" )
-		List<Publication> publications = (List<Publication>) results.get( "result" );
-
-		for ( Publication publication : publications )
-		{
-			System.out.println( "title : " + publication.getTitle() );
-		}
+		if ( (Long) publicationMap.get( "totalCount" ) > 0 )
+			for ( Publication publication : (List<Publication>) publicationMap.get( "publications" ) )
+			{
+				System.out.println( "title : " + publication.getTitle() );
+			}
 
 //		Map<String, Object> results2 = persistenceStrategy.getPublicationDAO().getPublicationByFUllTextSearchWithPaging( "", 1, 20 );
 //		@SuppressWarnings( "unchecked" )

@@ -12,6 +12,7 @@ import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
+import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
 
 import de.rwth.i9.palm.helper.comparator.AuthorByNoCitationComparator;
@@ -84,7 +85,7 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 			return Collections.emptyList();
 
 		StringBuilder queryString = new StringBuilder();
-		queryString.append( "SELECT a " );
+		queryString.append( "SELECT DISTINCT a " );
 		queryString.append( "FROM Author a " );
 		queryString.append( "LEFT JOIN a.aliases aa " );
 		queryString.append( "WHERE a.name = :name " );
@@ -117,39 +118,101 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Map<String, Object> getAuthorWithPaging( String queryString, int pageNo, int maxResult )
+	public Map<String, Object> getAuthorWithPaging( String queryString, String addedAuthor, int pageNo, int maxResult )
 	{
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append( "FROM Author " );
+		boolean isWhereClauseEvoked = false;
+
+		StringBuilder mainQuery = new StringBuilder();
+		mainQuery.append( "SELECT a " );
+
+		StringBuilder countQuery = new StringBuilder();
+		countQuery.append( "SELECT COUNT(DISTINCT a) " );
+
+		StringBuilder restQuery = new StringBuilder();
+		restQuery.append( "FROM Author a " );
+
 		if ( !queryString.equals( "" ) )
-			stringBuilder.append( "WHERE name LIKE :queryString " );
-		stringBuilder.append( "ORDER BY citedBy desc, name asc" );
+		{
+			isWhereClauseEvoked = true;
+			restQuery.append( "WHERE name LIKE :queryString " );
+		}
+		if ( addedAuthor.equals( "yes" ) )
+		{
+			if ( !isWhereClauseEvoked )
+			{
+				restQuery.append( "WHERE " );
+				isWhereClauseEvoked = true;
+			}
+			else
+				restQuery.append( "AND " );
+			restQuery.append( "added IS TRUE " );
+		}
+
+		restQuery.append( "ORDER BY citedBy desc, name asc" );
 		
-		Query query = getCurrentSession().createQuery( stringBuilder.toString() );
+		Query query = getCurrentSession().createQuery( mainQuery.toString() + restQuery.toString() );
 		if ( !queryString.equals( "" ) )
 			query.setParameter( "queryString", "%" + queryString + "%" );
 		query.setFirstResult( pageNo * maxResult );
 		query.setMaxResults( maxResult );
 
-		int count;
-		if( !queryString.equals( "" ) ){
-			StringBuilder stringBuilder2 = new StringBuilder();
-			stringBuilder2.append( "SELECT COUNT(*) FROM Author " );
-			stringBuilder2.append( "WHERE name LIKE :queryString " );
-			
-			Query query2 = getCurrentSession().createQuery( stringBuilder2.toString() );
-			query2.setParameter( "queryString", "%" + queryString + "%" );
-			
-			count = ((Number) query2.uniqueResult()).intValue();
-		} else
-			count = this.countTotal();
+		/* Executes count query */
+		Query hibQueryCount = getCurrentSession().createQuery( countQuery.toString() + restQuery.toString() );
+		if ( !queryString.equals( "" ) )
+			hibQueryCount.setParameter( "queryString", "%" + queryString + "%" );
+
+		int count = ( (Long) hibQueryCount.uniqueResult() ).intValue();
 
 		// prepare the container for result
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
-		resultMap.put( "count", count );
-		resultMap.put( "result", query.list() );
+		resultMap.put( "totalCount", count );
+		resultMap.put( "authors", query.list() );
 
 		return resultMap;
+	}
+
+	@Override
+	public List<Author> getAuthorListWithPaging( String queryString, String addedAuthor, int pageNo, int maxResult )
+	{
+		boolean isWhereClauseEvoked = false;
+
+		StringBuilder mainQuery = new StringBuilder();
+		mainQuery.append( "SELECT a FROM Author a " );
+
+		if ( !queryString.equals( "" ) )
+		{
+			isWhereClauseEvoked = true;
+			mainQuery.append( "WHERE name LIKE :queryString " );
+		}
+		if ( !addedAuthor.equals( "yes" ) )
+		{
+			if ( !isWhereClauseEvoked )
+			{
+				mainQuery.append( "WHERE " );
+				isWhereClauseEvoked = true;
+			}
+			else
+				mainQuery.append( "AND " );
+			mainQuery.append( "added IS TRUE " );
+		}
+
+		mainQuery.append( "ORDER BY citedBy desc, name asc" );
+
+		Query query = getCurrentSession().createQuery( mainQuery.toString() );
+
+		if ( !queryString.equals( "" ) )
+			query.setParameter( "queryString", "%" + queryString + "%" );
+		query.setFirstResult( pageNo * maxResult );
+		query.setMaxResults( maxResult );
+
+		// prepare the container for result
+		@SuppressWarnings( "unchecked" )
+		List<Author> authors = query.list();
+
+		if ( authors == null || authors.isEmpty() )
+			return Collections.emptyList();
+
+		return authors;
 	}
 
 	/**
@@ -192,10 +255,10 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Map<String, Object> getAuthorByFullTextSearchWithPaging( String queryString, int page, int maxResult )
+	public Map<String, Object> getAuthorByFullTextSearchWithPaging( String queryString, String addedAuthor, int page, int maxResult )
 	{
 		if ( queryString.equals( "" ) )
-			return this.getAuthorWithPaging( "", page, maxResult );
+			return this.getAuthorWithPaging( "", addedAuthor, page, maxResult );
 		
 		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
 		
@@ -233,21 +296,85 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		
 		Collections.sort( authors, new AuthorByNoCitationComparator() );
 		
-		resultMap.put( "count", totalRows );
-		resultMap.put( "result", authors);
+		resultMap.put( "totalCount", totalRows );
+		resultMap.put( "authors", authors );
 
 		return resultMap;
+	}
+
+	@Override
+	public List<Author> getAuthorListByFullTextSearchWithPaging( String queryString, String addedAuthor, int page, int maxResult )
+	{
+		if ( queryString.equals( "" ) )
+			return this.getAuthorListWithPaging( "", addedAuthor, page, maxResult );
+
+		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
+
+		// create native Lucene query using the query DSL
+		// alternatively you can write the Lucene query using the Lucene query
+		// parser
+		// or the Lucene programmatic API. The Hibernate Search DSL is
+		// recommended though
+		
+		QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity( Author.class ).get();
+
+		// Query using lucene boolean query
+		@SuppressWarnings( "rawtypes" )
+		BooleanJunction combinedBooleanJunction = qb.bool();
+		
+		combinedBooleanJunction
+					.must( qb
+							.keyword()
+							.onFields( "lastName", "name" )
+							.matching( queryString )
+							.createQuery());
+		
+		if( addedAuthor.equals( "yes" )){
+			combinedBooleanJunction
+					.must( qb
+							.keyword()
+							.onFields( "added" )
+							.matching( true )
+							.createQuery()
+							
+					);
+		}
+			
+		// wrap Lucene query in a org.hibernate.Query
+		org.hibernate.search.FullTextQuery hibQuery = fullTextSession.createFullTextQuery( combinedBooleanJunction.createQuery(), Author.class );
+
+		// apply limit
+		hibQuery.setFirstResult( page * maxResult );
+		hibQuery.setMaxResults( maxResult );
+
+		// prepare the container for result
+		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+
+		@SuppressWarnings( "unchecked" )
+		List<Author> authors = hibQuery.list();
+
+		if ( authors == null || authors.isEmpty() )
+			return Collections.emptyList();
+
+		Collections.sort( authors, new AuthorByNoCitationComparator() );
+
+		return authors;
 	}
 
 	@Override
 	public List<Author> getAuthorByNameAndInstitution( String name, String institutionName )
 	{
 		StringBuilder queryString = new StringBuilder();
-		queryString.append( "FROM Author " );
-		queryString.append( "WHERE name = :name " );
+
+		queryString.append( "SELECT DISTINCT a " );
+		queryString.append( "FROM Author a " );
+		queryString.append( "LEFT JOIN a.aliases aa " );
+		queryString.append( "WHERE a.name = :name " );
+		queryString.append( "OR aa.name = :aname " );
 
 		Query query = getCurrentSession().createQuery( queryString.toString() );
 		query.setParameter( "name", name );
+		query.setParameter( "aname", name );
 
 		@SuppressWarnings( "unchecked" )
 		List<Author> authors = query.list();
@@ -343,4 +470,5 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 
 		return authors;
 	}
+
 }
