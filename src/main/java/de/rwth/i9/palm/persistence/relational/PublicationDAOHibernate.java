@@ -419,7 +419,7 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	 * 
 	 */
 	@Override
-	public List<Publication> getPublicationByEventWithPaging( Event event, int pageNo, int maxResult )
+	public List<Publication> getPublicationByEventWithPaging( Event event, Integer pageNo, Integer maxResult )
 	{
 		// do query twice, first query the total rows
 		Query queryCount = getCurrentSession().createQuery( "FROM Publication WHERE event = :event" );
@@ -428,8 +428,10 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 
 		Query hibQuery = getCurrentSession().createQuery( "FROM Publication WHERE event = :event" );
 		hibQuery.setParameter( "event", event );
-		hibQuery.setFirstResult( pageNo * maxResult );
-		hibQuery.setMaxResults( maxResult );
+		if ( pageNo != null )
+			hibQuery.setFirstResult( pageNo * maxResult );
+		if ( maxResult != null )
+			hibQuery.setMaxResults( maxResult );
 
 		@SuppressWarnings( "unchecked" )
 		List<Publication> publications = hibQuery.list();
