@@ -104,4 +104,26 @@ public class UserDAOHibernate extends GenericDAOHibernate<User> implements UserD
 		return true;
 	}
 
+	@Override
+	public boolean isUsernameExist( String username )
+	{
+		if ( username == null || username.isEmpty() )
+			return false;
+
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "FROM User " );
+		queryString.append( "WHERE username = :username " );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+		query.setParameter( "username", username );
+
+		@SuppressWarnings( "unchecked" )
+		List<User> users = query.list();
+
+		if ( users == null || users.size() == 0 )
+			return false;
+
+		return true;
+	}
+
 }
