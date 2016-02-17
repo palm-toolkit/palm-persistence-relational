@@ -2,6 +2,7 @@ package de.rwth.i9.palm.persistence.relational;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,9 +97,9 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 			}
 			else
 				stringBuilder.append( "AND " );
-			stringBuilder.append( "(p.title LIKE :query " );
-			stringBuilder.append( "OR p.abstractText LIKE :query1 " );
-			stringBuilder.append( "OR p.keywordText LIKE :query2) " );
+			stringBuilder.append( "(REPLACE(p.title,'-',' ') LIKE :query " );
+			stringBuilder.append( "OR REPLACE(p.abstractText,'-',' ') LIKE :query1 " );
+			stringBuilder.append( "OR REPLACE(p.keywordText,'-',' ') LIKE :query2) " );
 		}
 		if ( !year.equals( "all" ) )
 		{
@@ -327,7 +328,11 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		@SuppressWarnings( "rawtypes" )
 		BooleanJunction authorBooleanJunction = qb.bool();
 		
-		if( author != null ){
+		// TODO
+		// org.hibernate.search.exception.SearchException: Unable to find field publicationAuthors.author in de.rwth.i9.palm.model.Publication
+		// at org.hibernate.search.engine.spi.DocumentBuilderIndexedEntity.objectToString(DocumentBuilderIndexedEntity.java:888)
+		if ( author != null && false )
+		{
 			org.apache.lucene.search.Query mustAuthorQuery = qb
 					  .keyword()
 					  .onFields( "publicationAuthors.author" )
@@ -398,6 +403,28 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		@SuppressWarnings( "unchecked" )
 		List<Publication> publications = hibQuery.list();
 
+		// TODO : remove this code after problem with hibernate search solved
+		// Eliminate publication that not written by author
+
+		if ( author != null )
+		{
+			for ( Iterator<Publication> iter = publications.listIterator(); iter.hasNext(); )
+			{
+				Publication publication = iter.next();
+				boolean removePublication = true;
+				for ( Author eachAuthor : publication.getAuthors() )
+				{
+					if ( author.equals( eachAuthor ) )
+					{
+						removePublication = false;
+						break;
+					}
+				}
+				if ( removePublication )
+					iter.remove();
+			}
+		}
+
 		if ( totalRows == 0 )
 		{
 			publicationMap.put( "totalCount", 0 );
@@ -419,7 +446,7 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	 * 
 	 */
 	@Override
-	public List<Publication> getPublicationByEventWithPaging( Event event, int pageNo, int maxResult )
+	public List<Publication> getPublicationByEventWithPaging( Event event, Integer pageNo, Integer maxResult )
 	{
 		// do query twice, first query the total rows
 		Query queryCount = getCurrentSession().createQuery( "FROM Publication WHERE event = :event" );
@@ -428,8 +455,10 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 
 		Query hibQuery = getCurrentSession().createQuery( "FROM Publication WHERE event = :event" );
 		hibQuery.setParameter( "event", event );
-		hibQuery.setFirstResult( pageNo * maxResult );
-		hibQuery.setMaxResults( maxResult );
+		if ( pageNo != null )
+			hibQuery.setFirstResult( pageNo * maxResult );
+		if ( maxResult != null )
+			hibQuery.setMaxResults( maxResult );
 
 		@SuppressWarnings( "unchecked" )
 		List<Publication> publications = hibQuery.list();

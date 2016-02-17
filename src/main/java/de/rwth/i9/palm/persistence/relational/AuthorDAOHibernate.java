@@ -17,7 +17,6 @@ import org.hibernate.search.query.dsl.QueryBuilder;
 
 import de.rwth.i9.palm.helper.comparator.AuthorByNoCitationComparator;
 import de.rwth.i9.palm.model.Author;
-import de.rwth.i9.palm.model.Institution;
 import de.rwth.i9.palm.persistence.AuthorDAO;
 
 public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements AuthorDAO
@@ -385,16 +384,14 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		// if only one result
 		if ( authors.size() == 1 )
 		{
-			if ( authors.get( 0 ).getInstitutions().isEmpty() )
+			if ( authors.get( 0 ).getInstitution() == null )
 				return authors;
 			else
 			{
-				for ( Institution institution : authors.get( 0 ).getInstitutions() )
-				{
-					if ( institution.getName().contains( institutionName.toLowerCase() ) )
-						return authors;
-				}
-				return Collections.emptyList();
+				if ( authors.get( 0 ).getInstitution().getName().contains( institutionName.toLowerCase() ) )
+					return authors;
+				else
+					return Collections.emptyList();
 			}
 		}
 		else
@@ -404,12 +401,8 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 			{
 				Author author = i.next();
 				boolean removeAuthor = true;
-				for ( Institution institution : author.getInstitutions() )
-				{
-					if ( institution.getName().contains( institutionName.toLowerCase() ) )
-						removeAuthor = false;
-				}
-				if ( removeAuthor )
+
+				if ( author.getInstitution().getName().contains( institutionName.toLowerCase() ) )
 					i.remove();
 			}
 		}
