@@ -234,11 +234,17 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 		hibQuery.setFirstResult( pageNo * maxResult );
 		hibQuery.setMaxResults( maxResult );
 		
+		@SuppressWarnings( "unchecked" )
+		List<EventGroup> eventGroups = hibQuery.list();
+		
+		if( eventGroups.size() < maxResult )
+			totalRows = eventGroups.size();
+		
 		// prepare the container for result
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 				
 		resultMap.put( "totalCount", totalRows );
-		resultMap.put( "eventGroups", hibQuery.list() );
+		resultMap.put( "eventGroups", eventGroups );
 
 		return resultMap;
 	}
