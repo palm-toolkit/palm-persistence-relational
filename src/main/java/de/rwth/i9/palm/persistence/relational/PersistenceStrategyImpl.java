@@ -25,6 +25,7 @@ import de.rwth.i9.palm.persistence.FunctionDAO;
 import de.rwth.i9.palm.persistence.InstantiableDAO;
 import de.rwth.i9.palm.persistence.InstitutionDAO;
 import de.rwth.i9.palm.persistence.InterestDAO;
+import de.rwth.i9.palm.persistence.InterestProfileCircleDAO;
 import de.rwth.i9.palm.persistence.InterestProfileDAO;
 import de.rwth.i9.palm.persistence.InterestProfilePropertyDAO;
 import de.rwth.i9.palm.persistence.LocationDAO;
@@ -132,6 +133,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private InterestProfileDAO interestProfileDAO;
+
+	@Autowired( required = false )
+	private InterestProfileCircleDAO interestProfileCircleDAO;
 
 	@Autowired( required = false )
 	private InterestProfilePropertyDAO interestProfilePropertyDAO;
@@ -353,6 +357,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.interestProfileDAO = new InterestProfileDAOHibernate( this.sessionFactory );
 
 		return this.interestProfileDAO;
+	}
+
+	@Override
+	public InterestProfileCircleDAO getInterestProfileCircleDAO()
+	{
+		if ( this.interestProfileCircleDAO == null )
+			this.interestProfileCircleDAO = new InterestProfileCircleDAOHibernate( this.sessionFactory );
+
+		return this.interestProfileCircleDAO;
 	}
 
 	@Override
