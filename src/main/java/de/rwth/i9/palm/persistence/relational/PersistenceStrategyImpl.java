@@ -10,6 +10,8 @@ import de.rwth.i9.palm.persistence.AuthorDAO;
 import de.rwth.i9.palm.persistence.AuthorInterestDAO;
 import de.rwth.i9.palm.persistence.AuthorInterestProfileDAO;
 import de.rwth.i9.palm.persistence.AuthorSourceDAO;
+import de.rwth.i9.palm.persistence.AuthorTopicModelingDAO;
+import de.rwth.i9.palm.persistence.AuthorTopicModelingProfileDAO;
 import de.rwth.i9.palm.persistence.CircleDAO;
 import de.rwth.i9.palm.persistence.CircleInterestDAO;
 import de.rwth.i9.palm.persistence.CircleInterestProfileDAO;
@@ -43,6 +45,7 @@ import de.rwth.i9.palm.persistence.SessionDataSetDAO;
 import de.rwth.i9.palm.persistence.SourceDAO;
 import de.rwth.i9.palm.persistence.SourcePropertyDAO;
 import de.rwth.i9.palm.persistence.SubjectDAO;
+import de.rwth.i9.palm.persistence.TopicModelingAlgorithmAuthorDAO;
 import de.rwth.i9.palm.persistence.TopicModelingAlgorithmCircleDAO;
 import de.rwth.i9.palm.persistence.UserDAO;
 import de.rwth.i9.palm.persistence.UserRequestDAO;
@@ -91,6 +94,12 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private AuthorSourceDAO authorSourceDAO;
+
+	@Autowired( required = false )
+	private AuthorTopicModelingDAO authorTopicModelingDAO;
+
+	@Autowired( required = false )
+	private AuthorTopicModelingProfileDAO authorTopicModelingProfileDAO;
 
 	@Autowired( required = false )
 	private CircleDAO circleDAO;
@@ -189,6 +198,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private TopicModelingAlgorithmCircleDAO topicModelingAlgorithmCircleDAO;
 
 	@Autowired( required = false )
+	private TopicModelingAlgorithmAuthorDAO topicModelingAlgorithmAuthorDAO;
+
+	@Autowired( required = false )
 	private UserDAO userDAO;
 
 	@Autowired( required = false )
@@ -234,6 +246,24 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.authorSourceDAO = new AuthorSourceDAOHibernate( this.sessionFactory );
 
 		return this.authorSourceDAO;
+	}
+
+	@Override
+	public AuthorTopicModelingDAO getAuthorTopicModelingDAO()
+	{
+		if ( this.authorTopicModelingDAO == null )
+			this.authorTopicModelingDAO = new AuthorTopicModelingDAOHibernate( this.sessionFactory );
+
+		return this.authorTopicModelingDAO;
+	}
+
+	@Override
+	public AuthorTopicModelingProfileDAO getAuthorTopicModelingProfileDAO()
+	{
+		if ( this.authorTopicModelingProfileDAO == null )
+			this.authorTopicModelingProfileDAO = new AuthorTopicModelingProfileDAOHibernate( this.sessionFactory );
+
+		return this.authorTopicModelingProfileDAO;
 	}
 
 	@Override
@@ -513,6 +543,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.subjectDAO = new SubjectDAOHibernate( this.sessionFactory );
 
 		return this.subjectDAO;
+	}
+
+	@Override
+	public TopicModelingAlgorithmAuthorDAO getTopicModelingAlgorithmAuthorDAO()
+	{
+		if ( this.topicModelingAlgorithmAuthorDAO == null )
+			this.topicModelingAlgorithmAuthorDAO = new TopicModelingAlgorithmAuthorDAOHibernate( this.sessionFactory );
+
+		return this.topicModelingAlgorithmAuthorDAO;
 	}
 
 	@Override
