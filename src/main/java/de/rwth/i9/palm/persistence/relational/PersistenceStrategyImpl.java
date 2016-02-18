@@ -13,6 +13,8 @@ import de.rwth.i9.palm.persistence.AuthorSourceDAO;
 import de.rwth.i9.palm.persistence.CircleDAO;
 import de.rwth.i9.palm.persistence.CircleInterestDAO;
 import de.rwth.i9.palm.persistence.CircleInterestProfileDAO;
+import de.rwth.i9.palm.persistence.CircleTopicModelingDAO;
+import de.rwth.i9.palm.persistence.CircleTopicModelingProfileDAO;
 import de.rwth.i9.palm.persistence.CircleWidgetDAO;
 import de.rwth.i9.palm.persistence.ConfigDAO;
 import de.rwth.i9.palm.persistence.ConfigPropertyDAO;
@@ -41,6 +43,7 @@ import de.rwth.i9.palm.persistence.SessionDataSetDAO;
 import de.rwth.i9.palm.persistence.SourceDAO;
 import de.rwth.i9.palm.persistence.SourcePropertyDAO;
 import de.rwth.i9.palm.persistence.SubjectDAO;
+import de.rwth.i9.palm.persistence.TopicModelingAlgorithmCircleDAO;
 import de.rwth.i9.palm.persistence.UserDAO;
 import de.rwth.i9.palm.persistence.UserRequestDAO;
 import de.rwth.i9.palm.persistence.UserWidgetDAO;
@@ -97,6 +100,12 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private CircleInterestProfileDAO circleInterestProfileDAO;
+
+	@Autowired( required = false )
+	private CircleTopicModelingDAO circleTopicModelingDAO;
+
+	@Autowired( required = false )
+	private CircleTopicModelingProfileDAO circleTopicModelingProfileDAO;
 
 	@Autowired( required = false )
 	private CircleWidgetDAO circleWidgetDAO;
@@ -177,6 +186,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private SubjectDAO subjectDAO;
 
 	@Autowired( required = false )
+	private TopicModelingAlgorithmCircleDAO topicModelingAlgorithmCircleDAO;
+
+	@Autowired( required = false )
 	private UserDAO userDAO;
 
 	@Autowired( required = false )
@@ -249,6 +261,24 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.circleInterestProfileDAO = new CircleInterestProfileDAOHibernate( this.sessionFactory );
 
 		return this.circleInterestProfileDAO;
+	}
+
+	@Override
+	public CircleTopicModelingDAO getCircleTopicModelingDAO()
+	{
+		if ( this.circleTopicModelingDAO == null )
+			this.circleTopicModelingDAO = new CircleTopicModelingDAOHibernate( this.sessionFactory );
+
+		return this.circleTopicModelingDAO;
+	}
+
+	@Override
+	public CircleTopicModelingProfileDAO getCircleTopicModelingProfileDAO()
+	{
+		if ( this.circleTopicModelingProfileDAO == null )
+			this.circleTopicModelingProfileDAO = new CircleTopicModelingProfileDAOHibernate( this.sessionFactory );
+
+		return this.circleTopicModelingProfileDAO;
 	}
 
 	@Override
@@ -483,6 +513,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.subjectDAO = new SubjectDAOHibernate( this.sessionFactory );
 
 		return this.subjectDAO;
+	}
+
+	@Override
+	public TopicModelingAlgorithmCircleDAO getTopicModelingAlgorithmCircleDAO()
+	{
+		if ( this.topicModelingAlgorithmCircleDAO == null )
+			this.topicModelingAlgorithmCircleDAO = new TopicModelingAlgorithmCircleDAOHibernate( this.sessionFactory );
+
+		return this.topicModelingAlgorithmCircleDAO;
 	}
 
 	@Override
