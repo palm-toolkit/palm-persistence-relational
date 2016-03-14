@@ -16,6 +16,7 @@ import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
 
 import de.rwth.i9.palm.model.Author;
+import de.rwth.i9.palm.model.Circle;
 import de.rwth.i9.palm.model.Event;
 import de.rwth.i9.palm.model.Publication;
 import de.rwth.i9.palm.model.PublicationType;
@@ -542,6 +543,10 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		return publications;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * 
+	 */
 	@Override
 	public List<String> getDistinctPublicationYearByAuthor( Author author )
 	{
@@ -562,6 +567,180 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		List<String> yearList = hibQueryMain.list();
 
 		return yearList;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * 
+	 */
+	@Override
+	public List<String> getDistinctPublicationYearByCircle( Circle circle )
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append( "SELECT DISTINCT p.year " );
+		stringBuilder.append( "FROM Circle c " );
+		stringBuilder.append( "LEFT JOIN c.publications p " );
+		stringBuilder.append( "WHERE c = :c " );
+		stringBuilder.append( "AND p.year IS NOT NULL " );
+		stringBuilder.append( "ORDER BY p.year DESC" );
+
+		/* Executes main query */
+		Query hibQueryMain = getCurrentSession().createQuery( stringBuilder.toString() );
+		if ( circle != null )
+			hibQueryMain.setParameter( "c", circle );
+
+		@SuppressWarnings( "unchecked" )
+		List<String> yearList = hibQueryMain.list();
+
+		return yearList;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * 
+	 */
+	@Override
+	public Map<String, Object> getPublicationWithPaging( String query, String publicationType, Circle circle, Integer pageNo, Integer maxResult, String year, String orderBy )
+	{
+		if ( circle == null )
+			return Collections.emptyMap();
+
+		// container
+		Map<String, Object> publicationMap = new LinkedHashMap<String, Object>();
+
+		Set<PublicationType> publicationTypes = new HashSet<PublicationType>();
+		if ( !publicationType.equals( "all" ) )
+		{
+			String[] publicationTypeArray = publicationType.split( "-" );
+
+			if ( publicationTypeArray.length > 0 )
+			{
+				for ( String eachPublicatonType : publicationTypeArray )
+				{
+					try
+					{
+						publicationTypes.add( PublicationType.valueOf( eachPublicatonType.toUpperCase() ) );
+					}
+					catch ( Exception e )
+					{
+					}
+				}
+			}
+		}
+
+		boolean isWhereClauseEvoked = false;
+
+		StringBuilder mainQuery = new StringBuilder();
+		mainQuery.append( "SELECT DISTINCT p " );
+
+		StringBuilder countQuery = new StringBuilder();
+		countQuery.append( "SELECT COUNT(DISTINCT p) " );
+
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append( "FROM Circle c " );
+		stringBuilder.append( "LEFT JOIN c.publications p " );
+		stringBuilder.append( "WHERE c = :c " );
+
+		if ( !query.equals( "" ) )
+		{
+			stringBuilder.append( "AND " );
+			stringBuilder.append( "(REPLACE(p.title,'-',' ') LIKE :query " );
+			stringBuilder.append( "OR REPLACE(p.abstractText,'-',' ') LIKE :query1 " );
+			stringBuilder.append( "OR REPLACE(p.keywordText,'-',' ') LIKE :query2) " );
+		}
+		if ( !year.equals( "all" ) )
+		{
+
+			stringBuilder.append( "AND " );
+			stringBuilder.append( "p.year = :year " );
+		}
+		if ( !publicationTypes.isEmpty() )
+		{
+			for ( int i = 1; i <= publicationTypes.size(); i++ )
+			{
+				if ( i == 1 )
+					stringBuilder.append( "AND ( " );
+				else
+					stringBuilder.append( "OR " );
+
+				stringBuilder.append( "p.publicationType = :publicationType" + i + " " );
+			}
+			stringBuilder.append( " ) " );
+		}
+
+		if ( orderBy.equals( "citation" ) )
+			stringBuilder.append( "ORDER BY p.citedBy DESC" );
+		else if ( orderBy.equals( "date" ) )
+			stringBuilder.append( "ORDER BY p.publicationDate DESC" );
+
+		/* Executes main query */
+		Query hibQueryMain = getCurrentSession().createQuery( mainQuery.toString() + stringBuilder.toString() );
+		hibQueryMain.setParameter( "c", circle );
+
+		if ( !query.equals( "" ) )
+		{
+			hibQueryMain.setParameter( "query", "%" + query + "%" );
+			hibQueryMain.setParameter( "query1", "%" + query + "%" );
+			hibQueryMain.setParameter( "query2", "%" + query + "%" );
+		}
+		if ( !year.equals( "all" ) )
+		{
+			hibQueryMain.setParameter( "year", year );
+		}
+		if ( !publicationTypes.isEmpty() )
+		{
+			int publicationTypeIndex = 1;
+			for ( PublicationType eachPublicationType : publicationTypes )
+			{
+				hibQueryMain.setParameter( "publicationType" + publicationTypeIndex, eachPublicationType );
+				publicationTypeIndex++;
+			}
+		}
+
+		if ( pageNo != null )
+			hibQueryMain.setFirstResult( pageNo * maxResult );
+		if ( maxResult != null )
+			hibQueryMain.setMaxResults( maxResult );
+
+		@SuppressWarnings( "unchecked" )
+		List<Publication> publications = hibQueryMain.list();
+
+		if ( publications == null || publications.isEmpty() )
+		{
+			publicationMap.put( "totalCount", 0 );
+			return publicationMap;
+		}
+
+		publicationMap.put( "publications", publications );
+
+		/* Executes count query */
+		Query hibQueryCount = getCurrentSession().createQuery( countQuery.toString() + stringBuilder.toString() );
+		hibQueryCount.setParameter( "c", circle );
+
+		if ( !query.equals( "" ) )
+		{
+			hibQueryCount.setParameter( "query", "%" + query + "%" );
+			hibQueryCount.setParameter( "query1", "%" + query + "%" );
+			hibQueryCount.setParameter( "query2", "%" + query + "%" );
+		}
+
+		if ( !year.equals( "all" ) )
+			hibQueryCount.setParameter( "year", year );
+
+		if ( !publicationTypes.isEmpty() )
+		{
+			int publicationTypeIndex = 1;
+			for ( PublicationType eachPublicationType : publicationTypes )
+			{
+				hibQueryCount.setParameter( "publicationType" + publicationTypeIndex, eachPublicationType );
+				publicationTypeIndex++;
+			}
+		}
+
+		int count = ( (Long) hibQueryCount.uniqueResult() ).intValue();
+		publicationMap.put( "totalCount", count );
+
+		return publicationMap;
 	}
 
 }
