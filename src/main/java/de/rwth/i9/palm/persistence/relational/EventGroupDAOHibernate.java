@@ -275,10 +275,14 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 					queryString = new StringBuilder();
 					queryString.append( "SELECT cg " );
 					queryString.append( "FROM EventGroup cg " );
-					queryString.append( "WHERE cg.notation = :notation " );
+					queryString.append( "WHERE REPLACE(cg.notation,'-','') = :notation " );
+					queryString.append( "OR REPLACE(cg.name,'-','') = :notation2 " );
+					queryString.append( "OR REPLACE(cg.name,'-','') = :name " );
 
 					Query query2 = getCurrentSession().createQuery( queryString.toString() );
 					query2.setParameter( "notation", eventGroupCompareTo.getNotation() );
+					query2.setParameter( "notation2", eventGroupCompareTo.getNotation() );
+					query2.setParameter( "name", eventGroupCompareTo.getName() );
 
 					@SuppressWarnings( "unchecked" )
 					List<EventGroup> eventGroups2 = query2.list();
