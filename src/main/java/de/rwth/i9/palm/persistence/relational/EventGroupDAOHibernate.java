@@ -249,4 +249,50 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 		return resultMap;
 	}
 
+	@Override
+	public EventGroup getSimilarEventGroup( EventGroup eventGroupCompareTo )
+	{
+		if ( eventGroupCompareTo.getDblpUrl() != null )
+		{
+			StringBuilder queryString = new StringBuilder();
+			queryString.append( "SELECT cg " );
+			queryString.append( "FROM EventGroup cg " );
+			queryString.append( "WHERE cg.dblpUrl = :dblpUrl " );
+
+			Query query = getCurrentSession().createQuery( queryString.toString() );
+			query.setParameter( "dblpUrl", eventGroupCompareTo.getDblpUrl() );
+
+			@SuppressWarnings( "unchecked" )
+			List<EventGroup> eventGroups = query.list();
+
+			if ( eventGroups != null && !eventGroups.isEmpty() )
+				return eventGroups.get( 0 );
+
+			else
+			{
+				if ( eventGroupCompareTo.getNotation() != null && !eventGroupCompareTo.getNotation().isEmpty() )
+				{
+					queryString = new StringBuilder();
+					queryString.append( "SELECT cg " );
+					queryString.append( "FROM EventGroup cg " );
+					queryString.append( "WHERE REPLACE(cg.notation,'-','') = :notation " );
+					queryString.append( "OR REPLACE(cg.name,'-','') = :notation2 " );
+					queryString.append( "OR REPLACE(cg.name,'-','') = :name " );
+
+					Query query2 = getCurrentSession().createQuery( queryString.toString() );
+					query2.setParameter( "notation", eventGroupCompareTo.getNotation() );
+					query2.setParameter( "notation2", eventGroupCompareTo.getNotation() );
+					query2.setParameter( "name", eventGroupCompareTo.getName() );
+
+					@SuppressWarnings( "unchecked" )
+					List<EventGroup> eventGroups2 = query2.list();
+
+					if ( eventGroups2 != null && !eventGroups2.isEmpty() )
+						return eventGroups2.get( 0 );
+				}
+			}
+		}
+		return null;
+	}
+
 }

@@ -24,6 +24,29 @@ public class WidgetDAOHibernate extends GenericDAOHibernate<Widget> implements W
 	 * @inheritDoc
 	 */
 	@Override
+	public List<Widget> getWidgetByWidgetType( WidgetType widgetType )
+	{
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "FROM Widget " );
+		queryString.append( "WHERE widgetType = :widgetType " );
+		queryString.append( "ORDER BY position ASC" );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+		query.setParameter( "widgetType", widgetType );
+
+		@SuppressWarnings( "unchecked" )
+		List<Widget> widgets = query.list();
+
+		if ( widgets == null || widgets.isEmpty() )
+			return Collections.emptyList();
+
+		return widgets;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	@Override
 	public List<Widget> getActiveWidgetByWidgetType( WidgetType widgetType )
 	{
 		StringBuilder queryString = new StringBuilder();
