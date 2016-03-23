@@ -19,20 +19,20 @@ public class UserEventGroupBookmarkDAOHibernate extends GenericDAOHibernate<User
 	}
 
 	@Override
-	public UserEventGroupBookmark getByUserAndEventGroup( User user, EventGroup publication )
+	public UserEventGroupBookmark getByUserAndEventGroup( User user, EventGroup eventGroup )
 	{
-		if ( user == null || publication == null )
+		if ( user == null || eventGroup == null )
 			return null;
 
 		StringBuilder queryString = new StringBuilder();
 		queryString.append( "SELECT ueb FROM User user " );
 		queryString.append( "JOIN user.userEventGroupBookmarks ueb " );
 		queryString.append( "WHERE user = :user " );
-		queryString.append( "AND ueb.publication = :publication" );
+		queryString.append( "AND ueb.eventGroup = :eventGroup" );
 
 		Query query = getCurrentSession().createQuery( queryString.toString() );
 		query.setParameter( "user", user );
-		query.setParameter( "publication", publication );
+		query.setParameter( "eventGroup", eventGroup );
 
 		@SuppressWarnings( "unchecked" )
 		List<UserEventGroupBookmark> userEventGroupBookmarks = query.list();

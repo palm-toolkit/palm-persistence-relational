@@ -19,20 +19,20 @@ public class UserAuthorBookmarkDAOHibernate extends GenericDAOHibernate<UserAuth
 	}
 
 	@Override
-	public UserAuthorBookmark getByUserAndAuthor( User user, Author publication )
+	public UserAuthorBookmark getByUserAndAuthor( User user, Author author )
 	{
-		if ( user == null || publication == null )
+		if ( user == null || author == null )
 			return null;
 
 		StringBuilder queryString = new StringBuilder();
 		queryString.append( "SELECT uab FROM User user " );
 		queryString.append( "JOIN user.userAuthorBookmarks uab " );
 		queryString.append( "WHERE user = :user " );
-		queryString.append( "AND uab.publication = :publication" );
+		queryString.append( "AND uab.author = :author" );
 
 		Query query = getCurrentSession().createQuery( queryString.toString() );
 		query.setParameter( "user", user );
-		query.setParameter( "publication", publication );
+		query.setParameter( "author", author );
 
 		@SuppressWarnings( "unchecked" )
 		List<UserAuthorBookmark> userAuthorBookmarks = query.list();

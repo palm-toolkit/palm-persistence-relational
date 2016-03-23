@@ -19,20 +19,20 @@ public class UserCircleBookmarkDAOHibernate extends GenericDAOHibernate<UserCirc
 	}
 
 	@Override
-	public UserCircleBookmark getByUserAndCircle( User user, Circle publication )
+	public UserCircleBookmark getByUserAndCircle( User user, Circle circle )
 	{
-		if ( user == null || publication == null )
+		if ( user == null || circle == null )
 			return null;
 
 		StringBuilder queryString = new StringBuilder();
 		queryString.append( "SELECT ucb FROM User user " );
 		queryString.append( "JOIN user.userCircleBookmarks ucb " );
 		queryString.append( "WHERE user = :user " );
-		queryString.append( "AND ucb.publication = :publication" );
+		queryString.append( "AND ucb.circle = :circle" );
 
 		Query query = getCurrentSession().createQuery( queryString.toString() );
 		query.setParameter( "user", user );
-		query.setParameter( "publication", publication );
+		query.setParameter( "circle", circle );
 
 		@SuppressWarnings( "unchecked" )
 		List<UserCircleBookmark> userCircleBookmarks = query.list();
