@@ -48,6 +48,7 @@ import de.rwth.i9.palm.persistence.SubjectDAO;
 import de.rwth.i9.palm.persistence.TopicModelingAlgorithmAuthorDAO;
 import de.rwth.i9.palm.persistence.TopicModelingAlgorithmCircleDAO;
 import de.rwth.i9.palm.persistence.UserDAO;
+import de.rwth.i9.palm.persistence.UserPublicationBookmarkDAO;
 import de.rwth.i9.palm.persistence.UserRequestDAO;
 import de.rwth.i9.palm.persistence.UserWidgetDAO;
 import de.rwth.i9.palm.persistence.WidgetDAO;
@@ -202,6 +203,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private UserDAO userDAO;
+
+	@Autowired( required = false )
+	private UserPublicationBookmarkDAO userPublicationBookmarkDAO;
 
 	@Autowired( required = false )
 	private UserRequestDAO userRequestDAO;
@@ -570,6 +574,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.userDAO = new UserDAOHibernate( this.sessionFactory );
 
 		return this.userDAO;
+	}
+
+	@Override
+	public UserPublicationBookmarkDAO getUserPublicationBookmarkDAO()
+	{
+		if ( this.userPublicationBookmarkDAO == null )
+			this.userPublicationBookmarkDAO = new UserPublicationBookmarkDAOHibernate( this.sessionFactory );
+
+		return this.userPublicationBookmarkDAO;
 	}
 
 	@Override
