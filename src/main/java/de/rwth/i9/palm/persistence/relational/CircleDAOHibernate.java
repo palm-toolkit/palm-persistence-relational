@@ -14,6 +14,7 @@ import org.hibernate.search.query.dsl.QueryBuilder;
 import de.rwth.i9.palm.helper.comparator.AuthorByNoCitationComparator;
 import de.rwth.i9.palm.model.Author;
 import de.rwth.i9.palm.model.Circle;
+import de.rwth.i9.palm.model.User;
 import de.rwth.i9.palm.persistence.CircleDAO;
 
 public class CircleDAOHibernate extends GenericDAOHibernate<Circle> implements CircleDAO
@@ -35,7 +36,7 @@ public class CircleDAOHibernate extends GenericDAOHibernate<Circle> implements C
 	}
 
 	@Override
-	public Map<String, Object> getCircleWithPaging( String query, Author creator, int pageNo, int maxResult, String orderBy )
+	public Map<String, Object> getCircleWithPaging( String query, User creator, int pageNo, int maxResult, String orderBy )
 	{
 		boolean isWhereClauseEvoked = false;
 
@@ -113,7 +114,7 @@ public class CircleDAOHibernate extends GenericDAOHibernate<Circle> implements C
 	}
 
 	@Override
-	public Map<String, Object> getCircleFullTextSearchWithPaging( String queryString, Author creator, int pageNo, int maxResult, String orderBy )
+	public Map<String, Object> getCircleFullTextSearchWithPaging( String queryString, User creator, int pageNo, int maxResult, String orderBy )
 	{
 		if ( queryString.equals( "" ) || creator != null )
 			return this.getCircleWithPaging( "", creator, pageNo, maxResult, orderBy );
