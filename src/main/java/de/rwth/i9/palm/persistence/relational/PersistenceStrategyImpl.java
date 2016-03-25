@@ -47,7 +47,11 @@ import de.rwth.i9.palm.persistence.SourcePropertyDAO;
 import de.rwth.i9.palm.persistence.SubjectDAO;
 import de.rwth.i9.palm.persistence.TopicModelingAlgorithmAuthorDAO;
 import de.rwth.i9.palm.persistence.TopicModelingAlgorithmCircleDAO;
+import de.rwth.i9.palm.persistence.UserAuthorBookmarkDAO;
+import de.rwth.i9.palm.persistence.UserCircleBookmarkDAO;
 import de.rwth.i9.palm.persistence.UserDAO;
+import de.rwth.i9.palm.persistence.UserEventGroupBookmarkDAO;
+import de.rwth.i9.palm.persistence.UserPublicationBookmarkDAO;
 import de.rwth.i9.palm.persistence.UserRequestDAO;
 import de.rwth.i9.palm.persistence.UserWidgetDAO;
 import de.rwth.i9.palm.persistence.WidgetDAO;
@@ -201,7 +205,19 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private TopicModelingAlgorithmAuthorDAO topicModelingAlgorithmAuthorDAO;
 
 	@Autowired( required = false )
+	private UserAuthorBookmarkDAO userAuthorBookmarkDAO;
+
+	@Autowired( required = false )
+	private UserCircleBookmarkDAO userCircleBookmarkDAO;
+
+	@Autowired( required = false )
 	private UserDAO userDAO;
+
+	@Autowired( required = false )
+	private UserEventGroupBookmarkDAO userEventGroupBookmarkDAO;
+
+	@Autowired( required = false )
+	private UserPublicationBookmarkDAO userPublicationBookmarkDAO;
 
 	@Autowired( required = false )
 	private UserRequestDAO userRequestDAO;
@@ -564,12 +580,48 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
+	public UserAuthorBookmarkDAO getUserAuthorBookmarkDAO()
+	{
+		if ( this.userAuthorBookmarkDAO == null )
+			this.userAuthorBookmarkDAO = new UserAuthorBookmarkDAOHibernate( this.sessionFactory );
+
+		return this.userAuthorBookmarkDAO;
+	}
+
+	@Override
+	public UserCircleBookmarkDAO getUserCircleBookmarkDAO()
+	{
+		if ( this.userCircleBookmarkDAO == null )
+			this.userCircleBookmarkDAO = new UserCircleBookmarkDAOHibernate( this.sessionFactory );
+
+		return this.userCircleBookmarkDAO;
+	}
+
+	@Override
 	public UserDAO getUserDAO()
 	{
 		if ( this.userDAO == null )
 			this.userDAO = new UserDAOHibernate( this.sessionFactory );
 
 		return this.userDAO;
+	}
+
+	@Override
+	public UserEventGroupBookmarkDAO getUserEventGroupBookmarkDAO()
+	{
+		if ( this.userEventGroupBookmarkDAO == null )
+			this.userEventGroupBookmarkDAO = new UserEventGroupBookmarkDAOHibernate( this.sessionFactory );
+
+		return this.userEventGroupBookmarkDAO;
+	}
+
+	@Override
+	public UserPublicationBookmarkDAO getUserPublicationBookmarkDAO()
+	{
+		if ( this.userPublicationBookmarkDAO == null )
+			this.userPublicationBookmarkDAO = new UserPublicationBookmarkDAOHibernate( this.sessionFactory );
+
+		return this.userPublicationBookmarkDAO;
 	}
 
 	@Override

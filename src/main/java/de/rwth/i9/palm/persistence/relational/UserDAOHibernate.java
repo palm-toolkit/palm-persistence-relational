@@ -1,5 +1,6 @@
 package de.rwth.i9.palm.persistence.relational;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.Query;
@@ -66,6 +67,30 @@ public class UserDAOHibernate extends GenericDAOHibernate<User> implements UserD
 			return null;
 
 		return users.get( 0 );
+	}
+
+	@Override
+	public List<User> getByName( String name )
+	{
+
+		if ( name.equalsIgnoreCase( "" ) )
+			return Collections.emptyList();
+
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "FROM User u " );
+		queryString.append( "WHERE u.name LIKE :name " );
+		queryString.append( "ORDER BY u.name ASC" );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+		query.setParameter( "name", "%" + name + "%" );
+
+		@SuppressWarnings( "unchecked" )
+		List<User> users = query.list();
+
+		if ( users == null || users.isEmpty() )
+			return Collections.emptyList();
+
+		return users;
 	}
 
 	@Override
