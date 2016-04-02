@@ -48,7 +48,7 @@ public class CircleWidgetDAOHibernate extends GenericDAOHibernate<CircleWidget> 
 						queryString.append( "AND ( " );
 					else
 						queryString.append( "OR " );
-					queryString.append( "uw.widgetStatus = :widgetStatus" + i + " " );
+					queryString.append( "cw.widgetStatus = :widgetStatus" + i + " " );
 				}
 				queryString.append( ") " );
 			}
@@ -104,7 +104,7 @@ public class CircleWidgetDAOHibernate extends GenericDAOHibernate<CircleWidget> 
 						queryString.append( "AND ( " );
 					else
 						queryString.append( "OR " );
-					queryString.append( "uw.widgetStatus = :widgetStatus" + i + " " );
+					queryString.append( "cw.widgetStatus = :widgetStatus" + i + " " );
 				}
 				queryString.append( ") " );
 			}
