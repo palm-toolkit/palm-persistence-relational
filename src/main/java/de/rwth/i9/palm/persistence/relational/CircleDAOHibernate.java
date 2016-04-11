@@ -59,7 +59,14 @@ public class CircleDAOHibernate extends GenericDAOHibernate<Circle> implements C
 
 		if ( creator != null )
 		{
-			restQuery.append( "OR c.creator = :creator " );
+			if ( !isWhereClauseEvoked )
+			{
+				restQuery.append( "WHERE " );
+				isWhereClauseEvoked = true;
+			}
+			else
+				restQuery.append( "AND " );
+			restQuery.append( "c.creator = :creator " );
 		}
 
 		if ( orderBy.equals( "date" ) )
