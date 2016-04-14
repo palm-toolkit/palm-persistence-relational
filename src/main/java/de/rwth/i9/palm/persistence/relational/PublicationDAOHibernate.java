@@ -51,6 +51,9 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		// container
 		Map<String, Object> publicationMap = new LinkedHashMap<String, Object>();
 
+		// replace -
+		query = query.replace( "-", " " );
+
 		Set<PublicationType> publicationTypes = new HashSet<PublicationType>();
 		if ( !publicationType.equals( "all" ) )
 		{
