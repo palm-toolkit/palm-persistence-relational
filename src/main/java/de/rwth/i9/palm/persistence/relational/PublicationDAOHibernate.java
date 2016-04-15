@@ -149,11 +149,13 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 			stringBuilder.append( "p.event = :event " );
 		}
 
-		if ( orderBy.equals( "citation" ) )
-			stringBuilder.append( "ORDER BY p.citedBy DESC" );
-		else if ( orderBy.equals( "date" ) )
-			stringBuilder.append( "ORDER BY p.publicationDate DESC" );
-
+		if ( orderBy != null )
+		{
+			if ( orderBy.equals( "citation" ) )
+				stringBuilder.append( "ORDER BY p.citedBy DESC" );
+			else if ( orderBy.equals( "date" ) )
+				stringBuilder.append( "ORDER BY p.publicationDate DESC" );
+		}
 		/* Executes main query */
 		Query hibQueryMain = getCurrentSession().createQuery( mainQuery.toString() + stringBuilder.toString() );
 		if ( author != null )
