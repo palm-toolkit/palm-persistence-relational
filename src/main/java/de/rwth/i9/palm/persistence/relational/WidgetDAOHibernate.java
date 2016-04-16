@@ -183,4 +183,23 @@ public class WidgetDAOHibernate extends GenericDAOHibernate<Widget> implements W
 		return widgets;
 	}
 
+	@Override
+	public Widget getByUniqueName( String uniqueWidgetName )
+	{
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "FROM Widget " );
+		queryString.append( "WHERE uniqueName = :uniqueWidgetName " );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+		query.setParameter( "uniqueWidgetName", uniqueWidgetName );
+
+		@SuppressWarnings( "unchecked" )
+		List<Widget> widgets = query.list();
+
+		if ( widgets == null || widgets.isEmpty() )
+			return null;
+
+		return widgets.get( 0 );
+	}
+
 }
