@@ -553,7 +553,7 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	 * 
 	 */
 	@Override
-	public List<String> getDistinctPublicationYearByAuthor( Author author )
+	public List<String> getDistinctPublicationYearByAuthor( Author author, String orderBy )
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append( "SELECT DISTINCT p.year " );
@@ -561,8 +561,15 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		stringBuilder.append( "LEFT JOIN p.publicationAuthors pa " );
 		stringBuilder.append( "WHERE pa.author = :author " );
 		stringBuilder.append( "AND p.year IS NOT NULL " );
-		stringBuilder.append( "ORDER BY p.year DESC" );
-
+		if ( orderBy == null )
+			stringBuilder.append( "ORDER BY p.year DESC" );
+		else
+		{
+			if ( orderBy.equals( "ASC" ) )
+				stringBuilder.append( "ORDER BY p.year ASC" );
+			else
+				stringBuilder.append( "ORDER BY p.year DESC" );
+		}
 		/* Executes main query */
 		Query hibQueryMain = getCurrentSession().createQuery( stringBuilder.toString() );
 		if ( author != null )
