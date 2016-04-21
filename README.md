@@ -9,7 +9,7 @@ PALM collects academic publications from many sources, then combines and filters
 Moreover, PALM not only provides comprehensive information about researchers, but also their publications and venues (conferences / journal) where those publications published. In the future, PALM will also offer recommendation and prediction systems that related to researcher interests. 
 
 
-## PALM Web module
+## PALM Persistence Relational module
 
 This project is one of PALM module that contains the implementation for DAO interfaces from palm-persistence-api module. For the implementation, the Hibernate Object-Relational Mapping (ORM) framework is chosen for the mapping between the object-oriented domain model and the relational database.
 
