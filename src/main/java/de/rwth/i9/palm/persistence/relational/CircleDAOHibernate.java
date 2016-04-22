@@ -1,6 +1,5 @@
 package de.rwth.i9.palm.persistence.relational;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +10,6 @@ import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
 import org.hibernate.search.query.dsl.QueryBuilder;
 
-import de.rwth.i9.palm.helper.comparator.AuthorByNoCitationComparator;
 import de.rwth.i9.palm.model.Author;
 import de.rwth.i9.palm.model.Circle;
 import de.rwth.i9.palm.model.User;
@@ -55,7 +53,8 @@ public class CircleDAOHibernate extends GenericDAOHibernate<Circle> implements C
 		if ( !query.equals( "" ) )
 		{
 			isWhereClauseEvoked = true;
-			restQuery.append( "WHERE name LIKE :query " );
+			restQuery.append( "WHERE c.name LIKE :query " );
+			restQuery.append( "OR c.description = :description " );
 		}
 
 		if ( creator != null )
@@ -79,7 +78,10 @@ public class CircleDAOHibernate extends GenericDAOHibernate<Circle> implements C
 		Query hibQueryMain = getCurrentSession().createQuery( mainQuery.toString() + restQuery.toString() );
 
 		if ( !query.equals( "" ) )
+		{
 			hibQueryMain.setParameter( "query", "%" + query + "%" );
+			hibQueryMain.setParameter( "description", "%" + query + "%" );
+		}
 
 		if ( creator != null )
 			hibQueryMain.setParameter( "creator", creator );
@@ -102,7 +104,10 @@ public class CircleDAOHibernate extends GenericDAOHibernate<Circle> implements C
 		Query hibQueryCount = getCurrentSession().createQuery( countQuery.toString() + restQuery.toString() );
 
 		if ( !query.equals( "" ) )
+		{
 			hibQueryCount.setParameter( "query", "%" + query + "%" );
+			hibQueryCount.setParameter( "description", "%" + query + "%" );
+		}
 
 		if ( creator != null )
 			hibQueryCount.setParameter( "creator", creator );
@@ -119,6 +124,11 @@ public class CircleDAOHibernate extends GenericDAOHibernate<Circle> implements C
 		if ( queryString.equals( "" ) || creator != null )
 			return this.getCircleWithPaging( "", creator, pageNo, maxResult, orderBy );
 		
+		// dead code ahead
+		// due to strange behavior on circle indexing
+		if ( true )
+			return this.getCircleWithPaging( queryString, creator, pageNo, maxResult, orderBy );
+
 		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
 		
 		// create native Lucene query using the query DSL
@@ -143,20 +153,17 @@ public class CircleDAOHibernate extends GenericDAOHibernate<Circle> implements C
 		// apply limit
 		hibQuery.setFirstResult( pageNo * maxResult );
 		hibQuery.setMaxResults( maxResult );
-
-		if( totalRows == 0 )
-			return null;
 		
 		// prepare the container for result
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 		
 		@SuppressWarnings( "unchecked" )
-		List<Author> authors = hibQuery.list();
-		
-		Collections.sort( authors, new AuthorByNoCitationComparator() );
-		
+		List<Circle> circles = hibQuery.list();
+
 		resultMap.put( "totalCount", totalRows );
-		resultMap.put( "authors", authors );
+
+		if ( circles != null && !circles.isEmpty() )
+			resultMap.put( "circles", circles );
 
 		return resultMap;
 	}

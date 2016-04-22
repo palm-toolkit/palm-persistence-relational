@@ -23,6 +23,8 @@ import de.rwth.i9.palm.persistence.ConfigPropertyDAO;
 import de.rwth.i9.palm.persistence.CountryDAO;
 import de.rwth.i9.palm.persistence.EventDAO;
 import de.rwth.i9.palm.persistence.EventGroupDAO;
+import de.rwth.i9.palm.persistence.EventInterestDAO;
+import de.rwth.i9.palm.persistence.EventInterestProfileDAO;
 import de.rwth.i9.palm.persistence.ExtractionServiceDAO;
 import de.rwth.i9.palm.persistence.ExtractionServicePropertyDAO;
 import de.rwth.i9.palm.persistence.FunctionDAO;
@@ -31,6 +33,7 @@ import de.rwth.i9.palm.persistence.InstitutionDAO;
 import de.rwth.i9.palm.persistence.InterestDAO;
 import de.rwth.i9.palm.persistence.InterestProfileCircleDAO;
 import de.rwth.i9.palm.persistence.InterestProfileDAO;
+import de.rwth.i9.palm.persistence.InterestProfileEventDAO;
 import de.rwth.i9.palm.persistence.InterestProfilePropertyDAO;
 import de.rwth.i9.palm.persistence.LocationDAO;
 import de.rwth.i9.palm.persistence.PersistenceStrategy;
@@ -136,6 +139,12 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private EventDAO eventDAO;
 
 	@Autowired( required = false )
+	private EventInterestDAO eventInterestDAO;
+
+	@Autowired( required = false )
+	private EventInterestProfileDAO eventInterestProfileDAO;
+
+	@Autowired( required = false )
 	private EventGroupDAO eventGroupDAO;
 
 	@Autowired( required = false )
@@ -158,6 +167,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private InterestProfileCircleDAO interestProfileCircleDAO;
+
+	@Autowired( required = false )
+	private InterestProfileEventDAO interestProfileEventDAO;
 
 	@Autowired( required = false )
 	private InterestProfilePropertyDAO interestProfilePropertyDAO;
@@ -373,6 +385,24 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	}
 
 	@Override
+	public EventInterestDAO getEventInterestDAO()
+	{
+		if ( this.eventInterestDAO == null )
+			this.eventInterestDAO = new EventInterestDAOHibernate( this.sessionFactory );
+
+		return this.eventInterestDAO;
+	}
+
+	@Override
+	public EventInterestProfileDAO getEventInterestProfileDAO()
+	{
+		if ( this.eventInterestProfileDAO == null )
+			this.eventInterestProfileDAO = new EventInterestProfileDAOHibernate( this.sessionFactory );
+
+		return this.eventInterestProfileDAO;
+	}
+
+	@Override
 	public EventGroupDAO getEventGroupDAO()
 	{
 		if ( this.eventGroupDAO == null )
@@ -442,6 +472,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.interestProfileCircleDAO = new InterestProfileCircleDAOHibernate( this.sessionFactory );
 
 		return this.interestProfileCircleDAO;
+	}
+
+	@Override
+	public InterestProfileEventDAO getInterestProfileEventDAO()
+	{
+		if ( this.interestProfileEventDAO == null )
+			this.interestProfileEventDAO = new InterestProfileEventDAOHibernate( this.sessionFactory );
+
+		return this.interestProfileEventDAO;
 	}
 
 	@Override
