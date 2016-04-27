@@ -133,7 +133,7 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		if ( !queryString.equals( "" ) )
 		{
 			isWhereClauseEvoked = true;
-			restQuery.append( "WHERE name LIKE :queryString " );
+			restQuery.append( "WHERE a.name LIKE :queryString " );
 		}
 		if ( addedAuthor.equals( "yes" ) )
 		{
@@ -144,10 +144,10 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 			}
 			else
 				restQuery.append( "AND " );
-			restQuery.append( "added IS TRUE " );
+			restQuery.append( "a.added IS TRUE " );
 		}
 
-		restQuery.append( "ORDER BY citedBy desc, name asc" );
+		restQuery.append( "ORDER BY a.citedBy desc, a.name asc" );
 		
 		Query query = getCurrentSession().createQuery( mainQuery.toString() + restQuery.toString() );
 		if ( !queryString.equals( "" ) )
@@ -267,12 +267,16 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		QueryBuilder qb = fullTextSession.getSearchFactory()
 				.buildQueryBuilder().forEntity( Author.class ).get();
 		
-		org.apache.lucene.search.Query query = qb
-				  .keyword()
-				  .onFields( "lastName", "name" )
-				  .matching( queryString )
-				  .createQuery();
-		
+		org.apache.lucene.search.Query query = null;
+		if( !queryString.equals( "" ) ){
+			query = qb
+					  .keyword()
+					  .onFields( "lastName", "name" )
+					  .matching( queryString )
+					  .createQuery();
+		} else{
+			query = qb.all().createQuery();
+		}
 		// wrap Lucene query in a org.hibernate.Query
 		org.hibernate.search.FullTextQuery hibQuery =
 		    fullTextSession.createFullTextQuery(query, Author.class);
