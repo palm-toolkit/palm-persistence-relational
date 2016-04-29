@@ -39,7 +39,7 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 		stringBuilder.append( "SELECT cg " );
 		stringBuilder.append( "FROM EventGroup cg " );
 		if ( !queryString.equals( "" ) )
-			stringBuilder.append( "WHERE cg.name LIKE :queryString AND cg.added IS TRUE " );
+			stringBuilder.append( "WHERE cg.name LIKE :queryString OR cg.notation LIKE :queryString AND cg.added IS TRUE " );
 		else
 			stringBuilder.append( "WHERE cg.added IS TRUE " );
 
