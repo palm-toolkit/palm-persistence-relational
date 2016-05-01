@@ -586,7 +586,7 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	 * 
 	 */
 	@Override
-	public List<String> getDistinctPublicationYearByCircle( Circle circle )
+	public List<String> getDistinctPublicationYearByCircle( Circle circle, String orderBy )
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append( "SELECT DISTINCT p.year " );
@@ -594,8 +594,15 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		stringBuilder.append( "LEFT JOIN c.publications p " );
 		stringBuilder.append( "WHERE c = :c " );
 		stringBuilder.append( "AND p.year IS NOT NULL " );
-		stringBuilder.append( "ORDER BY p.year DESC" );
-
+		if ( orderBy == null )
+			stringBuilder.append( "ORDER BY p.year DESC" );
+		else
+		{
+			if ( orderBy.equals( "ASC" ) )
+				stringBuilder.append( "ORDER BY p.year ASC" );
+			else
+				stringBuilder.append( "ORDER BY p.year DESC" );
+		}
 		/* Executes main query */
 		Query hibQueryMain = getCurrentSession().createQuery( stringBuilder.toString() );
 		if ( circle != null )
