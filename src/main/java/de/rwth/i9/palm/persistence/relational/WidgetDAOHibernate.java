@@ -202,4 +202,21 @@ public class WidgetDAOHibernate extends GenericDAOHibernate<Widget> implements W
 		return widgets.get( 0 );
 	}
 
+	@Override
+	public List<Widget> getAllWidgets()
+	{
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "FROM Widget " );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+
+		@SuppressWarnings( "unchecked" )
+		List<Widget> widgets = query.list();
+
+		if ( widgets == null || widgets.isEmpty() )
+			return Collections.emptyList();
+
+		return widgets;
+	}
+
 }
