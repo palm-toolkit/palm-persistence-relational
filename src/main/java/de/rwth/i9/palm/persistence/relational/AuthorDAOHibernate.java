@@ -103,6 +103,7 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		return authors;
 	}
 
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -458,6 +459,54 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		Query query = getCurrentSession().createQuery( queryString.toString() );
 		query.setParameter( "name", "%" + name + "%" );
 		query.setParameter( "aname", "%" + name + "%" );
+
+		@SuppressWarnings( "unchecked" )
+		List<Author> authors = query.list();
+
+		if ( authors == null || authors.isEmpty() )
+			return Collections.emptyList();
+
+		return authors;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<Author> getAdded()
+	{
+
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "SELECT DISTINCT a " );
+		queryString.append( "FROM Author a " );
+		queryString.append( "WHERE a.added = 1 " );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+
+		@SuppressWarnings( "unchecked" )
+		List<Author> authors = query.list();
+
+		if ( authors == null || authors.isEmpty() )
+			return Collections.emptyList();
+
+		return authors;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public List<Author> getAuthorByEventId( String eventId )
+	{
+		StringBuilder queryString = new StringBuilder();
+		
+		queryString.append( "SELECT DISTINCT a FROM Author a " );
+		queryString.append( "JOIN a.publicationAuthors p_a " );
+		queryString.append( "JOIN p_a.publication p " );
+		queryString.append( "WHERE a.added = 1 AND p.event.id = :eventId" );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+		query.setParameter( "eventId", eventId );
 
 		@SuppressWarnings( "unchecked" )
 		List<Author> authors = query.list();
