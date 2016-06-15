@@ -480,6 +480,25 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	 * 
 	 */
 	@Override
+	public List<Publication> getPublicationByEventId( String eventId )
+	{
+		Query hibQuery = getCurrentSession().createQuery( "FROM Publication WHERE event.id = :eventId" );
+		hibQuery.setParameter( "eventId", eventId );
+
+		@SuppressWarnings( "unchecked" )
+		List<Publication> publications = hibQuery.list();
+
+		if ( publications == null || publications.isEmpty() )
+			return Collections.emptyList();
+
+		return publications;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * 
+	 */
+	@Override
 	public List<Publication> getPublicationViaPhraseSlopQuery( String publicationTitle , int slope)
 	{
 		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
@@ -538,6 +557,32 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		Query query = getCurrentSession().createQuery( stringBuilder.toString() );
 		for ( int i = 0; i < coauthors.length; i++ )
 			query.setParameter( "author" + i, coauthors[i] );
+
+		@SuppressWarnings( "unchecked" )
+		List<Publication> publications = query.list();
+
+		if ( publications == null || publications.isEmpty() )
+			return Collections.emptyList();
+
+		return publications;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * 
+	 */
+	@Override
+	public List<Publication> getPublicationByAuthorId( String authorId )
+	{
+		StringBuilder queryString = new StringBuilder();
+
+		queryString.append( "SELECT DISTINCT p FROM Author a " );
+		queryString.append( "JOIN a.publicationAuthors p_a " );
+		queryString.append( "JOIN p_a.publication p " );
+		queryString.append( "WHERE a.id = :authorId" );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+		query.setParameter( "authorId", authorId );
 
 		@SuppressWarnings( "unchecked" )
 		List<Publication> publications = query.list();
