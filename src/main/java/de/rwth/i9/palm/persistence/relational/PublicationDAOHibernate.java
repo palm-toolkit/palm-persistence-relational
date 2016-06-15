@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -481,18 +482,11 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	 * 
 	 */
 	@Override
-	public List<Publication> getPublicationByEventId( String eventId )
+	public List<DataMiningPublication> getDataMiningObjects()
 	{
-		Query hibQuery = getCurrentSession().createQuery( "FROM Publication WHERE event.id = :eventId" );
-		hibQuery.setParameter( "eventId", eventId );
-
 		@SuppressWarnings( "unchecked" )
-		List<Publication> publications = hibQuery.list();
-
-		if ( publications == null || publications.isEmpty() )
-			return Collections.emptyList();
-
-		return publications;
+		List<DataMiningPublication> result = getCurrentSession().createSQLQuery( "SELECT * FROM Publication p WHERE p.id IN ( SELECT p_t.publication_id FROM publication_topic p_t )" ).addEntity( DataMiningPublication.class ).list();
+		return result;
 	}
 
 	/**
@@ -500,10 +494,97 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	 * 
 	 */
 	@Override
-	public List<DataMiningPublication> getDataMiningObjects()
+	public List<DataMiningPublication> getDataMiningObjectsByCircle( String... circleIds )
 	{
+		if ( circleIds.length == 0 )
+			return new LinkedList<DataMiningPublication>();
+			
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "SELECT * FROM Publication p JOIN circle_publication c_p ON p.id = c_p.publication_id WHERE p.id IN ( SELECT p_t.publication_id FROM publication_topic p_t ) " );
+		
+		queryString.append( "AND c_p.circle_id IN (" );
+		for ( int i = 0; i < circleIds.length; i++ )
+		{
+			if ( i == 0 )
+				queryString.append( String.format( ":id%d", i ) );
+			else
+				queryString.append( String.format( ", :id%d", i ) );
+		}
+		queryString.append( ")" );
+	
+		Query query = getCurrentSession().createSQLQuery( queryString.toString() ).addEntity( DataMiningPublication.class );
+		for ( int i = 0; i < circleIds.length; i++ )
+		{
+			query.setParameter( String.format( "id%d", i ), circleIds[i] );
+		}
 		@SuppressWarnings( "unchecked" )
-		List<DataMiningPublication> result = getCurrentSession().createSQLQuery( "SELECT * FROM Publication p WHERE p.id IN ( SELECT p_t.publication_id FROM publication_topic p_t ) LIMIT 20" ).addEntity( DataMiningPublication.class ).list();
+		List<DataMiningPublication> result = query.list();
+		return result;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * 
+	 */
+	@Override
+	public List<DataMiningPublication> getDataMiningObjectsByEvent( String... eventIds )
+	{
+		if ( eventIds.length == 0 )
+			return new LinkedList<DataMiningPublication>();
+
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "SELECT * FROM Publication p WHERE p.id IN ( SELECT p_t.publication_id FROM publication_topic p_t ) " );
+
+		queryString.append( "AND p.event_id IN (" );
+		for ( int i = 0; i < eventIds.length; i++ )
+		{
+			if ( i == 0 )
+				queryString.append( String.format( ":id%d", i ) );
+			else
+				queryString.append( String.format( ", :id%d", i ) );
+		}
+		queryString.append( ")" );
+
+		Query query = getCurrentSession().createSQLQuery( queryString.toString() ).addEntity( DataMiningPublication.class );
+		for ( int i = 0; i < eventIds.length; i++ )
+		{
+			query.setParameter( String.format( "id%d", i ), eventIds[i] );
+		}
+		@SuppressWarnings( "unchecked" )
+		List<DataMiningPublication> result = query.list();
+		return result;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * 
+	 */
+	@Override
+	public List<DataMiningPublication> getDataMiningObjectsByAuthor( String... authorIds )
+	{
+		if ( authorIds.length == 0 )
+			return new LinkedList<DataMiningPublication>();
+
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "SELECT * FROM Publication p JOIN publication_author p_a ON p.id = p_a.publication_id WHERE p.id IN ( SELECT p_t.publication_id FROM publication_topic p_t ) " );
+
+		queryString.append( "AND p_a.author_id IN (" );
+		for ( int i = 0; i < authorIds.length; i++ )
+		{
+			if ( i == 0 )
+				queryString.append( String.format( ":id%d", i ) );
+			else
+				queryString.append( String.format( ", :id%d", i ) );
+		}
+		queryString.append( ")" );
+
+		Query query = getCurrentSession().createSQLQuery( queryString.toString() ).addEntity( DataMiningPublication.class );
+		for ( int i = 0; i < authorIds.length; i++ )
+		{
+			query.setParameter( String.format( "id%d", i ), authorIds[i] );
+		}
+		@SuppressWarnings( "unchecked" )
+		List<DataMiningPublication> result = query.list();
 		return result;
 	}
 
@@ -570,32 +651,6 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		Query query = getCurrentSession().createQuery( stringBuilder.toString() );
 		for ( int i = 0; i < coauthors.length; i++ )
 			query.setParameter( "author" + i, coauthors[i] );
-
-		@SuppressWarnings( "unchecked" )
-		List<Publication> publications = query.list();
-
-		if ( publications == null || publications.isEmpty() )
-			return Collections.emptyList();
-
-		return publications;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * 
-	 */
-	@Override
-	public List<Publication> getPublicationByAuthorId( String authorId )
-	{
-		StringBuilder queryString = new StringBuilder();
-
-		queryString.append( "SELECT DISTINCT p FROM Author a " );
-		queryString.append( "JOIN a.publicationAuthors p_a " );
-		queryString.append( "JOIN p_a.publication p " );
-		queryString.append( "WHERE a.id = :authorId" );
-
-		Query query = getCurrentSession().createQuery( queryString.toString() );
-		query.setParameter( "authorId", authorId );
 
 		@SuppressWarnings( "unchecked" )
 		List<Publication> publications = query.list();

@@ -3,6 +3,7 @@ package de.rwth.i9.palm.persistence.relational;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ import org.hibernate.search.query.dsl.QueryBuilder;
 
 import de.rwth.i9.palm.helper.comparator.AuthorByNoCitationComparator;
 import de.rwth.i9.palm.model.Author;
+import de.rwth.i9.palm.model.DataMiningAuthor;
 import de.rwth.i9.palm.persistence.AuthorDAO;
 
 public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements AuthorDAO
@@ -479,7 +481,7 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		StringBuilder queryString = new StringBuilder();
 		queryString.append( "SELECT DISTINCT a " );
 		queryString.append( "FROM Author a " );
-		queryString.append( "WHERE a.added = 1 " );
+		queryString.append( "WHERE a.added = 1" );
 
 		Query query = getCurrentSession().createQuery( queryString.toString() );
 
@@ -496,25 +498,110 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<Author> getAuthorByEventId( String eventId )
+	public List<DataMiningAuthor> getDataMiningObjects()
 	{
-		StringBuilder queryString = new StringBuilder();
-		
-		queryString.append( "SELECT DISTINCT a FROM Author a " );
-		queryString.append( "JOIN a.publicationAuthors p_a " );
-		queryString.append( "JOIN p_a.publication p " );
-		queryString.append( "WHERE a.added = 1 AND p.event.id = :eventId" );
-
-		Query query = getCurrentSession().createQuery( queryString.toString() );
-		query.setParameter( "eventId", eventId );
-
 		@SuppressWarnings( "unchecked" )
-		List<Author> authors = query.list();
+		List<DataMiningAuthor> result = getCurrentSession().createSQLQuery( "SELECT DISTINCT * FROM author a WHERE a.added=1" ).addEntity( DataMiningAuthor.class ).list();
+		return result;
+	}
 
-		if ( authors == null || authors.isEmpty() )
-			return Collections.emptyList();
+	/**
+	 * {@inheritDoc}
+	 * 
+	 */
+	@Override
+	public List<DataMiningAuthor> getDataMiningObjectsByCircle( String... circleIds )
+	{
+		if ( circleIds.length == 0 )
+			return new LinkedList<DataMiningAuthor>();
 
-		return authors;
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "SELECT DISTINCT * FROM Author a JOIN circle_author c_a ON c_a.author_id = a.id WHERE a.added=1 " );
+
+		queryString.append( "AND c_a.circle_id IN (" );
+		for ( int i = 0; i < circleIds.length; i++ )
+		{
+			if ( i == 0 )
+				queryString.append( String.format( ":id%d", i ) );
+			else
+				queryString.append( String.format( ", :id%d", i ) );
+		}
+		queryString.append( ")" );
+
+		Query query = getCurrentSession().createSQLQuery( queryString.toString() ).addEntity( DataMiningAuthor.class );
+		for ( int i = 0; i < circleIds.length; i++ )
+		{
+			query.setParameter( String.format( "id%d", i ), circleIds[i] );
+		}
+		@SuppressWarnings( "unchecked" )
+		List<DataMiningAuthor> result = query.list();
+		return result;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * 
+	 */
+	@Override
+	public List<DataMiningAuthor> getDataMiningObjectsByEvent( String... eventIds )
+	{
+		if ( eventIds.length == 0 )
+			return new LinkedList<DataMiningAuthor>();
+
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "SELECT DISTINCT a.* FROM Author a JOIN publication_author p_a JOIN publication p JOIN academic_event e ON p_a.author_id = a.id AND p_a.publication_id = p.id AND p.event_id = e.id WHERE a.added=1 " );
+
+		queryString.append( "AND e.id IN (" );
+		for ( int i = 0; i < eventIds.length; i++ )
+		{
+			if ( i == 0 )
+				queryString.append( String.format( ":id%d", i ) );
+			else
+				queryString.append( String.format( ", :id%d", i ) );
+		}
+		queryString.append( ")" );
+
+		Query query = getCurrentSession().createSQLQuery( queryString.toString() ).addEntity( DataMiningAuthor.class );
+		for ( int i = 0; i < eventIds.length; i++ )
+		{
+			query.setParameter( String.format( "id%d", i ), eventIds[i] );
+		}
+		@SuppressWarnings( "unchecked" )
+		List<DataMiningAuthor> result = query.list();
+		return result;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * 
+	 */
+	@Override
+	public List<DataMiningAuthor> getDataMiningObjectsByPublication( String... publicationIds )
+	{
+		if ( publicationIds.length == 0 )
+			return new LinkedList<DataMiningAuthor>();
+
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "SELECT DISTINCT a.* FROM Author a JOIN publication_author p_a ON a.id = p_a.author_id WHERE a.added=1 " );
+
+		queryString.append( "AND p_a.publication_id IN (" );
+		for ( int i = 0; i < publicationIds.length; i++ )
+		{
+			if ( i == 0 )
+				queryString.append( String.format( ":id%d", i ) );
+			else
+				queryString.append( String.format( ", :id%d", i ) );
+		}
+		queryString.append( ")" );
+
+		Query query = getCurrentSession().createSQLQuery( queryString.toString() ).addEntity( DataMiningAuthor.class );
+		for ( int i = 0; i < publicationIds.length; i++ )
+		{
+			query.setParameter( String.format( "id%d", i ), publicationIds[i] );
+		}
+		@SuppressWarnings( "unchecked" )
+		List<DataMiningAuthor> result = query.list();
+		return result;
 	}
 
 }

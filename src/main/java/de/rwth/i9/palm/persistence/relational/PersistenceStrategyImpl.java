@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import de.rwth.i9.palm.persistence.AuthorDAO;
 import de.rwth.i9.palm.persistence.AuthorInterestDAO;
+import de.rwth.i9.palm.persistence.AuthorInterestFlatDAO;
 import de.rwth.i9.palm.persistence.AuthorInterestProfileDAO;
 import de.rwth.i9.palm.persistence.AuthorSourceDAO;
 import de.rwth.i9.palm.persistence.AuthorTopicModelingDAO;
@@ -43,6 +44,7 @@ import de.rwth.i9.palm.persistence.PublicationFileDAO;
 import de.rwth.i9.palm.persistence.PublicationHistoryDAO;
 import de.rwth.i9.palm.persistence.PublicationSourceDAO;
 import de.rwth.i9.palm.persistence.PublicationTopicDAO;
+import de.rwth.i9.palm.persistence.PublicationTopicFlatDAO;
 import de.rwth.i9.palm.persistence.RoleDAO;
 import de.rwth.i9.palm.persistence.SessionDataSetDAO;
 import de.rwth.i9.palm.persistence.SourceDAO;
@@ -95,6 +97,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private AuthorInterestDAO authorInterestDAO;
+
+	@Autowired( required = false )
+	private AuthorInterestFlatDAO authorInterestFlatDAO;
 
 	@Autowired( required = false )
 	private AuthorInterestProfileDAO authorInterestProfileDAO;
@@ -194,6 +199,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private PublicationTopicDAO publicationTopicDAO;
+	
+	@Autowired( required = false )
+	private PublicationTopicFlatDAO publicationTopicFlatDAO;
 
 	@Autowired( required = false )
 	private RoleDAO roleDAO;
@@ -256,6 +264,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.authorInterestDAO = new AuthorInterestDAOHibernate( this.sessionFactory );
 
 		return this.authorInterestDAO;
+	}
+
+	@Override
+	public AuthorInterestFlatDAO getAuthorInterestFlatDAO()
+	{
+		if ( this.authorInterestFlatDAO == null )
+			this.authorInterestFlatDAO = new AuthorInterestFlatDAOHibernate( this.sessionFactory );
+
+		return this.authorInterestFlatDAO;
 	}
 
 	@Override
@@ -553,6 +570,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.publicationTopicDAO = new PublicationTopicDAOHibernate( this.sessionFactory );
 
 		return this.publicationTopicDAO;
+	}
+
+	@Override
+	public PublicationTopicFlatDAO getPublicationTopicFlatDAO()
+	{
+		if ( this.publicationTopicFlatDAO == null )
+			this.publicationTopicFlatDAO = new PublicationTopicFlatDAOHibernate( this.sessionFactory );
+
+		return this.publicationTopicFlatDAO;
 	}
 
 	@Override
