@@ -10,6 +10,7 @@ import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
+import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
 
 import de.rwth.i9.palm.model.EventGroup;
@@ -33,24 +34,64 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 
 	@SuppressWarnings( "unchecked" )
 	@Override
-	public List<EventGroup> getEventGroupListWithPaging( String queryString, String type, int pageNo, int maxResult )
+	public List<EventGroup> getEventGroupListWithPaging( String queryString, String type, int pageNo, int maxResult, String addedVenue )
 	{
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append( "SELECT cg " );
-		stringBuilder.append( "FROM EventGroup cg " );
+		boolean isWhereClauseEvoked = false;
+
+		StringBuilder mainQuery = new StringBuilder();
+		mainQuery.append( "SELECT cg " );
+
+		StringBuilder countQuery = new StringBuilder();
+		countQuery.append( "SELECT COUNT(DISTINCT cg) " );
+
+		StringBuilder restQuery = new StringBuilder();
+		restQuery.append( "FROM EventGroup cg " );
+
 		if ( !queryString.equals( "" ) )
-			stringBuilder.append( "WHERE cg.name LIKE :queryString AND cg.added IS TRUE " );
-		else
-			stringBuilder.append( "WHERE cg.added IS TRUE " );
+		{
+			isWhereClauseEvoked = true;
+			restQuery.append( "WHERE cg.name LIKE :queryString OR cg.notation LIKE :queryString AND cg.added IS TRUE " );
+		}
 
 		if ( type.equals( "conference" ) || type.equals( "workshop" ) )
-			stringBuilder.append( "AND ( cg.publicationType = :pubTypeConference OR cg.publicationType = :pubTypeWorkshop ) " );
+		{
+			if ( !isWhereClauseEvoked )
+			{
+				restQuery.append( "WHERE " );
+				isWhereClauseEvoked = true;
+			}
+			else
+				restQuery.append( "AND " );
+
+			restQuery.append( "( cg.publicationType = :pubTypeConference OR cg.publicationType = :pubTypeWorkshop ) " );
+		}
 		if ( type.equals( "journal" ) )
-			stringBuilder.append( "AND cg.publicationType = :pubTypeJournal " );
+		{
+			if ( !isWhereClauseEvoked )
+			{
+				restQuery.append( "WHERE " );
+				isWhereClauseEvoked = true;
+			}
+			else
+				restQuery.append( "AND " );
 
-		stringBuilder.append( "ORDER BY cg.name" );
+			restQuery.append( "cg.publicationType = :pubTypeJournal " );
+		}
+		if ( addedVenue.equals( "yes" ) )
+		{
+			if ( !isWhereClauseEvoked )
+			{
+				restQuery.append( "WHERE " );
+				isWhereClauseEvoked = true;
+			}
+			else
+				restQuery.append( "AND " );
+			restQuery.append( "cg.added IS TRUE " );
+		}
 
-		Query query = getCurrentSession().createQuery( stringBuilder.toString() );
+		restQuery.append( "ORDER BY cg.name" );
+
+		Query query = getCurrentSession().createQuery( mainQuery.toString() + restQuery.toString() );
 		if ( !queryString.equals( "" ) )
 			query.setParameter( "queryString", "%" + queryString + "%" );
 		if ( type.equals( "conference" ) || type.equals( "workshop" ) )
@@ -73,8 +114,10 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 	}
 
 	@Override
-	public Map<String, Object> getEventGroupMapWithPaging( String queryString, String type, int pageNo, int maxResult )
+	public Map<String, Object> getEventGroupMapWithPaging( String queryString, String type, int pageNo, int maxResult, String addedVenue )
 	{
+		boolean isWhereClauseEvoked = false;
+
 		StringBuilder mainQuery = new StringBuilder();
 		mainQuery.append( "SELECT cg " );
 
@@ -84,14 +127,46 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 		StringBuilder restQuery = new StringBuilder();
 		restQuery.append( "FROM EventGroup cg " );
 		if ( !queryString.equals( "" ) )
-			restQuery.append( "WHERE cg.name LIKE :queryString AND cg.added IS TRUE " );
-		else
-			restQuery.append( "WHERE cg.added IS TRUE " );
+		{
+			isWhereClauseEvoked = true;
+			restQuery.append( "WHERE cg.name LIKE :queryString OR cg.notation LIKE :queryString AND cg.added IS TRUE " );
+		}
 
 		if ( type.equals( "conference" ) || type.equals( "workshop" ) )
-			restQuery.append( "AND ( cg.publicationType = :pubTypeConference OR cg.publicationType = :pubTypeWorkshop ) " );
+		{
+			if ( !isWhereClauseEvoked )
+			{
+				restQuery.append( "WHERE " );
+				isWhereClauseEvoked = true;
+			}
+			else
+				restQuery.append( "AND " );
+
+			restQuery.append( "( cg.publicationType = :pubTypeConference OR cg.publicationType = :pubTypeWorkshop ) " );
+		}
 		if ( type.equals( "journal" ) )
-			restQuery.append( "AND cg.publicationType = :pubTypeJournal " );
+		{
+			if ( !isWhereClauseEvoked )
+			{
+				restQuery.append( "WHERE " );
+				isWhereClauseEvoked = true;
+			}
+			else
+				restQuery.append( "AND " );
+
+			restQuery.append( "cg.publicationType = :pubTypeJournal " );
+		}
+		if ( addedVenue.equals( "yes" ) )
+		{
+			if ( !isWhereClauseEvoked )
+			{
+				restQuery.append( "WHERE " );
+				isWhereClauseEvoked = true;
+			}
+			else
+				restQuery.append( "AND " );
+			restQuery.append( "cg.added IS TRUE " );
+		}
 
 		restQuery.append( "ORDER BY cg.name" );
 
@@ -153,10 +228,10 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 	}
 
 	@Override
-	public List<EventGroup> getEventGroupListFullTextSearchWithPaging( String queryString, String type, int pageNo, int maxResult )
+	public List<EventGroup> getEventGroupListFullTextSearchWithPaging( String queryString, String type, int pageNo, int maxResult, String addedVenue )
 	{
 		if ( queryString.equals( "" ) )
-			return this.getEventGroupListWithPaging( queryString, type, pageNo, maxResult );
+			return this.getEventGroupListWithPaging( queryString, type, pageNo, maxResult, addedVenue );
 
 		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
 		
@@ -166,16 +241,32 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 		QueryBuilder qb = fullTextSession.getSearchFactory()
 				.buildQueryBuilder().forEntity( EventGroup.class ).get();
 		
-		org.apache.lucene.search.Query query = qb
-				  .keyword()
-				  .onFields("name", "notation")
-				  .matching( queryString )
-				  .createQuery();
+		// Query using lucene boolean query
+		@SuppressWarnings( "rawtypes" )
+		BooleanJunction combinedBooleanJunction = qb.bool();
+		
+		combinedBooleanJunction
+		.must( qb
+			  .keyword()
+			  .onFields("name", "notation")
+			  .matching( queryString )
+			  .createQuery());
+	
+		if( addedVenue.equals( "yes" )){
+			combinedBooleanJunction
+					.must( qb
+							.keyword()
+							.onFields( "added" )
+							.matching( true )
+							.createQuery()
+							
+					);
+		}
 		
 		// wrap Lucene query in a org.hibernate.Query
 		org.hibernate.search.FullTextQuery hibQuery =
-		    fullTextSession.createFullTextQuery(query, EventGroup.class);
-		
+	    fullTextSession.createFullTextQuery(combinedBooleanJunction.createQuery(), EventGroup.class);
+	
 		// apply limit
 		hibQuery.setFirstResult( pageNo * maxResult );
 		hibQuery.setMaxResults( maxResult );
@@ -194,10 +285,10 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 	}
 
 	@Override
-	public Map<String, Object> getEventGroupMapFullTextSearchWithPaging( String queryString, String notation, String type, int pageNo, int maxResult )
+	public Map<String, Object> getEventGroupMapFullTextSearchWithPaging( String queryString, String notation, String type, int pageNo, int maxResult, String addedVenue )
 	{
 		if ( queryString.equals( "" ) )
-			return this.getEventGroupMapWithPaging( queryString, type, pageNo, maxResult );
+			return this.getEventGroupMapWithPaging( queryString, type, pageNo, maxResult, addedVenue );
 
 		// remove any common words
 		queryString = queryString.toLowerCase().replace( "conference", "" );
@@ -213,15 +304,31 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 		QueryBuilder qb = fullTextSession.getSearchFactory()
 				.buildQueryBuilder().forEntity( EventGroup.class ).get();
 		
-		org.apache.lucene.search.Query query = qb
+		// Query using lucene boolean query
+		@SuppressWarnings( "rawtypes" )
+		BooleanJunction combinedBooleanJunction = qb.bool();
+		
+		combinedBooleanJunction
+			.must( qb
 				  .keyword()
 				  .onFields("name", "notation")
 				  .matching( queryString )
-				  .createQuery();
+				  .createQuery());
+		
+		if( addedVenue.equals( "yes" )){
+			combinedBooleanJunction
+					.must( qb
+							.keyword()
+							.onFields( "added" )
+							.matching( true )
+							.createQuery()
+							
+					);
+		}
 		
 		// wrap Lucene query in a org.hibernate.Query
 		org.hibernate.search.FullTextQuery hibQuery =
-		    fullTextSession.createFullTextQuery(query, EventGroup.class);
+		    fullTextSession.createFullTextQuery(combinedBooleanJunction.createQuery(), EventGroup.class);
 		
 		// org.apache.lucene.search.Sort sort = new Sort( new SortField(
 		// "title", (Type) SortField.STRING_FIRST ) );

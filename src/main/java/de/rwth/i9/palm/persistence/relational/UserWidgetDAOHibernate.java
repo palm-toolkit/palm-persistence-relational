@@ -133,4 +133,30 @@ public class UserWidgetDAOHibernate extends GenericDAOHibernate<UserWidget> impl
 		return userWidgets;
 	}
 
+	@Override
+	public List<UserWidget> getWidgetByColor( User user, WidgetType widgetType, WidgetStatus widgetStatus )
+	{
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "SELECT uw " );
+		queryString.append( "FROM UserWidget uw " );
+		queryString.append( "JOIN uw.widget w " );
+		queryString.append( "WHERE w.widgetType = :widgetType " );
+		queryString.append( "AND uw.user = :user " );
+		queryString.append( "AND uw.widgetStatus = :widgetStatus " );
+		queryString.append( "ORDER BY uw.widgetColor DESC" );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+		query.setParameter( "widgetType", widgetType );
+		query.setParameter( "user", user );
+		query.setParameter( "widgetStatus", widgetStatus );
+
+		@SuppressWarnings( "unchecked" )
+		List<UserWidget> userWidgets = query.list();
+
+		if ( userWidgets == null || userWidgets.isEmpty() )
+			return Collections.emptyList();
+
+		return userWidgets;
+	}
+
 }

@@ -151,4 +151,23 @@ public class UserDAOHibernate extends GenericDAOHibernate<User> implements UserD
 		return true;
 	}
 
+	@Override
+	public List<User> allUsers()
+	{
+
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "FROM User u " );
+		queryString.append( "ORDER BY u.name ASC" );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+
+		@SuppressWarnings( "unchecked" )
+		List<User> users = query.list();
+
+		if ( users == null || users.isEmpty() )
+			return Collections.emptyList();
+
+		return users;
+	}
+
 }
