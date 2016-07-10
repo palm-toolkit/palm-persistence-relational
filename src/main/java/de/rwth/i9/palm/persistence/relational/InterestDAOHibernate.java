@@ -35,4 +35,21 @@ public class InterestDAOHibernate extends GenericDAOHibernate<Interest>implement
 		return interests.get( 0 );
 	}
 
+	@Override
+	public List<Interest> allTerms()
+	{
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "FROM Interest " );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+
+		@SuppressWarnings( "unchecked" )
+		List<Interest> interests = query.list();
+
+		if ( interests == null || interests.isEmpty() )
+			return null;
+
+		return interests;
+	}
+
 }

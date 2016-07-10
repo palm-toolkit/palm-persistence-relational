@@ -517,4 +517,26 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		return authors;
 	}
 
+	@Override
+	public List<Author> getAuthorByEventNotAdded( String eventId )
+	{
+		StringBuilder queryString = new StringBuilder();
+
+		queryString.append( "SELECT DISTINCT a FROM Author a " );
+		queryString.append( "JOIN a.publicationAuthors p_a " );
+		queryString.append( "JOIN p_a.publication p " );
+		queryString.append( "WHERE p.event.id = :eventId" );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+		query.setParameter( "eventId", eventId );
+
+		@SuppressWarnings( "unchecked" )
+		List<Author> authors = query.list();
+
+		if ( authors == null || authors.isEmpty() )
+			return Collections.emptyList();
+
+		return authors;
+	}
+
 }
