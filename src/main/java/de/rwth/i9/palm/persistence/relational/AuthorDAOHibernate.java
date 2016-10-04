@@ -17,6 +17,7 @@ import org.hibernate.search.query.dsl.QueryBuilder;
 
 import de.rwth.i9.palm.helper.comparator.AuthorByNoCitationComparator;
 import de.rwth.i9.palm.model.Author;
+import de.rwth.i9.palm.model.DataMiningAuthor;
 import de.rwth.i9.palm.persistence.AuthorDAO;
 
 public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements AuthorDAO
@@ -473,13 +474,64 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<Author> getAdded()
+	public Map<String, Object> getAuthorWithoutPaging( String queryString, String addedAuthor )
 	{
+		boolean isWhereClauseEvoked = false;
 
+		StringBuilder mainQuery = new StringBuilder();
+		mainQuery.append( "SELECT a " );
+
+		StringBuilder countQuery = new StringBuilder();
+		countQuery.append( "SELECT COUNT(DISTINCT a) " );
+
+		StringBuilder restQuery = new StringBuilder();
+		restQuery.append( "FROM Author a " );
+
+		if ( !queryString.equals( "" ) )
+		{
+			isWhereClauseEvoked = true;
+			restQuery.append( "WHERE a.name LIKE :queryString " );
+		}
+		if ( addedAuthor.equals( "yes" ) )
+		{
+			if ( !isWhereClauseEvoked )
+			{
+				restQuery.append( "WHERE " );
+				isWhereClauseEvoked = true;
+			}
+			else
+				restQuery.append( "AND " );
+			restQuery.append( "a.added IS TRUE " );
+		}
+
+		restQuery.append( "ORDER BY a.name asc" );
+
+		Query query = getCurrentSession().createQuery( mainQuery.toString() + restQuery.toString() );
+		if ( !queryString.equals( "" ) )
+			query.setParameter( "queryString", "%" + queryString + "%" );
+
+		/* Executes count query */
+		Query hibQueryCount = getCurrentSession().createQuery( countQuery.toString() + restQuery.toString() );
+		if ( !queryString.equals( "" ) )
+			hibQueryCount.setParameter( "queryString", "%" + queryString + "%" );
+
+		int count = ( (Long) hibQueryCount.uniqueResult() ).intValue();
+
+		// prepare the container for result
+		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+		resultMap.put( "totalCount", count );
+		resultMap.put( "authors", query.list() );
+
+		return resultMap;
+	}
+
+	@Override
+	public List<Author> getAllAuthors()
+	{
 		StringBuilder queryString = new StringBuilder();
 		queryString.append( "SELECT DISTINCT a " );
 		queryString.append( "FROM Author a " );
-		queryString.append( "WHERE a.added = 1 " );
+		queryString.append( "WHERE a.added IS TRUE  " );
 
 		Query query = getCurrentSession().createQuery( queryString.toString() );
 
@@ -492,51 +544,12 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		return authors;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
-	public List<Author> getAuthorByEventId( String eventId )
+	public List<DataMiningAuthor> getDataMiningObjects()
 	{
-		StringBuilder queryString = new StringBuilder();
-		
-		queryString.append( "SELECT DISTINCT a FROM Author a " );
-		queryString.append( "JOIN a.publicationAuthors p_a " );
-		queryString.append( "JOIN p_a.publication p " );
-		queryString.append( "WHERE a.added = 1 AND p.event.id = :eventId" );
-
-		Query query = getCurrentSession().createQuery( queryString.toString() );
-		query.setParameter( "eventId", eventId );
-
 		@SuppressWarnings( "unchecked" )
-		List<Author> authors = query.list();
-
-		if ( authors == null || authors.isEmpty() )
-			return Collections.emptyList();
-
-		return authors;
-	}
-
-	@Override
-	public List<Author> getAuthorByEventNotAdded( String eventId )
-	{
-		StringBuilder queryString = new StringBuilder();
-
-		queryString.append( "SELECT DISTINCT a FROM Author a " );
-		queryString.append( "JOIN a.publicationAuthors p_a " );
-		queryString.append( "JOIN p_a.publication p " );
-		queryString.append( "WHERE p.event.id = :eventId" );
-
-		Query query = getCurrentSession().createQuery( queryString.toString() );
-		query.setParameter( "eventId", eventId );
-
-		@SuppressWarnings( "unchecked" )
-		List<Author> authors = query.list();
-
-		if ( authors == null || authors.isEmpty() )
-			return Collections.emptyList();
-
-		return authors;
+		List<DataMiningAuthor> result = getCurrentSession().createSQLQuery( "SELECT DISTINCT * FROM author a WHERE a.added=1" ).addEntity( DataMiningAuthor.class ).list();
+		return result;
 	}
 
 }

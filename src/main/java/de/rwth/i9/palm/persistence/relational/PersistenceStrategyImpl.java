@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import de.rwth.i9.palm.persistence.AuthorDAO;
 import de.rwth.i9.palm.persistence.AuthorInterestDAO;
+import de.rwth.i9.palm.persistence.AuthorInterestFlatDAO;
 import de.rwth.i9.palm.persistence.AuthorInterestProfileDAO;
 import de.rwth.i9.palm.persistence.AuthorSourceDAO;
 import de.rwth.i9.palm.persistence.AuthorTopicModelingDAO;
@@ -23,6 +24,7 @@ import de.rwth.i9.palm.persistence.ConfigPropertyDAO;
 import de.rwth.i9.palm.persistence.CountryDAO;
 import de.rwth.i9.palm.persistence.EventDAO;
 import de.rwth.i9.palm.persistence.EventGroupDAO;
+import de.rwth.i9.palm.persistence.EventGroupInterestFlatDAO;
 import de.rwth.i9.palm.persistence.EventInterestDAO;
 import de.rwth.i9.palm.persistence.EventInterestProfileDAO;
 import de.rwth.i9.palm.persistence.ExtractionServiceDAO;
@@ -97,6 +99,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private AuthorInterestDAO authorInterestDAO;
 
 	@Autowired( required = false )
+	private AuthorInterestFlatDAO authorInterestFlatDAO;
+
+	@Autowired( required = false )
 	private AuthorInterestProfileDAO authorInterestProfileDAO;
 
 	@Autowired( required = false )
@@ -140,6 +145,9 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 	@Autowired( required = false )
 	private EventInterestDAO eventInterestDAO;
+
+	@Autowired( required = false )
+	private EventGroupInterestFlatDAO eventGroupInterestFlatDAO;
 
 	@Autowired( required = false )
 	private EventInterestProfileDAO eventInterestProfileDAO;
@@ -256,6 +264,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.authorInterestDAO = new AuthorInterestDAOHibernate( this.sessionFactory );
 
 		return this.authorInterestDAO;
+	}
+
+	@Override
+	public AuthorInterestFlatDAO getAuthorInterestFlatDAO()
+	{
+		if ( this.authorInterestFlatDAO == null )
+			this.authorInterestFlatDAO = new AuthorInterestFlatDAOHibernate( this.sessionFactory );
+
+		return this.authorInterestFlatDAO;
 	}
 
 	@Override
@@ -391,6 +408,15 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 			this.eventInterestDAO = new EventInterestDAOHibernate( this.sessionFactory );
 
 		return this.eventInterestDAO;
+	}
+
+	@Override
+	public EventGroupInterestFlatDAO getEventGroupInterestFlatDAO()
+	{
+		if ( this.eventGroupInterestFlatDAO == null )
+			this.eventGroupInterestFlatDAO = new EventGroupInterestFlatDAOHibernate( this.sessionFactory );
+
+		return this.eventGroupInterestFlatDAO;
 	}
 
 	@Override

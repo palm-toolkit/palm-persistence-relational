@@ -140,6 +140,51 @@ public class WidgetDAOHibernate extends GenericDAOHibernate<Widget> implements W
 	 * @inheritDoc
 	 */
 	@Override
+	public List<Widget> getWidgetByColor( WidgetType widgetType, WidgetStatus... widgetStatuses )
+	{
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "FROM Widget " );
+		queryString.append( "WHERE widgetType = :widgetType " );
+
+		if ( widgetStatuses.length > 0 )
+		{
+			if ( widgetStatuses.length == 1 )
+			{
+				queryString.append( "AND widgetStatus = :widgetStatus0 " );
+			}
+			else
+			{
+				for ( int i = 0; i < widgetStatuses.length; i++ )
+				{
+					if ( i == 0 )
+						queryString.append( "AND ( " );
+					else
+						queryString.append( "OR " );
+					queryString.append( "widgetStatus = :widgetStatus" + i + " " );
+				}
+				queryString.append( ") " );
+			}
+		}
+		queryString.append( "ORDER BY color DESC " );
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+		query.setParameter( "widgetType", widgetType );
+		if ( widgetStatuses.length > 0 )
+			for ( int i = 0; i < widgetStatuses.length; i++ )
+				query.setParameter( "widgetStatus" + i, widgetStatuses[i] );
+
+		@SuppressWarnings( "unchecked" )
+		List<Widget> widgets = query.list();
+
+		if ( widgets == null || widgets.isEmpty() )
+			return Collections.emptyList();
+
+		return widgets;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	@Override
 	public List<Widget> getWidget( WidgetType widgetType, String widgetGroup, WidgetStatus... widgetStatuses )
 	{
 		StringBuilder queryString = new StringBuilder();

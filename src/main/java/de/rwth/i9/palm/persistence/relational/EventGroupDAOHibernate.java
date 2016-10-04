@@ -13,6 +13,7 @@ import org.hibernate.search.Search;
 import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
 
+import de.rwth.i9.palm.model.DataMiningEventGroup;
 import de.rwth.i9.palm.model.EventGroup;
 import de.rwth.i9.palm.model.PublicationType;
 import de.rwth.i9.palm.persistence.EventGroupDAO;
@@ -113,6 +114,84 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 		return eventGroup;
 	}
 
+	@SuppressWarnings( "unchecked" )
+	@Override
+	public List<EventGroup> getEventGroupListWithoutPaging( String queryString, String type, String addedVenue )
+	{
+		boolean isWhereClauseEvoked = false;
+
+		StringBuilder mainQuery = new StringBuilder();
+		mainQuery.append( "SELECT cg " );
+
+		StringBuilder countQuery = new StringBuilder();
+		countQuery.append( "SELECT COUNT(DISTINCT cg) " );
+
+		StringBuilder restQuery = new StringBuilder();
+		restQuery.append( "FROM EventGroup cg " );
+
+		if ( !queryString.equals( "" ) )
+		{
+			isWhereClauseEvoked = true;
+			restQuery.append( "WHERE cg.name LIKE :queryString OR cg.notation LIKE :queryString AND cg.added IS TRUE " );
+		}
+
+		if ( type.equals( "conference" ) || type.equals( "workshop" ) )
+		{
+			if ( !isWhereClauseEvoked )
+			{
+				restQuery.append( "WHERE " );
+				isWhereClauseEvoked = true;
+			}
+			else
+				restQuery.append( "AND " );
+
+			restQuery.append( "( cg.publicationType = :pubTypeConference OR cg.publicationType = :pubTypeWorkshop ) " );
+		}
+		if ( type.equals( "journal" ) )
+		{
+			if ( !isWhereClauseEvoked )
+			{
+				restQuery.append( "WHERE " );
+				isWhereClauseEvoked = true;
+			}
+			else
+				restQuery.append( "AND " );
+
+			restQuery.append( "cg.publicationType = :pubTypeJournal " );
+		}
+		if ( addedVenue.equals( "yes" ) )
+		{
+			if ( !isWhereClauseEvoked )
+			{
+				restQuery.append( "WHERE " );
+				isWhereClauseEvoked = true;
+			}
+			else
+				restQuery.append( "AND " );
+			restQuery.append( "cg.added IS TRUE " );
+		}
+
+		restQuery.append( "ORDER BY cg.name" );
+
+		Query query = getCurrentSession().createQuery( mainQuery.toString() + restQuery.toString() );
+		if ( !queryString.equals( "" ) )
+			query.setParameter( "queryString", "%" + queryString + "%" );
+		if ( type.equals( "conference" ) || type.equals( "workshop" ) )
+		{
+			query.setParameter( "pubTypeConference", PublicationType.CONFERENCE );
+			query.setParameter( "pubTypeWorkshop", PublicationType.WORKSHOP );
+		}
+		if ( type.equals( "journal" ) )
+			query.setParameter( "pubTypeJournal", PublicationType.JOURNAL );
+
+		// prepare the container for result
+		List<EventGroup> eventGroup = new ArrayList<EventGroup>();
+
+		eventGroup = query.list();
+
+		return eventGroup;
+	}
+
 	@Override
 	public Map<String, Object> getEventGroupMapWithPaging( String queryString, String type, int pageNo, int maxResult, String addedVenue )
 	{
@@ -183,6 +262,96 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 
 		query.setFirstResult( pageNo * maxResult );
 		query.setMaxResults( maxResult );
+
+		/* Executes count query */
+		Query hibQueryCount = getCurrentSession().createQuery( countQuery.toString() + restQuery.toString() );
+		if ( !queryString.equals( "" ) )
+			hibQueryCount.setParameter( "queryString", "%" + queryString + "%" );
+		if ( type.equals( "conference" ) || type.equals( "workshop" ) )
+		{
+			hibQueryCount.setParameter( "pubTypeConference", PublicationType.CONFERENCE );
+			hibQueryCount.setParameter( "pubTypeWorkshop", PublicationType.WORKSHOP );
+		}
+		if ( type.equals( "journal" ) )
+			hibQueryCount.setParameter( "pubTypeJournal", PublicationType.JOURNAL );
+
+		int count = ( (Long) hibQueryCount.uniqueResult() ).intValue();
+
+		// prepare the container for result
+		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+		resultMap.put( "totalCount", count );
+		resultMap.put( "eventGroups", query.list() );
+
+		return resultMap;
+	}
+
+	@Override
+	public Map<String, Object> getEventGroupMapWithoutPaging( String queryString, String type, String addedVenue )
+	{
+		boolean isWhereClauseEvoked = false;
+
+		StringBuilder mainQuery = new StringBuilder();
+		mainQuery.append( "SELECT cg " );
+
+		StringBuilder countQuery = new StringBuilder();
+		countQuery.append( "SELECT COUNT(DISTINCT cg) " );
+
+		StringBuilder restQuery = new StringBuilder();
+		restQuery.append( "FROM EventGroup cg " );
+		if ( !queryString.equals( "" ) )
+		{
+			isWhereClauseEvoked = true;
+			restQuery.append( "WHERE cg.name LIKE :queryString OR cg.notation LIKE :queryString AND cg.added IS TRUE " );
+		}
+
+		if ( type.equals( "conference" ) || type.equals( "workshop" ) )
+		{
+			if ( !isWhereClauseEvoked )
+			{
+				restQuery.append( "WHERE " );
+				isWhereClauseEvoked = true;
+			}
+			else
+				restQuery.append( "AND " );
+
+			restQuery.append( "( cg.publicationType = :pubTypeConference OR cg.publicationType = :pubTypeWorkshop ) " );
+		}
+		if ( type.equals( "journal" ) )
+		{
+			if ( !isWhereClauseEvoked )
+			{
+				restQuery.append( "WHERE " );
+				isWhereClauseEvoked = true;
+			}
+			else
+				restQuery.append( "AND " );
+
+			restQuery.append( "cg.publicationType = :pubTypeJournal " );
+		}
+		if ( addedVenue.equals( "yes" ) )
+		{
+			if ( !isWhereClauseEvoked )
+			{
+				restQuery.append( "WHERE " );
+				isWhereClauseEvoked = true;
+			}
+			else
+				restQuery.append( "AND " );
+			restQuery.append( "cg.added IS TRUE " );
+		}
+
+		restQuery.append( "ORDER BY cg.publicationType,cg.name" );
+
+		Query query = getCurrentSession().createQuery( mainQuery.toString() + restQuery.toString() );
+		if ( !queryString.equals( "" ) )
+			query.setParameter( "queryString", "%" + queryString + "%" );
+		if ( type.equals( "conference" ) || type.equals( "workshop" ) )
+		{
+			query.setParameter( "pubTypeConference", PublicationType.CONFERENCE );
+			query.setParameter( "pubTypeWorkshop", PublicationType.WORKSHOP );
+		}
+		if ( type.equals( "journal" ) )
+			query.setParameter( "pubTypeJournal", PublicationType.JOURNAL );
 
 		/* Executes count query */
 		Query hibQueryCount = getCurrentSession().createQuery( countQuery.toString() + restQuery.toString() );
@@ -357,6 +526,64 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 	}
 
 	@Override
+	public Map<String, Object> getEventGroupMapFullTextSearchWithoutPaging( String queryString, String notation, String type, String addedVenue )
+	{
+		if ( queryString.equals( "" ) )
+			return this.getEventGroupMapWithoutPaging( queryString, type, addedVenue );
+
+		// remove any common words
+		queryString = queryString.toLowerCase().replace( "conference", "" );
+		queryString = queryString.toLowerCase().replace( "journal", "" );
+		queryString = queryString.toLowerCase().replace( "proceedings", "" );
+		queryString = queryString.toLowerCase().replace( "international", "" );
+
+		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
+
+		// create native Lucene query using the query DSL
+		// alternatively you can write the Lucene query using the Lucene query
+		// parser
+		// or the Lucene programmatic API. The Hibernate Search DSL is
+		// recommended though
+		QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity( EventGroup.class ).get();
+
+		// Query using lucene boolean query
+		@SuppressWarnings( "rawtypes" )
+		BooleanJunction combinedBooleanJunction = qb.bool();
+
+		combinedBooleanJunction.must( qb.keyword().onFields( "name", "notation" ).matching( queryString ).createQuery() );
+
+		if ( addedVenue.equals( "yes" ) )
+		{
+			combinedBooleanJunction.must( qb.keyword().onFields( "added" ).matching( true ).createQuery()
+
+			);
+		}
+
+		// wrap Lucene query in a org.hibernate.Query
+		org.hibernate.search.FullTextQuery hibQuery = fullTextSession.createFullTextQuery( combinedBooleanJunction.createQuery(), EventGroup.class );
+
+		// org.apache.lucene.search.Sort sort = new Sort( new SortField(
+		// "title", (Type) SortField.STRING_FIRST ) );
+		// hibQuery.setSort( sort );
+
+		// get the total number of matching elements
+		int totalRows = hibQuery.getResultSize();
+
+		@SuppressWarnings( "unchecked" )
+		List<EventGroup> eventGroups = hibQuery.list();
+
+		totalRows = eventGroups.size();
+
+		// prepare the container for result
+		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+
+		resultMap.put( "totalCount", totalRows );
+		resultMap.put( "eventGroups", eventGroups );
+
+		return resultMap;
+	}
+
+	@Override
 	public EventGroup getSimilarEventGroup( EventGroup eventGroupCompareTo )
 	{
 		if ( eventGroupCompareTo.getDblpUrl() != null )
@@ -402,4 +629,11 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 		return null;
 	}
 
+	@Override
+	public List<DataMiningEventGroup> getDataMiningObjects()
+	{
+		@SuppressWarnings( "unchecked" )
+		List<DataMiningEventGroup> result = getCurrentSession().createSQLQuery( "SELECT DISTINCT * FROM academic_event_group a WHERE a.added=1" ).addEntity( DataMiningEventGroup.class ).list();
+		return result;
+	}
 }
