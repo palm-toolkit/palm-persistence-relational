@@ -17,6 +17,7 @@ import org.hibernate.search.query.dsl.QueryBuilder;
 
 import de.rwth.i9.palm.model.Author;
 import de.rwth.i9.palm.model.Circle;
+import de.rwth.i9.palm.model.DataMiningPublication;
 import de.rwth.i9.palm.model.Event;
 import de.rwth.i9.palm.model.Publication;
 import de.rwth.i9.palm.model.PublicationType;
@@ -1156,6 +1157,14 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		publicationMap.put( "totalCount", count );
 
 		return publicationMap;
+	}
+
+	@Override
+	public List<DataMiningPublication> getDataMiningObjects()
+	{
+		@SuppressWarnings( "unchecked" )
+		List<DataMiningPublication> result = getCurrentSession().createSQLQuery( "SELECT * FROM Publication p WHERE p.id IN ( SELECT p_t.publication_id FROM publication_topic p_t )" ).addEntity( DataMiningPublication.class ).list();
+		return result;
 	}
 
 }

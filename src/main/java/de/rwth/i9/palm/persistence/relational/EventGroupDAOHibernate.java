@@ -18,7 +18,7 @@ import de.rwth.i9.palm.model.EventGroup;
 import de.rwth.i9.palm.model.PublicationType;
 import de.rwth.i9.palm.persistence.EventGroupDAO;
 
-public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>implements EventGroupDAO
+public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup> implements EventGroupDAO
 {
 
 	public EventGroupDAOHibernate( SessionFactory sessionFactory )
@@ -403,53 +403,44 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 			return this.getEventGroupListWithPaging( queryString, type, pageNo, maxResult, addedVenue );
 
 		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
-		
+
 		// create native Lucene query using the query DSL
-		// alternatively you can write the Lucene query using the Lucene query parser
-		// or the Lucene programmatic API. The Hibernate Search DSL is recommended though
-		QueryBuilder qb = fullTextSession.getSearchFactory()
-				.buildQueryBuilder().forEntity( EventGroup.class ).get();
-		
+		// alternatively you can write the Lucene query using the Lucene query
+		// parser
+		// or the Lucene programmatic API. The Hibernate Search DSL is
+		// recommended though
+		QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity( EventGroup.class ).get();
+
 		// Query using lucene boolean query
 		@SuppressWarnings( "rawtypes" )
 		BooleanJunction combinedBooleanJunction = qb.bool();
-		
-		combinedBooleanJunction
-		.must( qb
-			  .keyword()
-			  .onFields("name", "notation")
-			  .matching( queryString )
-			  .createQuery());
-	
-		if( addedVenue.equals( "yes" )){
-			combinedBooleanJunction
-					.must( qb
-							.keyword()
-							.onFields( "added" )
-							.matching( true )
-							.createQuery()
-							
-					);
+
+		combinedBooleanJunction.must( qb.keyword().onFields( "name", "notation" ).matching( queryString ).createQuery() );
+
+		if ( addedVenue.equals( "yes" ) )
+		{
+			combinedBooleanJunction.must( qb.keyword().onFields( "added" ).matching( true ).createQuery()
+
+			);
 		}
-		
+
 		// wrap Lucene query in a org.hibernate.Query
-		org.hibernate.search.FullTextQuery hibQuery =
-	    fullTextSession.createFullTextQuery(combinedBooleanJunction.createQuery(), EventGroup.class);
-	
+		org.hibernate.search.FullTextQuery hibQuery = fullTextSession.createFullTextQuery( combinedBooleanJunction.createQuery(), EventGroup.class );
+
 		// apply limit
 		hibQuery.setFirstResult( pageNo * maxResult );
 		hibQuery.setMaxResults( maxResult );
-		
+
 		// org.apache.lucene.search.Sort sort = new Sort( new SortField(
 		// "title", (Type) SortField.STRING_FIRST ) );
 		// hibQuery.setSort( sort );
 
 		@SuppressWarnings( "unchecked" )
 		List<EventGroup> eventGroups = hibQuery.list();
-		
-		if( eventGroups ==  null || eventGroups.isEmpty() )
+
+		if ( eventGroups == null || eventGroups.isEmpty() )
 			return Collections.emptyList();
-		
+
 		return eventGroups;
 	}
 
@@ -466,59 +457,50 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 		queryString = queryString.toLowerCase().replace( "international", "" );
 
 		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
-		
+
 		// create native Lucene query using the query DSL
-		// alternatively you can write the Lucene query using the Lucene query parser
-		// or the Lucene programmatic API. The Hibernate Search DSL is recommended though
-		QueryBuilder qb = fullTextSession.getSearchFactory()
-				.buildQueryBuilder().forEntity( EventGroup.class ).get();
-		
+		// alternatively you can write the Lucene query using the Lucene query
+		// parser
+		// or the Lucene programmatic API. The Hibernate Search DSL is
+		// recommended though
+		QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity( EventGroup.class ).get();
+
 		// Query using lucene boolean query
 		@SuppressWarnings( "rawtypes" )
 		BooleanJunction combinedBooleanJunction = qb.bool();
-		
-		combinedBooleanJunction
-			.must( qb
-				  .keyword()
-				  .onFields("name", "notation")
-				  .matching( queryString )
-				  .createQuery());
-		
-		if( addedVenue.equals( "yes" )){
-			combinedBooleanJunction
-					.must( qb
-							.keyword()
-							.onFields( "added" )
-							.matching( true )
-							.createQuery()
-							
-					);
+
+		combinedBooleanJunction.must( qb.keyword().onFields( "name", "notation" ).matching( queryString ).createQuery() );
+
+		if ( addedVenue.equals( "yes" ) )
+		{
+			combinedBooleanJunction.must( qb.keyword().onFields( "added" ).matching( true ).createQuery()
+
+			);
 		}
-		
+
 		// wrap Lucene query in a org.hibernate.Query
-		org.hibernate.search.FullTextQuery hibQuery =
-		    fullTextSession.createFullTextQuery(combinedBooleanJunction.createQuery(), EventGroup.class);
-		
+		org.hibernate.search.FullTextQuery hibQuery = fullTextSession.createFullTextQuery( combinedBooleanJunction.createQuery(), EventGroup.class );
+
 		// org.apache.lucene.search.Sort sort = new Sort( new SortField(
 		// "title", (Type) SortField.STRING_FIRST ) );
 		// hibQuery.setSort( sort );
-		
+
 		// get the total number of matching elements
 		int totalRows = hibQuery.getResultSize();
-		
+
 		// apply limit
 		hibQuery.setFirstResult( pageNo * maxResult );
 		hibQuery.setMaxResults( maxResult );
-		
+
 		@SuppressWarnings( "unchecked" )
 		List<EventGroup> eventGroups = hibQuery.list();
-		
-		if( eventGroups.size() < maxResult )
+
+		if ( eventGroups.size() < maxResult )
 			totalRows = eventGroups.size();
-		
+
 		// prepare the container for result
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
-				
+
 		resultMap.put( "totalCount", totalRows );
 		resultMap.put( "eventGroups", eventGroups );
 
@@ -634,6 +616,7 @@ public class EventGroupDAOHibernate extends GenericDAOHibernate<EventGroup>imple
 	{
 		@SuppressWarnings( "unchecked" )
 		List<DataMiningEventGroup> result = getCurrentSession().createSQLQuery( "SELECT DISTINCT * FROM academic_event_group a WHERE a.added=1" ).addEntity( DataMiningEventGroup.class ).list();
+
 		return result;
 	}
 }

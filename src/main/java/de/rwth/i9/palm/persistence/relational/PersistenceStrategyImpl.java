@@ -45,6 +45,7 @@ import de.rwth.i9.palm.persistence.PublicationFileDAO;
 import de.rwth.i9.palm.persistence.PublicationHistoryDAO;
 import de.rwth.i9.palm.persistence.PublicationSourceDAO;
 import de.rwth.i9.palm.persistence.PublicationTopicDAO;
+import de.rwth.i9.palm.persistence.PublicationTopicFlatDAO;
 import de.rwth.i9.palm.persistence.RoleDAO;
 import de.rwth.i9.palm.persistence.SessionDataSetDAO;
 import de.rwth.i9.palm.persistence.SourceDAO;
@@ -204,11 +205,14 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 	private PublicationTopicDAO publicationTopicDAO;
 
 	@Autowired( required = false )
+	private PublicationTopicFlatDAO publicationTopicFlatDAO;
+
+	@Autowired( required = false )
 	private RoleDAO roleDAO;
 
 	@Autowired( required = false )
 	private SessionDataSetDAO sessionDataSetDAO;
-	
+
 	@Autowired( required = false )
 	private SourceDAO sourceDAO;
 
@@ -581,6 +585,14 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 		return this.publicationTopicDAO;
 	}
 
+	public PublicationTopicFlatDAO getPublicationTopicFlatDAO()
+	{
+		if ( this.publicationTopicFlatDAO == null )
+			this.publicationTopicFlatDAO = new PublicationTopicFlatDAOHibernate( this.sessionFactory );
+
+		return this.publicationTopicFlatDAO;
+	}
+
 	@Override
 	public RoleDAO getRoleDAO()
 	{
@@ -589,7 +601,7 @@ public class PersistenceStrategyImpl implements PersistenceStrategy
 
 		return this.roleDAO;
 	}
-	
+
 	@Override
 	public SessionDataSetDAO getSessionDataSetDAO()
 	{
