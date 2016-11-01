@@ -1,6 +1,8 @@
 package de.rwth.i9.palm.persistence.relational;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
@@ -8,9 +10,8 @@ import org.hibernate.SessionFactory;
 import de.rwth.i9.palm.model.Interest;
 import de.rwth.i9.palm.persistence.InterestDAO;
 
-public class InterestDAOHibernate extends GenericDAOHibernate<Interest>implements InterestDAO
+public class InterestDAOHibernate extends GenericDAOHibernate<Interest> implements InterestDAO
 {
-
 	public InterestDAOHibernate( SessionFactory sessionFactory )
 	{
 		super( sessionFactory );
@@ -50,6 +51,50 @@ public class InterestDAOHibernate extends GenericDAOHibernate<Interest>implement
 			return null;
 
 		return interests;
+	}
+
+	@Override
+	public Map<String, Object> allTermsByPaging( String query, Integer pageNo, Integer maxResult )
+	{
+		// container
+		Map<String, Object> interestMap = new LinkedHashMap<String, Object>();
+
+		// Interests
+		StringBuilder mainQuery = new StringBuilder();
+		mainQuery.append( "SELECT DISTINCT t " );
+
+		StringBuilder countQuery = new StringBuilder();
+		countQuery.append( "SELECT COUNT(DISTINCT t) " );
+
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append( "FROM Interest t " );
+		stringBuilder.append( "WHERE t.term like :query" );
+
+		stringBuilder.append( " ORDER BY t.term" );
+
+		/* Executes main query */
+		Query hibQueryMain = getCurrentSession().createQuery( mainQuery.toString() + stringBuilder.toString() );
+		hibQueryMain.setParameter( "query", "%" + query + "%" );
+
+		if ( pageNo != null )
+			hibQueryMain.setFirstResult( pageNo * maxResult );
+		if ( maxResult != null )
+			hibQueryMain.setMaxResults( maxResult );
+
+		@SuppressWarnings( "unchecked" )
+		List<Interest> interests = hibQueryMain.list();
+
+		if ( interests == null || interests.isEmpty() )
+		{
+			interestMap.put( "totalCount", 0 );
+			return interestMap;
+		}
+
+		interestMap.put( "interests", interests );
+		interestMap.put( "totalCount", interests.size() );
+
+		return interestMap;
+
 	}
 
 }
