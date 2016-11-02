@@ -1,5 +1,6 @@
 package de.rwth.i9.palm.persistence.relational;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -436,33 +437,29 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	public List<Publication> getPublicationByFullTextSearch( String queryString )
 	{
 		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
-		
+
 		// create native Lucene query using the query DSL
-		// alternatively you can write the Lucene query using the Lucene query parser
-		// or the Lucene programmatic API. The Hibernate Search DSL is recommended though
-		QueryBuilder qb = fullTextSession.getSearchFactory()
-				.buildQueryBuilder().forEntity( Publication.class ).get();
-		
-		org.apache.lucene.search.Query query = qb
-				  .keyword()
-				  .onFields("title", "abstractText", "contentText")
-				  .matching( queryString )
-				  .createQuery();
-		
+		// alternatively you can write the Lucene query using the Lucene query
+		// parser
+		// or the Lucene programmatic API. The Hibernate Search DSL is
+		// recommended though
+		QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity( Publication.class ).get();
+
+		org.apache.lucene.search.Query query = qb.keyword().onFields( "title", "abstractText", "contentText" ).matching( queryString ).createQuery();
+
 		// wrap Lucene query in a org.hibernate.Query
-		org.hibernate.search.FullTextQuery hibQuery =
-		    fullTextSession.createFullTextQuery(query, Publication.class);
-		
+		org.hibernate.search.FullTextQuery hibQuery = fullTextSession.createFullTextQuery( query, Publication.class );
+
 		// org.apache.lucene.search.Sort sort = new Sort( new SortField(
 		// "title", (Type) SortField.STRING_FIRST ) );
 		// hibQuery.setSort( sort );
 
 		@SuppressWarnings( "unchecked" )
 		List<Publication> publications = hibQuery.list();
-		
-		if( publications ==  null || publications.isEmpty() )
+
+		if ( publications == null || publications.isEmpty() )
 			return Collections.emptyList();
-		
+
 		return publications;
 	}
 
@@ -473,94 +470,86 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	@Override
 	public Map<String, Object> getPublicationByFullTextSearchWithPaging( String query, String publicationType, Author author, Event event, Integer page, Integer maxResult, String year, String orderBy )
 	{
-		// Due to difficulties connecting author with publication on Hibernate Search
+		// Due to difficulties connecting author with publication on Hibernate
+		// Search
 		// if author is not null, then use standard search
 		if ( author != null )
 			return this.getPublicationWithPaging( query, publicationType, author, event, page, maxResult, year, orderBy );
 
 		if ( query.equals( "" ) )
 			return this.getPublicationWithPaging( query, publicationType, author, event, page, maxResult, year, orderBy );
-		
-		// container
-				Map<String, Object> publicationMap = new LinkedHashMap<String, Object>();
-				
-				// publication types, collect as Enun list
-				Set<PublicationType> publicationTypes = new HashSet<PublicationType>();
-				if ( !publicationType.equals( "all" ) )
-				{
-					String[] publicationTypeArray = publicationType.split( "-" );
 
-					if ( publicationTypeArray.length > 0 )
+		// container
+		Map<String, Object> publicationMap = new LinkedHashMap<String, Object>();
+
+		// publication types, collect as Enun list
+		Set<PublicationType> publicationTypes = new HashSet<PublicationType>();
+		if ( !publicationType.equals( "all" ) )
+		{
+			String[] publicationTypeArray = publicationType.split( "-" );
+
+			if ( publicationTypeArray.length > 0 )
+			{
+				for ( String eachPublicatonType : publicationTypeArray )
+				{
+					try
 					{
-						for ( String eachPublicatonType : publicationTypeArray )
-						{
-							try
-							{
-								publicationTypes.add( PublicationType.valueOf( eachPublicatonType.toUpperCase() ) );
-							}
-							catch ( Exception e )
-							{
-							}
-						}
+						publicationTypes.add( PublicationType.valueOf( eachPublicatonType.toUpperCase() ) );
+					}
+					catch ( Exception e )
+					{
 					}
 				}
+			}
+		}
 
 		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
-		
+
 		// create native Lucene query using the query DSL
-		// alternatively you can write the Lucene query using the Lucene query parser
-		// or the Lucene programmatic API. The Hibernate Search DSL is recommended though
-		QueryBuilder qb = fullTextSession.getSearchFactory()
-				.buildQueryBuilder().forEntity( Publication.class ).get();
-		
-		// query builder for specific 
-		
+		// alternatively you can write the Lucene query using the Lucene query
+		// parser
+		// or the Lucene programmatic API. The Hibernate Search DSL is
+		// recommended though
+		QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity( Publication.class ).get();
+
+		// query builder for specific
+
 		@SuppressWarnings( "rawtypes" )
 		BooleanJunction combinedBooleanJunction = qb.bool();
-		
-		combinedBooleanJunction
-					.must( qb
-					  .keyword()
-					  .onFields("title", "abstractText", "contentText")
-					  .matching( query )
-					  .createQuery() );
-		
+
+		combinedBooleanJunction.must( qb.keyword().onFields( "title", "abstractText", "contentText" ).matching( query ).createQuery() );
+
 		@SuppressWarnings( "rawtypes" )
 		BooleanJunction authorBooleanJunction = qb.bool();
-		
+
 		// TODO
-		// org.hibernate.search.exception.SearchException: Unable to find field publicationAuthors.author in de.rwth.i9.palm.model.Publication
-		// at org.hibernate.search.engine.spi.DocumentBuilderIndexedEntity.objectToString(DocumentBuilderIndexedEntity.java:888)
+		// org.hibernate.search.exception.SearchException: Unable to find field
+		// publicationAuthors.author in de.rwth.i9.palm.model.Publication
+		// at
+		// org.hibernate.search.engine.spi.DocumentBuilderIndexedEntity.objectToString(DocumentBuilderIndexedEntity.java:888)
 		if ( author != null && false )
 		{
-			org.apache.lucene.search.Query mustAuthorQuery = qb
-					  .keyword()
-					  .onFields( "publicationAuthors.author" )
-					  .matching( author )
-					  .createQuery();
-			
+			org.apache.lucene.search.Query mustAuthorQuery = qb.keyword().onFields( "publicationAuthors.author" ).matching( author ).createQuery();
+
 			authorBooleanJunction.must( mustAuthorQuery );
 		}
-		
-		if( !authorBooleanJunction.isEmpty() )
+
+		if ( !authorBooleanJunction.isEmpty() )
 			combinedBooleanJunction.must( authorBooleanJunction.createQuery() );
-		
+
 		@SuppressWarnings( "rawtypes" )
 		BooleanJunction yearBooleanJunction = qb.bool();
-		
-		if( !year.equals( "all" ) ){
-			org.apache.lucene.search.Query mustAuthorQuery = qb
-					  .keyword()
-					  .onFields( "year" )
-					  .matching( year )
-					  .createQuery();
-			
+
+		if ( !year.equals( "all" ) )
+		{
+			org.apache.lucene.search.Query mustAuthorQuery = qb.keyword().onFields( "year" ).matching( year ).createQuery();
+
 			yearBooleanJunction.must( mustAuthorQuery );
 		}
-		
-		if( !yearBooleanJunction.isEmpty() )
+
+		if ( !yearBooleanJunction.isEmpty() )
 			combinedBooleanJunction.must( yearBooleanJunction.createQuery() );
-		
+
 		if ( !publicationTypes.isEmpty() )
 		{
 			@SuppressWarnings( "rawtypes" )
@@ -569,36 +558,30 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 			{
 
 				// TODO : change must with should
-				org.apache.lucene.search.Query mustPublicationTypeQuery = qb
-							  .keyword()
-							  .onFields("publicationType")
-							  .matching( eachPublicationType )
-							  .createQuery();
-					
+				org.apache.lucene.search.Query mustPublicationTypeQuery = qb.keyword().onFields( "publicationType" ).matching( eachPublicationType ).createQuery();
+
 				publicationTypeBooleanJunction.should( mustPublicationTypeQuery );
-				
 
 			}
 			combinedBooleanJunction.must( publicationTypeBooleanJunction.createQuery() );
 		}
-		
+
 		// wrap Lucene query in a org.hibernate.Query
-		org.hibernate.search.FullTextQuery hibQuery =
-		    fullTextSession.createFullTextQuery(combinedBooleanJunction.createQuery(), Publication.class);
-		
+		org.hibernate.search.FullTextQuery hibQuery = fullTextSession.createFullTextQuery( combinedBooleanJunction.createQuery(), Publication.class );
+
 		// get the total number of matching elements
 		int totalRows = hibQuery.getResultSize();
-		
+
 		// apply limit
 		if ( page != null )
 			hibQuery.setFirstResult( page * maxResult );
 		if ( maxResult != null )
 			hibQuery.setMaxResults( maxResult );
-		
+
 		// org.apache.lucene.search.Sort sort = new Sort( new SortField(
 		// "title", (Type) SortField.STRING_FIRST ) );
 		// hibQuery.setSort( sort );
-		
+
 		// prepare the container for result
 		@SuppressWarnings( "unchecked" )
 		List<Publication> publications = hibQuery.list();
@@ -851,37 +834,33 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	 * 
 	 */
 	@Override
-	public List<Publication> getPublicationViaPhraseSlopQuery( String publicationTitle , int slope)
+	public List<Publication> getPublicationViaPhraseSlopQuery( String publicationTitle, int slope )
 	{
 		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
-		
+
 		// create native Lucene query using the query DSL
-		// alternatively you can write the Lucene query using the Lucene query parser
-		// or the Lucene programmatic API. The Hibernate Search DSL is recommended though
-		QueryBuilder qb = fullTextSession.getSearchFactory()
-				.buildQueryBuilder().forEntity( Publication.class ).get();
-		
+		// alternatively you can write the Lucene query using the Lucene query
+		// parser
+		// or the Lucene programmatic API. The Hibernate Search DSL is
+		// recommended though
+		QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity( Publication.class ).get();
+
 		@SuppressWarnings( "deprecation" )
-		org.apache.lucene.search.Query query = qb
-					.phrase().withSlop( slope )
-					.onField( "title" )
-					.sentence( publicationTitle )
-					.createQuery();
-		
+		org.apache.lucene.search.Query query = qb.phrase().withSlop( slope ).onField( "title" ).sentence( publicationTitle ).createQuery();
+
 		// wrap Lucene query in a org.hibernate.Query
-		org.hibernate.search.FullTextQuery hibQuery =
-		    fullTextSession.createFullTextQuery(query, Publication.class);
-		
+		org.hibernate.search.FullTextQuery hibQuery = fullTextSession.createFullTextQuery( query, Publication.class );
+
 		// org.apache.lucene.search.Sort sort = new Sort( new SortField(
 		// "title", (Type) SortField.STRING_FIRST ) );
 		// hibQuery.setSort( sort );
 
 		@SuppressWarnings( "unchecked" )
 		List<Publication> publications = hibQuery.list();
-		
-		if( publications ==  null || publications.isEmpty() )
+
+		if ( publications == null || publications.isEmpty() )
 			return Collections.emptyList();
-		
+
 		return publications;
 	}
 
@@ -1167,4 +1146,79 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		return result;
 	}
 
+	@Override
+	public List<Publication> getAllPublications()
+	{
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "FROM Publication " );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+
+		@SuppressWarnings( "unchecked" )
+		List<Publication> publications = query.list();
+
+		if ( publications == null || publications.isEmpty() )
+			return null;
+
+		return publications;
+	}
+
+	@SuppressWarnings( "unchecked" )
+	@Override
+	public List<Publication> getPublicationByTitle( List<String> titles )
+	{
+		Boolean flag = false;
+		StringBuilder queryString = new StringBuilder();
+
+		queryString.append( "SELECT DISTINCT p FROM Publication p " );
+		queryString.append( "WHERE p.title in ( " );
+
+		List<String> titleWithQuotes = new ArrayList<String>();
+		for ( int i = 0; i < titles.size(); i++ )
+		{
+			String str = titles.get( i );
+			if ( str.contains( "'" ) )
+			{
+				// str = str.replace( "'", "" );
+				titleWithQuotes.add( str );
+			}
+			else
+			{
+				flag = true;
+				if ( i != titles.size() - 1 )
+					queryString.append( "'" + str + "'" + "," );
+				else
+					queryString.append( "'" + str + "')" );
+			}
+		}
+		// queryString.append( " " );
+
+		System.out.println( queryString.toString() );
+		Query query;
+		List<Publication> publications = new ArrayList<Publication>();
+		if ( flag )
+		{
+			query = getCurrentSession().createQuery( queryString.toString() );
+			publications = query.list();
+		}
+
+		if ( titleWithQuotes.size() > 0 )
+		{
+			for ( String title : titleWithQuotes )
+			{
+				StringBuilder queryStringAlt = new StringBuilder();
+				queryStringAlt.append( "SELECT DISTINCT p FROM Publication p " );
+				queryStringAlt.append( "WHERE p.title=:title " );
+				Query queryAlt = getCurrentSession().createQuery( queryStringAlt.toString() );
+				queryAlt.setParameter( "title", title );
+				publications.addAll( queryAlt.list() );
+			}
+		}
+
+		System.out.println( "pus: " + publications.size() );
+		if ( publications == null || publications.isEmpty() )
+			return Collections.emptyList();
+
+		return publications;
+	}
 }
