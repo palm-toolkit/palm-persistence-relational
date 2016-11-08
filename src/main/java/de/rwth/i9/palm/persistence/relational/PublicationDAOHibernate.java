@@ -1165,55 +1165,29 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 
 	@SuppressWarnings( "unchecked" )
 	@Override
-	public List<Publication> getPublicationByTitle( List<String> titles )
+	public List<Publication> getPublicationByIds( List<String> ids )
 	{
-		Boolean flag = false;
 		StringBuilder queryString = new StringBuilder();
 
 		queryString.append( "SELECT DISTINCT p FROM Publication p " );
-		queryString.append( "WHERE p.title in ( " );
+		queryString.append( "WHERE p.id in ( " );
 
-		List<String> titleWithQuotes = new ArrayList<String>();
-		for ( int i = 0; i < titles.size(); i++ )
+		for ( int i = 0; i < ids.size(); i++ )
 		{
-			String str = titles.get( i );
-			if ( str.contains( "'" ) )
-			{
-				// str = str.replace( "'", "" );
-				titleWithQuotes.add( str );
-			}
+			String str = ids.get( i );
+			if ( i != ids.size() - 1 )
+				queryString.append( "'" + str + "'" + "," );
 			else
-			{
-				flag = true;
-				if ( i != titles.size() - 1 )
-					queryString.append( "'" + str + "'" + "," );
-				else
-					queryString.append( "'" + str + "')" );
-			}
+				queryString.append( "'" + str + "')" );
 		}
 		// queryString.append( " " );
 
 		System.out.println( queryString.toString() );
 		Query query;
 		List<Publication> publications = new ArrayList<Publication>();
-		if ( flag )
-		{
 			query = getCurrentSession().createQuery( queryString.toString() );
 			publications = query.list();
-		}
 
-		if ( titleWithQuotes.size() > 0 )
-		{
-			for ( String title : titleWithQuotes )
-			{
-				StringBuilder queryStringAlt = new StringBuilder();
-				queryStringAlt.append( "SELECT DISTINCT p FROM Publication p " );
-				queryStringAlt.append( "WHERE p.title=:title " );
-				Query queryAlt = getCurrentSession().createQuery( queryStringAlt.toString() );
-				queryAlt.setParameter( "title", title );
-				publications.addAll( queryAlt.list() );
-			}
-		}
 
 		System.out.println( "pus: " + publications.size() );
 		if ( publications == null || publications.isEmpty() )
