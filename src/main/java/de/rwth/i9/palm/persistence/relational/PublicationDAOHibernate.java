@@ -1182,14 +1182,11 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		}
 		// queryString.append( " " );
 
-		System.out.println( queryString.toString() );
 		Query query;
 		List<Publication> publications = new ArrayList<Publication>();
 			query = getCurrentSession().createQuery( queryString.toString() );
 			publications = query.list();
 
-
-		System.out.println( "pus: " + publications.size() );
 		if ( publications == null || publications.isEmpty() )
 			return Collections.emptyList();
 
