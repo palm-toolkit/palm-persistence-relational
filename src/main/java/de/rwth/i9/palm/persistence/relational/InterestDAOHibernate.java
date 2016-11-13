@@ -66,14 +66,14 @@ public class InterestDAOHibernate extends GenericDAOHibernate<Interest> implemen
 		StringBuilder countQuery = new StringBuilder();
 		countQuery.append( "SELECT COUNT(DISTINCT t) " );
 
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append( "FROM Interest t " );
-		stringBuilder.append( "WHERE t.term like :query" );
+		StringBuilder restQuery = new StringBuilder();
+		restQuery.append( "FROM Interest t " );
+		restQuery.append( "WHERE t.term like :query" );
 
-		stringBuilder.append( " ORDER BY t.term" );
+		restQuery.append( " ORDER BY t.term" );
 
 		/* Executes main query */
-		Query hibQueryMain = getCurrentSession().createQuery( mainQuery.toString() + stringBuilder.toString() );
+		Query hibQueryMain = getCurrentSession().createQuery( mainQuery.toString() + restQuery.toString() );
 		hibQueryMain.setParameter( "query", "%" + query + "%" );
 
 		if ( pageNo != null )
@@ -90,8 +90,14 @@ public class InterestDAOHibernate extends GenericDAOHibernate<Interest> implemen
 			return interestMap;
 		}
 
+		/* Executes count query */
+		Query hibQueryCount = getCurrentSession().createQuery( countQuery.toString() + restQuery.toString() );
+		hibQueryCount.setParameter( "query", "%" + query + "%" );
+
+		int count = ( (Long) hibQueryCount.uniqueResult() ).intValue();
+
 		interestMap.put( "interests", interests );
-		interestMap.put( "totalCount", interests.size() );
+		interestMap.put( "totalCount", count );
 
 		return interestMap;
 
