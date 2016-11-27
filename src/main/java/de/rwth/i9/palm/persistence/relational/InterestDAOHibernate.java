@@ -56,25 +56,33 @@ public class InterestDAOHibernate extends GenericDAOHibernate<Interest> implemen
 	@Override
 	public Map<String, Object> allTermsByPaging( String query, Integer pageNo, Integer maxResult )
 	{
+
 		// container
 		Map<String, Object> interestMap = new LinkedHashMap<String, Object>();
+//		select distinct(i.id), i.term from interest i, term_value t where '%learning analytic%' like CONCAT('%',i.term,'%') or CONCAT('%',i.term,'%') like '%learning analytics%' and t.term = i.term;
 
 		// Interests
 		StringBuilder mainQuery = new StringBuilder();
-		mainQuery.append( "SELECT DISTINCT t " );
+		mainQuery.append( "SELECT DISTINCT i " );
 
 		StringBuilder countQuery = new StringBuilder();
-		countQuery.append( "SELECT COUNT(DISTINCT t) " );
+		countQuery.append( "SELECT COUNT(DISTINCT i) " );
 
 		StringBuilder restQuery = new StringBuilder();
-		restQuery.append( "FROM Interest t " );
-		restQuery.append( "WHERE t.term like :query" );
+		restQuery.append( "FROM Interest i " );
 
-		restQuery.append( " ORDER BY t.term" );
+		if ( query != "" )
+		{
+			restQuery.append( "WHERE i.term like :query" );
+			restQuery.append( " or :query like CONCAT('%',i.term,'%')" );
+		}
+
+		restQuery.append( " ORDER BY i.term" );
 
 		/* Executes main query */
 		Query hibQueryMain = getCurrentSession().createQuery( mainQuery.toString() + restQuery.toString() );
-		hibQueryMain.setParameter( "query", "%" + query + "%" );
+		if ( query != "" )
+			hibQueryMain.setParameter( "query", "%" + query + "%" );
 
 		if ( pageNo != null )
 			hibQueryMain.setFirstResult( pageNo * maxResult );
@@ -92,10 +100,10 @@ public class InterestDAOHibernate extends GenericDAOHibernate<Interest> implemen
 
 		/* Executes count query */
 		Query hibQueryCount = getCurrentSession().createQuery( countQuery.toString() + restQuery.toString() );
-		hibQueryCount.setParameter( "query", "%" + query + "%" );
+		if ( query != "" )
+			hibQueryCount.setParameter( "query", "%" + query + "%" );
 
 		int count = ( (Long) hibQueryCount.uniqueResult() ).intValue();
-
 		interestMap.put( "interests", interests );
 		interestMap.put( "totalCount", count );
 

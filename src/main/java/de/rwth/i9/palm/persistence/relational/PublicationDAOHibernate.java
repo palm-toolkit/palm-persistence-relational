@@ -1167,29 +1167,34 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	@Override
 	public List<Publication> getPublicationByIds( List<String> ids )
 	{
-		StringBuilder queryString = new StringBuilder();
-
-		queryString.append( "SELECT DISTINCT p FROM Publication p " );
-		queryString.append( "WHERE p.id in ( " );
-
-		for ( int i = 0; i < ids.size(); i++ )
-		{
-			String str = ids.get( i );
-			if ( i != ids.size() - 1 )
-				queryString.append( "'" + str + "'" + "," );
-			else
-				queryString.append( "'" + str + "')" );
-		}
-		// queryString.append( " " );
-
-		Query query;
 		List<Publication> publications = new ArrayList<Publication>();
+
+		if ( !ids.isEmpty() )
+		{
+			StringBuilder queryString = new StringBuilder();
+
+			queryString.append( "SELECT DISTINCT p FROM Publication p " );
+			queryString.append( "WHERE p.id in ( " );
+
+			for ( int i = 0; i < ids.size(); i++ )
+			{
+				String str = ids.get( i );
+				if ( i != ids.size() - 1 )
+					queryString.append( "'" + str + "'" + "," );
+				else
+					queryString.append( "'" + str + "')" );
+			}
+			if ( ids.size() == 0 )
+				queryString.append( " )" );
+
+			Query query;
+
 			query = getCurrentSession().createQuery( queryString.toString() );
 			publications = query.list();
 
-		if ( publications == null || publications.isEmpty() )
-			return Collections.emptyList();
-
+			if ( publications == null || publications.isEmpty() )
+				return Collections.emptyList();
+		}
 		return publications;
 	}
 }
