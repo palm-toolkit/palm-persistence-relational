@@ -633,8 +633,6 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		if ( author != null )
 			return this.getPublicationWithoutPaging( query, publicationType, author, event, year, orderBy );
 
-		System.out.println( "step 8" );
-
 		if ( query.equals( "" ) )
 			return this.getPublicationWithoutPaging( query, publicationType, author, event, year, orderBy );
 
@@ -661,8 +659,6 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 				}
 			}
 		}
-
-		System.out.println( "step 9" );
 
 		FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession() );
 
@@ -727,8 +723,6 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 			combinedBooleanJunction.must( publicationTypeBooleanJunction.createQuery() );
 		}
 
-		System.out.println( "step 10" );
-
 		// wrap Lucene query in a org.hibernate.Query
 		org.hibernate.search.FullTextQuery hibQuery = fullTextSession.createFullTextQuery( combinedBooleanJunction.createQuery(), Publication.class );
 
@@ -776,8 +770,6 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		totalRows = publications.size();
 
 		publicationMap.put( "totalCount", totalRows );
-
-		System.out.println( "step 11" );
 
 		return publicationMap;
 	}
