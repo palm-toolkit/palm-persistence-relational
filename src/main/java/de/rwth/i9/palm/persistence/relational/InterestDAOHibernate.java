@@ -71,9 +71,11 @@ public class InterestDAOHibernate extends GenericDAOHibernate<Interest> implemen
 		StringBuilder restQuery = new StringBuilder();
 		restQuery.append( "FROM Interest i " );
 
+		restQuery.append( "WHERE i.term not like ' %'  and i.term not like '-%' and i.term not like '0%'" );
+
 		if ( query != "" )
 		{
-			restQuery.append( "WHERE i.term like :query" );
+			restQuery.append( " and i.term like :query" );
 			restQuery.append( " or :query like CONCAT('%',i.term,'%')" );
 		}
 

@@ -525,24 +525,61 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 		return resultMap;
 	}
 
-	@Override
-	public List<Author> getAllAuthors()
+	public Map<String, Object> getAuthorWithPagingOrderByName( String queryString, String addedAuthor, int pageNo, int maxResult )
 	{
-		StringBuilder queryString = new StringBuilder();
-		queryString.append( "SELECT DISTINCT a " );
-		queryString.append( "FROM Author a " );
-		queryString.append( "WHERE a.added IS TRUE  " );
 
-		Query query = getCurrentSession().createQuery( queryString.toString() );
+		boolean isWhereClauseEvoked = false;
 
-		@SuppressWarnings( "unchecked" )
-		List<Author> authors = query.list();
+		StringBuilder mainQuery = new StringBuilder();
+		mainQuery.append( "SELECT a " );
 
-		if ( authors == null || authors.isEmpty() )
-			return Collections.emptyList();
+		StringBuilder countQuery = new StringBuilder();
+		countQuery.append( "SELECT COUNT(DISTINCT a) " );
 
-		return authors;
+		StringBuilder restQuery = new StringBuilder();
+		restQuery.append( "FROM Author a " );
+
+		if ( !queryString.equals( "" ) )
+		{
+			isWhereClauseEvoked = true;
+			restQuery.append( "WHERE a.name LIKE :queryString " );
+		}
+		if ( addedAuthor.equals( "yes" ) )
+		{
+			if ( !isWhereClauseEvoked )
+			{
+				restQuery.append( "WHERE " );
+				isWhereClauseEvoked = true;
+			}
+			else
+				restQuery.append( "AND " );
+			restQuery.append( "a.added IS TRUE " );
+		}
+
+		restQuery.append( "ORDER BY a.name asc" );
+
+		Query query = getCurrentSession().createQuery( mainQuery.toString() + restQuery.toString() );
+		if ( !queryString.equals( "" ) )
+			query.setParameter( "queryString", "%" + queryString + "%" );
+		query.setFirstResult( pageNo * maxResult );
+		query.setMaxResults( maxResult );
+
+		/* Executes count query */
+		Query hibQueryCount = getCurrentSession().createQuery( countQuery.toString() + restQuery.toString() );
+		if ( !queryString.equals( "" ) )
+			hibQueryCount.setParameter( "queryString", "%" + queryString + "%" );
+
+		int count = ( (Long) hibQueryCount.uniqueResult() ).intValue();
+
+		// prepare the container for result
+		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+		resultMap.put( "totalCount", count );
+		resultMap.put( "authors", query.list() );
+
+		return resultMap;
+
 	}
+
 
 	@Override
 	public List<DataMiningAuthor> getDataMiningObjects()
