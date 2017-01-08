@@ -580,6 +580,24 @@ public class AuthorDAOHibernate extends GenericDAOHibernate<Author> implements A
 
 	}
 
+	@Override
+	public List<Author> getAllAuthors()
+	{
+		StringBuilder queryString = new StringBuilder();
+		queryString.append( "SELECT DISTINCT a " );
+		queryString.append( "FROM Author a " );
+		queryString.append( "WHERE a.added IS TRUE  " );
+
+		Query query = getCurrentSession().createQuery( queryString.toString() );
+
+		@SuppressWarnings( "unchecked" )
+		List<Author> authors = query.list();
+
+		if ( authors == null || authors.isEmpty() )
+			return Collections.emptyList();
+
+		return authors;
+	}
 
 	@Override
 	public List<DataMiningAuthor> getDataMiningObjects()
