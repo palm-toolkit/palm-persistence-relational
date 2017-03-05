@@ -619,7 +619,7 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	 * 
 	 */
 	@Override
-	public Map<String, Object> getPublicationWithPaging( String query, String publicationType, Circle circle, Integer pageNo, Integer maxResult, String year, String orderBy )
+	public Map<String, Object> getPublicationWithPaging( String query, String publicationType, Circle circle, Author author, Integer pageNo, Integer maxResult, String year, String orderBy )
 	{
 		if ( circle == null )
 			return Collections.emptyMap();
@@ -673,6 +673,13 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 			stringBuilder.append( "AND " );
 			stringBuilder.append( "p.year = :year " );
 		}
+		if ( author != null )
+		{
+
+			stringBuilder.append( "AND " );
+			stringBuilder.append( "p.publicationAuthors LIKE = :author " );
+		}
+
 		if ( !publicationTypes.isEmpty() )
 		{
 			for ( int i = 1; i <= publicationTypes.size(); i++ )
@@ -695,6 +702,9 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		/* Executes main query */
 		Query hibQueryMain = getCurrentSession().createQuery( mainQuery.toString() + stringBuilder.toString() );
 		hibQueryMain.setParameter( "c", circle );
+
+		if ( author != null )
+			hibQueryMain.setParameter( "author", author );
 
 		if ( !query.equals( "" ) )
 		{
