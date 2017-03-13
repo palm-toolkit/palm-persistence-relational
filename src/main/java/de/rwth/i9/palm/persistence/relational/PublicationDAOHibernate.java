@@ -287,6 +287,8 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		if ( query.equals( "" ) )
 			return this.getPublicationWithPaging( query, publicationType, author, event, page, maxResult, year, orderBy );
 		
+		if ( true )
+			return this.getPublicationWithPaging( query, publicationType, author, event, page, maxResult, year, orderBy );
 		// container
 				Map<String, Object> publicationMap = new LinkedHashMap<String, Object>();
 				
