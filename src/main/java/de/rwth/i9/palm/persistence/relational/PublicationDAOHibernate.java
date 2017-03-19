@@ -923,6 +923,7 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 	@Override
 	public List<String> getDistinctPublicationYearByAuthor( Author author, String orderBy )
 	{
+		System.out.println( "author: " + author.getName() + " : " + orderBy );
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append( "SELECT DISTINCT p.year " );
 		stringBuilder.append( "FROM Publication p " );

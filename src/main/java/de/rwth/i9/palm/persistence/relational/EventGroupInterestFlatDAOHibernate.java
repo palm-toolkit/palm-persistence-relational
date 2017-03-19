@@ -10,12 +10,22 @@ public class EventGroupInterestFlatDAOHibernate extends GenericDAOHibernate<Even
 {
 	private SessionFactory sessionFactory;
 
+	/**
+	 * @param sessionFactory
+	 */
 	public EventGroupInterestFlatDAOHibernate( SessionFactory sessionFactory )
 	{
 		super( sessionFactory );
 		this.sessionFactory = sessionFactory;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * de.rwth.i9.palm.persistence.EventGroupInterestFlatDAO#eventIdExists(java.
+	 * lang.String)
+	 */
 	public boolean eventIdExists( String eventGroupId )
 	{
 		if ( eventGroupId.equals( "" ) )

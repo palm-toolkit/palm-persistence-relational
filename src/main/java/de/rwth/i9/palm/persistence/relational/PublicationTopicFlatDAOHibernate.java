@@ -10,12 +10,22 @@ public class PublicationTopicFlatDAOHibernate extends GenericDAOHibernate<Public
 {
 	private SessionFactory sessionFactory;
 
+	/**
+	 * @param sessionFactory
+	 */
 	public PublicationTopicFlatDAOHibernate( SessionFactory sessionFactory )
 	{
 		super( sessionFactory );
 		this.sessionFactory = sessionFactory;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * de.rwth.i9.palm.persistence.PublicationTopicFlatDAO#publicationIdExists(
+	 * java.lang.String)
+	 */
 	public boolean publicationIdExists( String publicationId )
 	{
 		if ( publicationId.equals( "" ) )

@@ -10,12 +10,22 @@ public class AuthorInterestFlatDAOHibernate extends GenericDAOHibernate<AuthorIn
 {
 	private SessionFactory sessionFactory;
 
+	/**
+	 * @param sessionFactory
+	 */
 	public AuthorInterestFlatDAOHibernate( SessionFactory sessionFactory )
 	{
 		super( sessionFactory );
 		this.sessionFactory = sessionFactory;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * de.rwth.i9.palm.persistence.AuthorInterestFlatDAO#authorIdExists(java.
+	 * lang.String)
+	 */
 	public boolean authorIdExists( String authorId )
 	{
 		if ( authorId.equals( "" ) )
