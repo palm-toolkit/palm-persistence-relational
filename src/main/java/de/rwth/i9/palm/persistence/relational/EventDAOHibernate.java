@@ -11,6 +11,7 @@ import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
 import org.hibernate.search.query.dsl.QueryBuilder;
 
+import de.rwth.i9.palm.model.Author;
 import de.rwth.i9.palm.model.Event;
 import de.rwth.i9.palm.model.EventGroup;
 import de.rwth.i9.palm.persistence.EventDAO;
@@ -233,6 +234,71 @@ FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession()
 			return null;
 
 		return events.get( 0 );
+	}
+
+	@Override
+	public Map<String, Object> getParticipantsEvent( String query, Event event, Integer pageNo, Integer maxResult, String orderBy )
+	{
+
+		// container
+		Map<String, Object> researcherMap = new LinkedHashMap<String, Object>();
+
+		boolean isWhereClauseEvoked = false;
+
+		StringBuilder mainQuery = new StringBuilder();
+		StringBuilder stringBuilder = new StringBuilder();
+
+		mainQuery.append( "SELECT pa.author " );
+
+		if ( event != null )
+		{
+			isWhereClauseEvoked = true;
+
+			stringBuilder.append( "FROM Publication p " );
+			stringBuilder.append( "LEFT JOIN  p.publicationAuthors pa " );
+			stringBuilder.append( "WHERE p.event = :event " );
+		}
+
+		if ( !query.equals( "" ) )
+		{
+			query = query.replace( "-", " " );
+
+			if ( !isWhereClauseEvoked )
+			{
+				stringBuilder.append( "WHERE " );
+				isWhereClauseEvoked = true;
+			}
+			else
+				stringBuilder.append( "AND " );
+			stringBuilder.append( " pa.author.name LIKE :query " );
+		}
+
+		stringBuilder.append( "GROUP BY pa.author " );
+
+		if ( orderBy != null )
+		{
+			if ( orderBy.equals( "nrPublications" ) )
+				stringBuilder.append( "ORDER BY COUNT(pa.author) DESC" );
+			else if ( orderBy.equals( "hindex" ) )
+				stringBuilder.append( "ORDER BY pa.author.hindex DESC" );
+		}
+
+		Query hibQueryMain = getCurrentSession().createQuery( mainQuery.toString() + stringBuilder.toString() );
+
+		if ( event != null )
+			hibQueryMain.setParameter( "event", event );
+
+		if ( !query.equals( "" ) )
+			hibQueryMain.setParameter( "query", query );
+
+		if ( maxResult != null )
+			hibQueryMain.setMaxResults( maxResult );
+
+		List<Author> participantsList = hibQueryMain.list();
+
+		researcherMap.put( "participants", participantsList );
+
+		return researcherMap;
 	}
 
 }

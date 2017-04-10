@@ -234,7 +234,6 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		return publicationMap;
 
 	}
-
 	/**
 	 * {@inheritDoc}
 	 */
