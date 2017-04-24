@@ -281,7 +281,13 @@ FullTextSession fullTextSession = Search.getFullTextSession( getCurrentSession()
 				stringBuilder.append( "ORDER BY COUNT(pa.author) DESC" );
 			else if ( orderBy.equals( "hindex" ) )
 				stringBuilder.append( "ORDER BY pa.author.hindex DESC" );
+			else if ( orderBy.equals( "nrCitations" ) )
+				stringBuilder.append( "ORDER BY SUM(p.citedBy) DESC" );
+
+			stringBuilder.append( ", pa.author.name" );
 		}
+		else
+			stringBuilder.append( "ORDER BY pa.author.name" );
 
 		Query hibQueryMain = getCurrentSession().createQuery( mainQuery.toString() + stringBuilder.toString() );
 
