@@ -910,4 +910,317 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		return publicationMap;
 	}
 
+	@Override
+	public Map<String, Object> getPublicationWithPaging( String query, String publicationType, Circle circle, Author memberCircle, Integer startPage, Integer maxresult, Integer yearMin, Integer yearMax, String orderBy )
+	{
+		if ( circle == null )
+			return Collections.emptyMap();
+
+		// container
+		Map<String, Object> publicationMap = new LinkedHashMap<String, Object>();
+
+		Set<PublicationType> publicationTypes = new HashSet<PublicationType>();
+		if ( !publicationType.equals( "all" ) )
+		{
+			String[] publicationTypeArray = publicationType.split( "-" );
+
+			if ( publicationTypeArray.length > 0 )
+			{
+				for ( String eachPublicatonType : publicationTypeArray )
+				{
+					try
+					{
+						publicationTypes.add( PublicationType.valueOf( eachPublicatonType.toUpperCase() ) );
+					}
+					catch ( Exception e )
+					{
+					}
+				}
+			}
+		}
+
+		boolean isWhereClauseEvoked = false;
+
+		StringBuilder mainQuery = new StringBuilder();
+		mainQuery.append( "SELECT DISTINCT p " );
+
+		StringBuilder countQuery = new StringBuilder();
+		countQuery.append( "SELECT COUNT(DISTINCT p) " );
+
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append( "FROM Circle c, Publication pub " );
+		stringBuilder.append( "LEFT JOIN c.publications p " );
+		stringBuilder.append( "LEFT JOIN pub.publicationAuthors pa " );
+		stringBuilder.append( "WHERE c = :c AND pub = p AND pa.author = :pa " );
+
+		if ( !query.equals( "" ) )
+		{
+			stringBuilder.append( "AND " );
+			stringBuilder.append( "(REPLACE(p.title,'-',' ') LIKE :query " );
+			stringBuilder.append( "OR REPLACE(p.abstractText,'-',' ') LIKE :query1 " );
+			stringBuilder.append( "OR REPLACE(p.keywordText,'-',' ') LIKE :query2) " );
+		}
+		if ( yearMin != 0 )
+		{
+			stringBuilder.append( "AND " );
+			stringBuilder.append( "p.year >= :yearMin " );
+		}
+		if ( yearMax != 0 )
+		{
+			stringBuilder.append( "AND " );
+			stringBuilder.append( "p.year <= :yearMax " );
+		}
+		if ( !publicationTypes.isEmpty() )
+		{
+			for ( int i = 1; i <= publicationTypes.size(); i++ )
+			{
+				if ( i == 1 )
+					stringBuilder.append( "AND ( " );
+				else
+					stringBuilder.append( "OR " );
+
+				stringBuilder.append( "p.publicationType = :publicationType" + i + " " );
+			}
+			stringBuilder.append( " ) " );
+		}
+
+		if ( orderBy.equals( "citation" ) )
+			stringBuilder.append( "ORDER BY p.citedBy DESC" );
+		else if ( orderBy.equals( "date" ) )
+			stringBuilder.append( "ORDER BY p.publicationDate DESC" );
+
+		/* Executes main query */
+		Query hibQueryMain = getCurrentSession().createQuery( mainQuery.toString() + stringBuilder.toString() );
+		hibQueryMain.setParameter( "c", circle );
+		hibQueryMain.setParameter( "pa", memberCircle );
+
+		if ( !query.equals( "" ) )
+		{
+			hibQueryMain.setParameter( "query", "%" + query + "%" );
+			hibQueryMain.setParameter( "query1", "%" + query + "%" );
+			hibQueryMain.setParameter( "query2", "%" + query + "%" );
+		}
+		if ( yearMin != 0 )
+		{
+			hibQueryMain.setParameter( "yearMin", yearMin.toString() );
+		}
+		if ( yearMax != 0 )
+		{
+			hibQueryMain.setParameter( "yearMax", yearMax.toString() );
+		}
+		if ( !publicationTypes.isEmpty() )
+		{
+			int publicationTypeIndex = 1;
+			for ( PublicationType eachPublicationType : publicationTypes )
+			{
+				hibQueryMain.setParameter( "publicationType" + publicationTypeIndex, eachPublicationType );
+				publicationTypeIndex++;
+			}
+		}
+
+		if ( startPage != null )
+			hibQueryMain.setFirstResult( startPage * maxresult );
+		if ( maxresult != null )
+			hibQueryMain.setMaxResults( maxresult );
+
+		@SuppressWarnings( "unchecked" )
+		List<Publication> publications = hibQueryMain.list();
+
+		if ( publications == null || publications.isEmpty() )
+		{
+			publicationMap.put( "totalCount", 0 );
+			return publicationMap;
+		}
+
+		publicationMap.put( "publications", publications );
+
+		/* Executes count query */
+		Query hibQueryCount = getCurrentSession().createQuery( countQuery.toString() + stringBuilder.toString() );
+		hibQueryCount.setParameter( "c", circle );
+		hibQueryCount.setParameter( "pa", memberCircle );
+
+		if ( !query.equals( "" ) )
+		{
+			hibQueryCount.setParameter( "query", "%" + query + "%" );
+			hibQueryCount.setParameter( "query1", "%" + query + "%" );
+			hibQueryCount.setParameter( "query2", "%" + query + "%" );
+		}
+
+		if ( yearMin != 0 )
+			hibQueryCount.setParameter( "yearMin", yearMin.toString() );
+
+		if ( yearMax != 0 )
+			hibQueryCount.setParameter( "yearMax", yearMax.toString() );
+
+		if ( !publicationTypes.isEmpty() )
+		{
+			int publicationTypeIndex = 1;
+			for ( PublicationType eachPublicationType : publicationTypes )
+			{
+				hibQueryCount.setParameter( "publicationType" + publicationTypeIndex, eachPublicationType );
+				publicationTypeIndex++;
+			}
+		}
+
+		int count = ( (Long) hibQueryCount.uniqueResult() ).intValue();
+		publicationMap.put( "totalCount", count );
+
+		return publicationMap;
+	}
+
+	@Override
+	public Map<String, Object> getPublicationWithPaging( String query, String publicationType, Circle circle, Integer startPage, Integer maxresult, Integer yearMin, Integer yearMax, String orderBy )
+	{
+		if ( circle == null )
+			return Collections.emptyMap();
+
+		// container
+		Map<String, Object> publicationMap = new LinkedHashMap<String, Object>();
+
+		Set<PublicationType> publicationTypes = new HashSet<PublicationType>();
+		if ( !publicationType.equals( "all" ) )
+		{
+			String[] publicationTypeArray = publicationType.split( "-" );
+
+			if ( publicationTypeArray.length > 0 )
+			{
+				for ( String eachPublicatonType : publicationTypeArray )
+				{
+					try
+					{
+						publicationTypes.add( PublicationType.valueOf( eachPublicatonType.toUpperCase() ) );
+					}
+					catch ( Exception e )
+					{
+					}
+				}
+			}
+		}
+
+		boolean isWhereClauseEvoked = false;
+
+		StringBuilder mainQuery = new StringBuilder();
+		mainQuery.append( "SELECT DISTINCT p " );
+
+		StringBuilder countQuery = new StringBuilder();
+		countQuery.append( "SELECT COUNT(DISTINCT p) " );
+
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append( "FROM Circle c " );
+		stringBuilder.append( "LEFT JOIN c.publications p " );
+		stringBuilder.append( "WHERE c = :c " );
+
+		if ( !query.equals( "" ) )
+		{
+			stringBuilder.append( "AND " );
+			stringBuilder.append( "(REPLACE(p.title,'-',' ') LIKE :query " );
+			stringBuilder.append( "OR REPLACE(p.abstractText,'-',' ') LIKE :query1 " );
+			stringBuilder.append( "OR REPLACE(p.keywordText,'-',' ') LIKE :query2) " );
+		}
+		if ( yearMin != 0 )
+		{
+			stringBuilder.append( "AND " );
+			stringBuilder.append( "p.year >= :yearMin " );
+		}
+		if ( yearMax != 0 )
+		{
+			stringBuilder.append( "AND " );
+			stringBuilder.append( "p.year <= :yearMax " );
+		}
+
+		if ( !publicationTypes.isEmpty() )
+		{
+			for ( int i = 1; i <= publicationTypes.size(); i++ )
+			{
+				if ( i == 1 )
+					stringBuilder.append( "AND ( " );
+				else
+					stringBuilder.append( "OR " );
+
+				stringBuilder.append( "p.publicationType = :publicationType" + i + " " );
+			}
+			stringBuilder.append( " ) " );
+		}
+
+		if ( orderBy.equals( "citation" ) )
+			stringBuilder.append( "ORDER BY p.citedBy DESC" );
+		else if ( orderBy.equals( "date" ) )
+			stringBuilder.append( "ORDER BY p.publicationDate DESC" );
+
+		/* Executes main query */
+		Query hibQueryMain = getCurrentSession().createQuery( mainQuery.toString() + stringBuilder.toString() );
+		hibQueryMain.setParameter( "c", circle );
+
+		if ( !query.equals( "" ) )
+		{
+			hibQueryMain.setParameter( "query", "%" + query + "%" );
+			hibQueryMain.setParameter( "query1", "%" + query + "%" );
+			hibQueryMain.setParameter( "query2", "%" + query + "%" );
+		}
+
+		if ( yearMin != 0 )
+			hibQueryMain.setParameter( "yearMin", yearMin.toString() );
+
+		if ( yearMax != 0 )
+			hibQueryMain.setParameter( "yearMax", yearMax.toString() );
+
+		if ( !publicationTypes.isEmpty() )
+		{
+			int publicationTypeIndex = 1;
+			for ( PublicationType eachPublicationType : publicationTypes )
+			{
+				hibQueryMain.setParameter( "publicationType" + publicationTypeIndex, eachPublicationType );
+				publicationTypeIndex++;
+			}
+		}
+
+		if ( startPage != null )
+			hibQueryMain.setFirstResult( startPage * maxresult );
+		if ( maxresult != null )
+			hibQueryMain.setMaxResults( maxresult );
+
+		@SuppressWarnings( "unchecked" )
+		List<Publication> publications = hibQueryMain.list();
+
+		if ( publications == null || publications.isEmpty() )
+		{
+			publicationMap.put( "totalCount", 0 );
+			return publicationMap;
+		}
+
+		publicationMap.put( "publications", publications );
+
+		/* Executes count query */
+		Query hibQueryCount = getCurrentSession().createQuery( countQuery.toString() + stringBuilder.toString() );
+		hibQueryCount.setParameter( "c", circle );
+
+		if ( !query.equals( "" ) )
+		{
+			hibQueryCount.setParameter( "query", "%" + query + "%" );
+			hibQueryCount.setParameter( "query1", "%" + query + "%" );
+			hibQueryCount.setParameter( "query2", "%" + query + "%" );
+		}
+
+		if ( yearMin != 0 )
+			hibQueryCount.setParameter( "yearMin", yearMin.toString() );
+
+		if ( yearMax != 0 )
+			hibQueryCount.setParameter( "yearMax", yearMax.toString() );
+
+		if ( !publicationTypes.isEmpty() )
+		{
+			int publicationTypeIndex = 1;
+			for ( PublicationType eachPublicationType : publicationTypes )
+			{
+				hibQueryCount.setParameter( "publicationType" + publicationTypeIndex, eachPublicationType );
+				publicationTypeIndex++;
+			}
+		}
+
+		int count = ( (Long) hibQueryCount.uniqueResult() ).intValue();
+		publicationMap.put( "totalCount", count );
+
+		return publicationMap;
+	}
+
 }

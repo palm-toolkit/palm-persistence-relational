@@ -168,4 +168,62 @@ public class CircleDAOHibernate extends GenericDAOHibernate<Circle> implements C
 		return resultMap;
 	}
 
+	@Override
+	public Map<String, Object> getCircleMembersByPublishingPeriod( Circle circle, Integer yearMin, Integer yearMax, int maxResult )
+	{
+		boolean isWhereClauseEvoked = false;
+
+		// container
+		Map<String, Object> circleMap = new LinkedHashMap<String, Object>();
+
+		StringBuilder stringBuilder = new StringBuilder();
+
+		stringBuilder.append( "SELECT a " );
+		stringBuilder.append( "FROM Circle c, Publication pub, Author a " );
+		stringBuilder.append( "LEFT JOIN c.publications p " );
+		stringBuilder.append( "LEFT JOIN pub.publicationAuthors pa " );
+		stringBuilder.append( "LEFT JOIN c.authors ca " );
+		stringBuilder.append( "WHERE c = :c AND pub = p AND a =ca AND pa.author.id = ca.id " );
+
+		isWhereClauseEvoked = true;
+
+		if ( yearMin != 0 )
+		{
+			if ( isWhereClauseEvoked )
+			{
+				stringBuilder.append( " AND pub.year >= :yMin " );
+			}
+		}
+		if ( yearMax != 0 )
+		{
+			if ( isWhereClauseEvoked )
+			{
+				stringBuilder.append( " AND pub.year <= :yMax " );
+			}
+		}
+		stringBuilder.append( "GROUP BY  a " );
+
+		/* Executes count query */
+		Query hibQuery = getCurrentSession().createQuery( stringBuilder.toString() );
+		hibQuery.setParameter( "c", circle );
+		if ( yearMin != 0 )
+			hibQuery.setParameter( "yMin", yearMin.toString() );
+		if ( yearMax != 0 )
+			hibQuery.setParameter( "yMax", yearMax.toString() );
+		hibQuery.setMaxResults( maxResult );
+
+		@SuppressWarnings( "unchecked" )
+		List<Author> authors = hibQuery.list();
+
+		if ( authors == null || authors.isEmpty() )
+		{
+			circleMap.put( "totalCount", 0 );
+			return circleMap;
+		}
+
+		circleMap.put( "authors", authors );
+
+		return circleMap;
+	}
+
 }
