@@ -945,7 +945,19 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		mainQuery.append( "SELECT DISTINCT p " );
 
 		StringBuilder countQuery = new StringBuilder();
-		countQuery.append( "SELECT COUNT(DISTINCT p) " );
+		countQuery.append( "SELECT SUM(p.citedBy) " );// COUNT(DISTINCT p) " );
+
+		StringBuilder citationRatePerYearQuery = new StringBuilder();
+		citationRatePerYearQuery.append( "SELECT p.year, SUM( p.citedBy), COUNT( DISTINCT p) " );
+
+		StringBuilder orderByQuery = new StringBuilder();
+		if ( orderBy.equals( "citation" ) )
+			orderByQuery.append( "ORDER BY p.citedBy DESC " );
+		else if ( orderBy.equals( "date" ) )
+			orderByQuery.append( "ORDER BY p.publicationDate DESC " );
+
+		StringBuilder groupByQuery = new StringBuilder();
+		groupByQuery.append( "GROUP BY p.year " );
 
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append( "FROM Circle c, Publication pub " );
@@ -984,13 +996,10 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 			stringBuilder.append( " ) " );
 		}
 
-		if ( orderBy.equals( "citation" ) )
-			stringBuilder.append( "ORDER BY p.citedBy DESC" );
-		else if ( orderBy.equals( "date" ) )
-			stringBuilder.append( "ORDER BY p.publicationDate DESC" );
+
 
 		/* Executes main query */
-		Query hibQueryMain = getCurrentSession().createQuery( mainQuery.toString() + stringBuilder.toString() );
+		Query hibQueryMain = getCurrentSession().createQuery( mainQuery.toString() + stringBuilder.toString() + orderByQuery.toString() );
 		hibQueryMain.setParameter( "c", circle );
 		hibQueryMain.setParameter( "pa", memberCircle );
 
@@ -1065,6 +1074,37 @@ public class PublicationDAOHibernate extends GenericDAOHibernate<Publication> im
 		int count = ( (Long) hibQueryCount.uniqueResult() ).intValue();
 		publicationMap.put( "totalCount", count );
 
+		/* Executes Citation Rate per Year query */
+
+		Query hibCitationRatePerYearQuery = getCurrentSession().createQuery( citationRatePerYearQuery.toString() + stringBuilder.toString() + groupByQuery.toString() );
+		hibCitationRatePerYearQuery.setParameter( "c", circle );
+		hibCitationRatePerYearQuery.setParameter( "pa", memberCircle );
+
+		if ( !query.equals( "" ) )
+		{
+			hibCitationRatePerYearQuery.setParameter( "query", "%" + query + "%" );
+			hibCitationRatePerYearQuery.setParameter( "query1", "%" + query + "%" );
+			hibCitationRatePerYearQuery.setParameter( "query2", "%" + query + "%" );
+		}
+
+		if ( yearMin != 0 )
+			hibCitationRatePerYearQuery.setParameter( "yearMin", yearMin.toString() );
+		if ( yearMax != 0 )
+			hibCitationRatePerYearQuery.setParameter( "yearMax", yearMax.toString() );
+
+		if ( !publicationTypes.isEmpty() )
+		{
+			int publicationTypeIndex = 1;
+			for ( PublicationType eachPublicationType : publicationTypes )
+			{
+				hibCitationRatePerYearQuery.setParameter( "publicationType" + publicationTypeIndex, eachPublicationType );
+				publicationTypeIndex++;
+			}
+		}
+
+		List<Object[]> citationRatePerYear = hibCitationRatePerYearQuery.list();
+
+		publicationMap.put( "citationRate", citationRatePerYear );
 		return publicationMap;
 	}
 
