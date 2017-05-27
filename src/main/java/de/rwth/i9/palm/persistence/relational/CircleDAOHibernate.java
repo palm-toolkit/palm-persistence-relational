@@ -176,9 +176,15 @@ public class CircleDAOHibernate extends GenericDAOHibernate<Circle> implements C
 		// container
 		Map<String, Object> circleMap = new LinkedHashMap<String, Object>();
 
+		StringBuilder mainQuery = new StringBuilder();
+		mainQuery.append( "SELECT a " );
+
+		StringBuilder countQuery = new StringBuilder();
+		countQuery.append( "SELECT a.id, COUNT( DISTINCT p), SUM( p.citedBy )  " );
+
 		StringBuilder stringBuilder = new StringBuilder();
 
-		stringBuilder.append( "SELECT a " );
+
 		stringBuilder.append( "FROM Circle c, Publication pub, Author a " );
 		stringBuilder.append( "LEFT JOIN c.publications p " );
 		stringBuilder.append( "LEFT JOIN pub.publicationAuthors pa " );
@@ -204,7 +210,7 @@ public class CircleDAOHibernate extends GenericDAOHibernate<Circle> implements C
 		stringBuilder.append( "GROUP BY  a " );
 
 		/* Executes count query */
-		Query hibQuery = getCurrentSession().createQuery( stringBuilder.toString() );
+		Query hibQuery = getCurrentSession().createQuery( mainQuery.toString() + stringBuilder.toString() );
 		hibQuery.setParameter( "c", circle );
 		if ( yearMin != 0 )
 			hibQuery.setParameter( "yMin", yearMin.toString() );
@@ -219,6 +225,30 @@ public class CircleDAOHibernate extends GenericDAOHibernate<Circle> implements C
 		{
 			circleMap.put( "totalCount", 0 );
 			return circleMap;
+		}
+
+		/* Executes count query */
+		Query hibCountQuery = getCurrentSession().createQuery( countQuery.toString() + stringBuilder.toString() );
+		hibCountQuery.setParameter( "c", circle );
+		if ( yearMin != 0 )
+			hibCountQuery.setParameter( "yMin", yearMin.toString() );
+		if ( yearMax != 0 )
+			hibCountQuery.setParameter( "yMax", yearMax.toString() );
+		hibCountQuery.setMaxResults( maxResult );
+
+		@SuppressWarnings( "unchecked" )
+		List<Object[]> counts = hibCountQuery.list();
+
+		if ( counts == null || counts.isEmpty() )
+		{
+			circleMap.put( "totalCount", 0 );
+			return circleMap;
+		}
+
+		for ( int i = 0; i < counts.size(); i++ )
+		{
+			authors.get( i ).setCitedBy( Math.toIntExact( (long) counts.get( i )[2] ) );
+			authors.get( i ).setNoPublication( Math.toIntExact( (long) counts.get( i )[1] ) );
 		}
 
 		circleMap.put( "authors", authors );
